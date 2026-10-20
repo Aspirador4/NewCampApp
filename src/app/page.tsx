@@ -1,102 +1,137 @@
-import Image from "next/image";
+import { createClient } from "@/utils/supabase/server";
+import { ShieldCheck, Database, Smartphone, Flame } from "lucide-react";
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="flex-1 flex flex-col p-5">
+      {/* Mobile Header */}
+      <header className="pt-4 pb-6 border-b border-neutral-200">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-md">
+              <Flame className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="font-bold text-lg leading-tight text-neutral-900">
+                Club Deportivo
+              </h1>
+              <p className="text-xs text-neutral-500 font-medium">
+                PWA Mobile-First
+              </p>
+            </div>
+          </div>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+            Fase 1 OK
+          </span>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex-1 py-6 flex flex-col gap-5">
+        {/* Architecture Specs Card */}
+        <div className="bg-white rounded-2xl p-4 border border-neutral-200/80 shadow-sm">
+          <h2 className="text-sm font-semibold text-neutral-800 uppercase tracking-wider mb-3">
+            Estado del Sistema
+          </h2>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 mt-0.5">
+                <ShieldCheck className="w-4 h-4" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-neutral-900">
+                  Next.js 15 + App Router
+                </p>
+                <p className="text-xs text-neutral-500">
+                  TypeScript, Tailwind CSS y ESLint activos
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 mt-0.5">
+                <Database className="w-4 h-4" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-neutral-900">
+                  Supabase SSR & Migraciones SQL
+                </p>
+                <p className="text-xs text-neutral-500">
+                  Esquema completo con 9 tablas, RLS e índices
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 mt-0.5">
+                <Smartphone className="w-4 h-4" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-neutral-900">
+                  Mobile-First Viewport
+                </p>
+                <p className="text-xs text-neutral-500">
+                  Optimizado para smartphones y standalone PWA
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Database Migration Checklist */}
+        <div className="bg-neutral-900 text-white rounded-2xl p-5 shadow-sm">
+          <p className="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">
+            Tablas del Modelo Mutable
+          </p>
+          <p className="text-xs text-neutral-400 mb-3">
+            Definidas en <code className="text-neutral-200">001_initial_schema.sql</code>
+          </p>
+          <ul className="text-xs space-y-1.5 font-mono text-neutral-300">
+            <li className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              profiles (+ custom_attributes JSONB)
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              profile_field_definitions
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              events & event_attendees (cupos)
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              event_guests (moderación)
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              event_attendance_logs (auditoría)
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              mvp_votes & user_stats (métricas mutables)
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              push_subscriptions (Web Push VAPID)
+            </li>
+          </ul>
+        </div>
+
+        {/* User Session Info */}
+        <div className="p-4 rounded-xl bg-neutral-100 border border-neutral-200 text-center">
+          <p className="text-xs text-neutral-600">
+            {user ? `Sesión iniciada como: ${user.email}` : "Sin sesión activa (Listo para Fase 2: Auth)"}
+          </p>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="py-3 text-center border-t border-neutral-200 text-xs text-neutral-400">
+        Club Deportivo &bull; Arquitectura Next.js 15 + Supabase
       </footer>
     </div>
   );
