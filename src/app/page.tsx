@@ -54,7 +54,7 @@ export default async function Home() {
             </div>
           </div>
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-            Fase 3 OK
+            PWA & VAPID OK
           </span>
         </div>
       </header>

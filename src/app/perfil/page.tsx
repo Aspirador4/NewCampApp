@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { ProfileForm } from '@/components/ProfileForm'
+import { PwaPrompt } from '@/components/PwaPrompt'
 import { Trophy, CalendarCheck, Award, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { Database } from '@/types/database.types'
@@ -153,6 +154,11 @@ export default async function PerfilPage() {
       {/* Profile Form Card */}
       <div className="bg-white rounded-2xl p-5 border border-neutral-200/80 shadow-sm">
         <ProfileForm profile={profile} fieldDefinitions={definitions} />
+      </div>
+
+      {/* PWA & Push Notifications Manager */}
+      <div className="mt-4">
+        <PwaPrompt />
       </div>
     </div>
   )

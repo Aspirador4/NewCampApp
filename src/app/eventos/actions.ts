@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { Database, EventStatus, EventType } from '@/types/database.types'
+import { sendPushToUser } from '@/app/api/push/actions'
 
 export async function createEvent(formData: FormData) {
   const supabase = await createClient()
@@ -161,6 +162,19 @@ export async function leaveEvent(eventId: string, reason?: string) {
     return fallbackLeaveEvent(supabase, eventId, user.id, reason)
   }
 
+  // Trigger Web Push Notification if a player was promoted from waitlist
+  if (data && typeof data === 'object' && 'promoted_user_id' in data && data.promoted_user_id) {
+    try {
+      await sendPushToUser(data.promoted_user_id as string, {
+        title: '¡Subiste de Lista de Espera! 🎉',
+        body: 'Se liberó un cupo en el partido y quedaste confirmado automáticamente.',
+        url: `/eventos/${eventId}`,
+      })
+    } catch (e) {
+      console.error('Error sending push to promoted user:', e)
+    }
+  }
+
   revalidatePath(`/eventos/${eventId}`)
   revalidatePath('/eventos')
   revalidatePath('/')
@@ -268,6 +282,27 @@ export async function updateEventStatus(eventId: string, newStatus: EventStatus)
 
   if (error) {
     return { error: error.message }
+  }
+
+  // If finalized, dispatch push notification to all confirmed attendees to vote for MVP
+  if (newStatus === 'finalizado') {
+    const { data: attendees } = await supabase
+      .from('event_attendees')
+      .select('user_id')
+      .eq('event_id', eventId)
+      .eq('status', 'confirmado')
+
+    for (const att of attendees || []) {
+      try {
+        await sendPushToUser(att.user_id, {
+          title: '¡Vota al MVP del Partido! 🏆',
+          body: 'El partido finalizó. Tienes 24hs para elegir a la figura del encuentro.',
+          url: `/eventos/${eventId}`,
+        })
+      } catch (e) {
+        console.error('Push error:', e)
+      }
+    }
   }
 
   revalidatePath(`/eventos/${eventId}`)

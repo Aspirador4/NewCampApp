@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
+import { sendPushToUser } from '@/app/api/push/actions'
 
 export async function requestGuest(formData: FormData) {
   const supabase = await createClient()
@@ -163,6 +164,19 @@ export async function approveGuest(guestId: string, eventId: string) {
     reason: `Invitado aprobado: ${updatedGuest?.guest_name}`,
   })
 
+  // Send push notification to the member who made the invitation
+  if (updatedGuest?.invited_by_user_id) {
+    try {
+      await sendPushToUser(updatedGuest.invited_by_user_id, {
+        title: '¡Invitado Aprobado! ✅',
+        body: `Tu invitado ${updatedGuest.guest_name} fue aprobado y confirmado para el partido.`,
+        url: `/eventos/${eventId}`,
+      })
+    } catch (e) {
+      console.error('Push error:', e)
+    }
+  }
+
   revalidatePath(`/eventos/${eventId}`)
   revalidatePath('/admin/invitados')
   return { success: true }
@@ -210,6 +224,19 @@ export async function rejectGuest(guestId: string, eventId: string) {
     action: 'invitado_rechazado',
     reason: `Invitado rechazado: ${rejectedGuest?.guest_name}`,
   })
+
+  // Send push notification to the member who made the invitation
+  if (rejectedGuest?.invited_by_user_id) {
+    try {
+      await sendPushToUser(rejectedGuest.invited_by_user_id, {
+        title: 'Solicitud de Invitado ❌',
+        body: `La postulación de ${rejectedGuest.guest_name} no pudo ser aprobada.`,
+        url: `/eventos/${eventId}`,
+      })
+    } catch (e) {
+      console.error('Push error:', e)
+    }
+  }
 
   revalidatePath(`/eventos/${eventId}`)
   revalidatePath('/admin/invitados')
