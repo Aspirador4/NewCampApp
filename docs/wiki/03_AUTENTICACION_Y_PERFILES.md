@@ -57,3 +57,41 @@ Los campos adicionales (posición en la cancha, pierna hábil, número de camise
 - **Bucket**: `avatars` (público para lectura optimizada de avatares).
 - **Ruta de archivo**: `avatars/{userId}/{timestamp}.{ext}`.
 - **Políticas RLS**: Los usuarios autenticados únicamente pueden insertar y actualizar sus propios archivos de avatar.
+
+---
+
+## 5. Configuración de Google OAuth en Supabase y Google Cloud Console
+
+Para activar el inicio de sesión con Google en producción y desarrollo:
+
+### Paso 1: Google Cloud Console
+1. Ingresar a [Google Cloud Console](https://console.cloud.google.com/) y crear o seleccionar un proyecto.
+2. Ir a **APIs & Services** > **OAuth consent screen**:
+   - Tipo de usuario: **External** (Externo).
+   - Completar nombre de app ("Club Deportivo"), correo de soporte y de desarrollador.
+3. Ir a **Credentials** > **Create Credentials** > **OAuth client ID**:
+   - Application type: **Web application**.
+   - Name: `Club Deportivo Web Client`.
+   - **Authorized JavaScript origins**:
+     - `https://new-camp-app.vercel.app`
+     - `https://qdscqskaridkcgfqzvej.supabase.co`
+     - `http://localhost:3000`
+   - **Authorized redirect URIs**:
+     - `https://qdscqskaridkcgfqzvej.supabase.co/auth/v1/callback`
+4. Copiar el **Client ID** y **Client Secret** generados.
+
+### Paso 2: Supabase Dashboard
+1. Ingresar al proyecto en [Supabase Dashboard](https://supabase.com/dashboard/project/qdscqskaridkcgfqzvej).
+2. Ir a **Authentication** > **Providers** > **Google**.
+3. Activar el interruptor **Enable Google provider**.
+4. Pegar el **Client ID** y **Client Secret**.
+5. Guardar los cambios.
+
+### Paso 3: Supabase URL Configuration
+1. Ir a **Authentication** > **URL Configuration**.
+2. **Site URL**: `https://new-camp-app.vercel.app`
+3. **Redirect URLs**:
+   - `https://new-camp-app.vercel.app/**`
+   - `http://localhost:3000/**`
+   - `https://*.vercel.app/**`
+
