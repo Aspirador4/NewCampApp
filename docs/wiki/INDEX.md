@@ -11,6 +11,7 @@ Bienvenido a la documentación técnica de la plataforma móvil para el Club Dep
 | [01. Arquitectura Técnica y Stack](file:///Users/seba/CampApp/docs/wiki/01_ARQUITECTURA_TECNICA.md) | Principios de diseño, enfoque mobile-first, PWA con Serwist y stack Next.js 15 + Supabase. |
 | [02. Base de Datos, Esquemas y RLS](file:///Users/seba/CampApp/docs/wiki/02_BASE_DE_DATOS_Y_MIGRACIONES.md) | Catálogo de tablas, índices, modelo JSONB mutable, políticas de seguridad RLS y funciones atómicas (RPCs). |
 | [03. Autenticación y Perfil Dinámico](file:///Users/seba/CampApp/docs/wiki/03_AUTENTICACION_Y_PERFILES.md) | Flujo Supabase SSR, Magic Link, Google OAuth, upload a Storage y motor de atributos dinámicos. |
+| [04. Módulo Financiero y Deudas](file:///Users/seba/CampApp/docs/wiki/04_MODELO_FINANCIERO_Y_DEUDAS.md) | Control de deudas por partido, costos fijos/prorrateados, cuenta corriente del socio y comprobantes. |
 
 ---
 
