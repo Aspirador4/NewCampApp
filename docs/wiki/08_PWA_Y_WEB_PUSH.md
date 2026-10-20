@@ -11,7 +11,7 @@ Documentación técnica del soporte PWA standalone, Service Worker y entrega de 
    - `theme_color: #059669`: Tinte de barra de estado móvil.
    - Iconos PWA: Generados en 192x192 y 512x512 maskable en `public/icons/`.
 2. **Instalación Ergonómica**:
-   - Componente [`PwaPrompt.tsx`](file:///Users/seba/CampApp/src/components/PwaPrompt.tsx):
+   - Componente [`PwaPrompt.tsx`](../../src/components/PwaPrompt.tsx):
      - **En Android / Chrome**: Captura el evento `beforeinstallprompt` y presenta un botón *"Instalar App"*.
      - **En iOS Safari**: Detecta el dispositivo e instruye al usuario a usar *"Compartir" -> "Agregar a Inicio"*.
 

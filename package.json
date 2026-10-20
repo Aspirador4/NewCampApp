@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "wiki:sync": "node scripts/sync-wiki.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

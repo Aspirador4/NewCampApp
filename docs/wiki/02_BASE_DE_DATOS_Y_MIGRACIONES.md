@@ -109,7 +109,7 @@ Para evitar condiciones de carrera (*race conditions*) con múltiples usuarios c
 ## 4. Instrucción de Ejecución en Supabase
 
 El script consolidado se encuentra en:
-[`supabase/migrations/001_initial_schema.sql`](file:///Users/seba/CampApp/supabase/migrations/001_initial_schema.sql)
+[`supabase/migrations/001_initial_schema.sql`](../../supabase/migrations/001_initial_schema.sql)
 
 Para aplicarlo:
 1. Abrir el panel de Supabase: **SQL Editor**.

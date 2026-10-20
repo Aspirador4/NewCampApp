@@ -30,11 +30,11 @@ stateDiagram-v2
 
 | Ruta | Componente | Función |
 | :--- | :--- | :--- |
-| `/eventos` | [`EventosPage`](file:///Users/seba/CampApp/src/app/eventos/page.tsx) | Feed mobile de eventos con filtros (Partidos, Asados, Entrenamientos, Finalizados) y barras de progreso de cupos. |
-| `/eventos/nuevo` | [`NuevoEventoPage`](file:///Users/seba/CampApp/src/app/eventos/nuevo/page.tsx) | Formulario restringido a administradores para convocar eventos con fecha, hora, lugar y cupo máximo. |
-| `/eventos/[id]` | [`EventDetailPage`](file:///Users/seba/CampApp/src/app/eventos/[id]/page.tsx) | Ficha del evento con botón 1-click CTA, listado de confirmados, lista de espera ordenada y auditoría. |
-| Componente | [`EventAttendanceCTA`](file:///Users/seba/CampApp/src/components/EventAttendanceCTA.tsx) | Control interactivo móvil con confirmación 1-click, advertencia de lista de espera y modal de baja. |
-| Componente | [`EventAdminControls`](file:///Users/seba/CampApp/src/components/EventAdminControls.tsx) | Botones rápidos para que los administradores inicien, finalicen o cancelen el evento. |
+| `/eventos` | [`EventosPage`](../../src/app/eventos/page.tsx) | Feed mobile de eventos con filtros (Partidos, Asados, Entrenamientos, Finalizados) y barras de progreso de cupos. |
+| `/eventos/nuevo` | [`NuevoEventoPage`](../../src/app/eventos/nuevo/page.tsx) | Formulario restringido a administradores para convocar eventos con fecha, hora, lugar y cupo máximo. |
+| `/eventos/[id]` | [`EventDetailPage`](../../src/app/eventos/[id]/page.tsx) | Ficha del evento con botón 1-click CTA, listado de confirmados, lista de espera ordenada y auditoría. |
+| Componente | [`EventAttendanceCTA`](../../src/components/EventAttendanceCTA.tsx) | Control interactivo móvil con confirmación 1-click, advertencia de lista de espera y modal de baja. |
+| Componente | [`EventAdminControls`](../../src/components/EventAdminControls.tsx) | Botones rápidos para que los administradores inicien, finalicen o cancelen el evento. |
 
 ---
 

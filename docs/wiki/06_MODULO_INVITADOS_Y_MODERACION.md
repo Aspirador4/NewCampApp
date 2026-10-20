@@ -43,7 +43,7 @@ sequenceDiagram
 
 ## 2. Componentes y Acciones
 
-- [`guest-actions.ts`](file:///Users/seba/CampApp/src/app/eventos/guest-actions.ts): Server Actions para `requestGuest`, `cancelGuestRequest`, `approveGuest` y `rejectGuest`.
-- [`GuestInviteModal.tsx`](file:///Users/seba/CampApp/src/components/GuestInviteModal.tsx): Modal mobile-first para solicitar invitados.
-- [`EventGuestsSection.tsx`](file:///Users/seba/CampApp/src/components/EventGuestsSection.tsx): Tarjetas de moderación rápida 1-tap para administradores y vista de "Mis Invitaciones" para socios.
-- [`/admin/invitados`](file:///Users/seba/CampApp/src/app/admin/invitados/page.tsx): Centro administrativo de moderación consolidada entre todos los eventos próximos.
+- [`guest-actions.ts`](../../src/app/eventos/guest-actions.ts): Server Actions para `requestGuest`, `cancelGuestRequest`, `approveGuest` y `rejectGuest`.
+- [`GuestInviteModal.tsx`](../../src/components/GuestInviteModal.tsx): Modal mobile-first para solicitar invitados.
+- [`EventGuestsSection.tsx`](../../src/components/EventGuestsSection.tsx): Tarjetas de moderación rápida 1-tap para administradores y vista de "Mis Invitaciones" para socios.
+- [`/admin/invitados`](../../src/app/admin/invitados/page.tsx): Centro administrativo de moderación consolidada entre todos los eventos próximos.
