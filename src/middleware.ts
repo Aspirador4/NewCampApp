@@ -5,6 +5,14 @@ export async function middleware(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request)
   const pathname = request.nextUrl.pathname
 
+  // If a magic link or OAuth code was sent to root or another page, redirect to auth callback
+  const hasAuthCode = request.nextUrl.searchParams.has('code') || request.nextUrl.searchParams.has('token_hash')
+  if (hasAuthCode && !pathname.startsWith('/auth/callback')) {
+    const callbackUrl = new URL('/auth/callback', request.url)
+    callbackUrl.search = request.nextUrl.search
+    return NextResponse.redirect(callbackUrl)
+  }
+
   // Protected routes that require authentication
   const isProtected =
     pathname.startsWith('/perfil') ||

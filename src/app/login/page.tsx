@@ -3,11 +3,18 @@ import { createClient } from '@/utils/supabase/server'
 import { LoginForm } from '@/components/LoginForm'
 import { Flame } from 'lucide-react'
 
-export default async function LoginPage() {
+interface LoginPageProps {
+  searchParams: Promise<{
+    error?: string
+  }>
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const { error } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // If already authenticated, redirect to home or profile
+  // If already authenticated, redirect to home
   if (user) {
     redirect('/')
   }
@@ -30,7 +37,7 @@ export default async function LoginPage() {
       {/* Login Card Form */}
       <div className="my-auto py-6">
         <div className="bg-white rounded-2xl p-5 border border-neutral-200/80 shadow-sm">
-          <LoginForm />
+          <LoginForm initialError={error} />
         </div>
       </div>
 

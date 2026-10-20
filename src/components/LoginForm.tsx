@@ -5,12 +5,16 @@ import { createClient } from '@/utils/supabase/client'
 import { signInWithOtp } from '@/app/auth/actions'
 import { Mail, ArrowRight, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
 
-export function LoginForm() {
+export function LoginForm({ initialError }: { initialError?: string | null }) {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(
+    initialError === 'auth-code-error'
+      ? 'El enlace de acceso expiró o fue abierto en un navegador diferente. Por favor solicita uno nuevo desde este mismo dispositivo.'
+      : initialError || null
+  )
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
