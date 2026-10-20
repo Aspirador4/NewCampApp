@@ -4,7 +4,8 @@ import Image from 'next/image'
 import { createClient } from '@/utils/supabase/server'
 import { EventAttendanceCTA } from '@/components/EventAttendanceCTA'
 import { EventAdminControls } from '@/components/EventAdminControls'
-import { ArrowLeft, Calendar, MapPin, Users, History, Clock, User } from 'lucide-react'
+import { EventGuestsSection, EventGuestItem } from '@/components/EventGuestsSection'
+import { ArrowLeft, Calendar, MapPin, Users, History, Clock, User, UserCheck } from 'lucide-react'
 
 interface AttendeeProfile {
   id: string
@@ -89,13 +90,32 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
   const attendees = (attendeesRaw || []) as unknown as AttendeeWithProfile[]
 
-  // Categorize
-  const confirmedAttendees = attendees.filter(
-    (a) => a.status === 'confirmado'
-  )
-  const waitlistAttendees = attendees.filter(
-    (a) => a.status === 'lista_espera'
-  )
+  // Fetch guests
+  const { data: guestsRaw } = await supabase
+    .from('event_guests')
+    .select(`
+      id,
+      event_id,
+      invited_by_user_id,
+      guest_name,
+      guest_contact,
+      status,
+      created_at,
+      inviter:invited_by_user_id (
+        full_name
+      )
+    `)
+    .eq('event_id', id)
+    .order('created_at', { ascending: true })
+
+  const guests = (guestsRaw || []) as unknown as EventGuestItem[]
+  const approvedGuests = guests.filter((g) => g.status === 'aprobado')
+
+  // Categorize attendees
+  const confirmedAttendees = attendees.filter((a) => a.status === 'confirmado')
+  const waitlistAttendees = attendees.filter((a) => a.status === 'lista_espera')
+
+  const totalConfirmedCount = confirmedAttendees.length + approvedGuests.length
 
   const userAttendee = attendees.find((a) => a.user_id === user.id)
   const userStatus = userAttendee?.status === 'cancelado' ? null : (userAttendee?.status as 'confirmado' | 'lista_espera' | null)
@@ -104,7 +124,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
   const waitlistPosition = waitlistIndex !== -1 ? waitlistIndex + 1 : undefined
 
   const maxCap = event.max_capacity
-  const isFull = maxCap ? confirmedAttendees.length >= maxCap : false
+  const isFull = maxCap ? totalConfirmedCount >= maxCap : false
   const eventClosed = event.status === 'finalizado' || event.status === 'cancelado'
 
   // Fetch attendance audit logs
@@ -121,7 +141,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
     `)
     .eq('event_id', id)
     .order('created_at', { ascending: false })
-    .limit(8)
+    .limit(10)
 
   const logs = (logsRaw || []) as unknown as LogWithUser[]
 
@@ -146,6 +166,12 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         return 'entró a lista de espera'
       case 'subio_espera':
         return 'ascendió a confirmado'
+      case 'solicito_invitado':
+        return 'postuló a un invitado'
+      case 'invitado_aprobado':
+        return 'aprobó un invitado'
+      case 'invitado_rechazado':
+        return 'rechazó un invitado'
       default:
         return action
     }
@@ -202,7 +228,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-emerald-600 flex-shrink-0" />
               <span className="font-medium">
-                Cupo: {confirmedAttendees.length} / {maxCap} jugadores
+                Cupo: {totalConfirmedCount} / {maxCap} jugadores
                 {waitlistAttendees.length > 0 && ` (${waitlistAttendees.length} en espera)`}
               </span>
             </div>
@@ -234,23 +260,24 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         </div>
       )}
 
-      {/* Confirmed Players List */}
+      {/* Confirmed Players List (Includes Socios and Approved Guests) */}
       <div className="mt-5 space-y-3">
         <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
           <h2 className="text-sm font-bold text-neutral-900 flex items-center gap-2">
             <span>Jugadores Confirmados</span>
             <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold">
-              {confirmedAttendees.length}{maxCap ? `/${maxCap}` : ''}
+              {totalConfirmedCount}{maxCap ? `/${maxCap}` : ''}
             </span>
           </h2>
         </div>
 
-        {confirmedAttendees.length === 0 ? (
+        {totalConfirmedCount === 0 ? (
           <p className="text-xs text-neutral-400 py-3 text-center">
             Aún no hay jugadores confirmados. ¡Sé el primero!
           </p>
         ) : (
           <div className="divide-y divide-neutral-100 bg-white rounded-2xl border border-neutral-200/80 shadow-xs overflow-hidden">
+            {/* Confirmed Socios */}
             {confirmedAttendees.map((attendee, index) => {
               const p = attendee.profiles
               const custom = p?.custom_attributes || {}
@@ -314,9 +341,57 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                 </div>
               )
             })}
+
+            {/* Approved Guests */}
+            {approvedGuests.map((guest, index) => (
+              <div
+                key={guest.id}
+                className="flex items-center justify-between p-3 bg-neutral-50/70"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-neutral-400 w-5 text-center">
+                    #{confirmedAttendees.length + index + 1}
+                  </span>
+
+                  <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs border border-emerald-200">
+                    <UserCheck className="w-4 h-4" />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-xs font-bold text-neutral-900">
+                        {guest.guest_name}
+                      </p>
+                      <span className="text-[9px] font-semibold uppercase px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800">
+                        Invitado
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-neutral-500">
+                      Invitado por: <span className="font-medium text-neutral-700">{guest.inviter?.full_name || 'Socio'}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <span className="text-[10px] text-neutral-400 font-mono">
+                  {new Date(guest.created_at).toLocaleTimeString('es-AR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </span>
+              </div>
+            ))}
           </div>
         )}
       </div>
+
+      {/* Guest Management & Invitation Section */}
+      <EventGuestsSection
+        eventId={event.id}
+        guests={guests}
+        currentUserId={user.id}
+        isAdmin={isAdmin}
+        eventClosed={eventClosed}
+      />
 
       {/* Waitlist Section */}
       {waitlistAttendees.length > 0 && (

@@ -6,7 +6,11 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
   // Protected routes that require authentication
-  const isProtected = pathname.startsWith('/perfil') || pathname.startsWith('/eventos') || pathname.startsWith('/ranking')
+  const isProtected =
+    pathname.startsWith('/perfil') ||
+    pathname.startsWith('/eventos') ||
+    pathname.startsWith('/ranking') ||
+    pathname.startsWith('/admin')
 
   if (isProtected && !user) {
     const loginUrl = new URL('/login', request.url)
