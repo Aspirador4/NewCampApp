@@ -15,16 +15,7 @@ export async function createEvent(formData: FormData) {
     return { error: 'Debes iniciar sesión para crear un evento' }
   }
 
-  // Check admin privileges
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('system_role')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.system_role !== 'admin') {
-    return { error: 'Solo los administradores pueden crear eventos' }
-  }
+  // Any authenticated member can create events
 
   const title = (formData.get('title') as string)?.trim()
   const description = (formData.get('description') as string)?.trim() || null

@@ -55,8 +55,8 @@ export default async function PerfilPage() {
     {
       id: '1',
       field_key: 'posicion',
-      label: 'Posición habitual',
-      field_type: 'select',
+      label: 'Posición(es) en la cancha',
+      field_type: 'multiselect',
       options: ['Arquero', 'Defensor', 'Mediocampista', 'Delantero'],
       is_required: false,
       display_order: 1,

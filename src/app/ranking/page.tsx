@@ -330,7 +330,9 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
                       </div>
 
                       <p className="text-[10px] text-neutral-500 capitalize">
-                        {String(custom.posicion || p?.sports_role || 'Jugador')}
+                        {Array.isArray(custom.posicion)
+                          ? (custom.posicion as string[]).join(', ')
+                          : String(custom.posicion || p?.sports_role || 'Jugador')}
                         {custom.numero_camiseta ? ` • #${String(custom.numero_camiseta)}` : ''}
                       </p>
                     </div>

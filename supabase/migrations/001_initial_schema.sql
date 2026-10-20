@@ -490,17 +490,19 @@ CREATE POLICY "Events viewable by authenticated users"
   USING (true);
 
 DROP POLICY IF EXISTS "Admins can insert events" ON public.events;
-CREATE POLICY "Admins can insert events"
+DROP POLICY IF EXISTS "Members can insert events" ON public.events;
+CREATE POLICY "Members can insert events"
   ON public.events FOR INSERT
   TO authenticated
-  WITH CHECK (public.is_admin(auth.uid()));
+  WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Admins can update events" ON public.events;
-CREATE POLICY "Admins can update events"
+DROP POLICY IF EXISTS "Admins and creators can update events" ON public.events;
+CREATE POLICY "Admins and creators can update events"
   ON public.events FOR UPDATE
   TO authenticated
-  USING (public.is_admin(auth.uid()))
-  WITH CHECK (public.is_admin(auth.uid()));
+  USING (public.is_admin(auth.uid()) OR auth.uid() = created_by)
+  WITH CHECK (public.is_admin(auth.uid()) OR auth.uid() = created_by);
 
 DROP POLICY IF EXISTS "Admins can delete events" ON public.events;
 CREATE POLICY "Admins can delete events"

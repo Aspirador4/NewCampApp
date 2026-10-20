@@ -12,17 +12,6 @@ export default async function NuevoEventoPage() {
     redirect('/login')
   }
 
-  // Verify admin
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('system_role')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.system_role !== 'admin') {
-    redirect('/eventos')
-  }
-
   return (
     <div className="flex-1 flex flex-col p-5 pb-24">
       {/* Header */}

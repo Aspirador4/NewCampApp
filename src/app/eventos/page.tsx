@@ -34,17 +34,6 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Check admin role
-  let isAdmin = false
-  if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('system_role')
-      .eq('id', user.id)
-      .single()
-    isAdmin = profile?.system_role === 'admin'
-  }
-
   // Fetch events
   let query = supabase
     .from('events')
@@ -96,15 +85,13 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
           </p>
         </div>
 
-        {isAdmin && (
-          <Link
-            href="/eventos/nuevo"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition active:scale-95"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Crear</span>
-          </Link>
-        )}
+        <Link
+          href="/eventos/nuevo"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition active:scale-95"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Crear</span>
+        </Link>
       </div>
 
       {/* Filter Tabs */}
@@ -168,9 +155,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
               No hay eventos convocados
             </h3>
             <p className="text-xs text-neutral-500 mt-1 max-w-xs mx-auto">
-              {isAdmin
-                ? 'Presiona "+ Crear" arriba para convocar el próximo partido o asado.'
-                : 'Aún no se han publicado eventos para esta categoría.'}
+              Presiona &quot;+ Crear&quot; arriba para convocar el próximo partido o asado.
             </p>
           </div>
         ) : (

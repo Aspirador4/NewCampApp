@@ -164,7 +164,11 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       full_name: p?.full_name || 'Socio',
       avatar_url: p?.avatar_url || null,
       sports_role: p?.sports_role || 'jugador',
-      posicion: custom.posicion ? String(custom.posicion) : undefined,
+      posicion: Array.isArray(custom.posicion)
+        ? (custom.posicion as string[]).join(', ')
+        : custom.posicion
+        ? String(custom.posicion)
+        : undefined,
       numero_camiseta: custom.numero_camiseta ? String(custom.numero_camiseta) : undefined,
     }
   })
@@ -412,7 +416,11 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                       </div>
 
                       <div className="flex items-center gap-2 text-[10px] text-neutral-500 capitalize">
-                        <span>{String(custom.posicion || p?.sports_role || 'Jugador')}</span>
+                        <span>
+                          {Array.isArray(custom.posicion)
+                            ? (custom.posicion as string[]).join(', ')
+                            : String(custom.posicion || p?.sports_role || 'Jugador')}
+                        </span>
                         {custom.numero_camiseta && (
                           <span className="font-mono font-bold text-emerald-700">
                             #{String(custom.numero_camiseta)}

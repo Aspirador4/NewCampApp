@@ -8,9 +8,10 @@ import { Camera, Loader2, User } from 'lucide-react'
 interface AvatarUploadProps {
   currentUrl: string | null
   fullName: string
+  editable?: boolean
 }
 
-export function AvatarUpload({ currentUrl, fullName }: AvatarUploadProps) {
+export function AvatarUpload({ currentUrl, fullName, editable = true }: AvatarUploadProps) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(currentUrl)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -67,15 +68,17 @@ export function AvatarUpload({ currentUrl, fullName }: AvatarUploadProps) {
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-          className="absolute bottom-0 right-0 p-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg transition active:scale-95 disabled:opacity-50"
-          title="Cambiar foto de perfil"
-        >
-          <Camera className="w-4 h-4" />
-        </button>
+        {editable && (
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="absolute bottom-0 right-0 p-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg transition active:scale-95 disabled:opacity-50"
+            title="Cambiar foto de perfil"
+          >
+            <Camera className="w-4 h-4" />
+          </button>
+        )}
 
         <input
           ref={fileInputRef}

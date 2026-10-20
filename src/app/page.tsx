@@ -76,7 +76,11 @@ export default async function Home() {
                   {profile?.full_name || user.email}
                 </p>
                 <p className="text-[11px] text-neutral-500 capitalize">
-                  Rol: {profile?.sports_role || 'Jugador'}
+                  {profile?.custom_attributes && typeof profile.custom_attributes === 'object' && 'posicion' in profile.custom_attributes && (profile.custom_attributes as Record<string, unknown>).posicion
+                    ? Array.isArray((profile.custom_attributes as Record<string, unknown>).posicion)
+                      ? ((profile.custom_attributes as Record<string, unknown>).posicion as string[]).join(', ')
+                      : String((profile.custom_attributes as Record<string, unknown>).posicion)
+                    : `Rol: ${profile?.sports_role || 'Jugador'}`}
                 </p>
               </div>
             </div>

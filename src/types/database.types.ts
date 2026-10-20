@@ -20,7 +20,7 @@ export type AttendanceAction =
   | 'solicito_invitado'
   | 'invitado_aprobado'
   | 'invitado_rechazado'
-export type FieldType = 'text' | 'number' | 'select' | 'boolean'
+export type FieldType = 'text' | 'number' | 'select' | 'multiselect' | 'boolean'
 
 export interface Database {
   public: {
