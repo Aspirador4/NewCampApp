@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/server'
 import { EventAttendanceCTA } from '@/components/EventAttendanceCTA'
 import { EventAdminControls } from '@/components/EventAdminControls'
 import { EventGuestsSection, EventGuestItem } from '@/components/EventGuestsSection'
+import { MvpVotingSection, MvpCandidate, MvpWinner } from '@/components/MvpVotingSection'
 import { ArrowLeft, Calendar, MapPin, Users, History, Clock, User, UserCheck } from 'lucide-react'
 
 interface AttendeeProfile {
@@ -145,6 +146,81 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
   const logs = (logsRaw || []) as unknown as LogWithUser[]
 
+  // MVP Voting details
+  const { data: userVote } = await supabase
+    .from('mvp_votes')
+    .select('id, voted_player_id')
+    .eq('event_id', id)
+    .eq('voter_id', user.id)
+    .maybeSingle()
+
+  const hasVoted = Boolean(userVote)
+
+  const candidates: MvpCandidate[] = confirmedAttendees.map((a) => {
+    const p = a.profiles
+    const custom = p?.custom_attributes || {}
+    return {
+      id: a.user_id,
+      full_name: p?.full_name || 'Socio',
+      avatar_url: p?.avatar_url || null,
+      sports_role: p?.sports_role || 'jugador',
+      posicion: custom.posicion ? String(custom.posicion) : undefined,
+      numero_camiseta: custom.numero_camiseta ? String(custom.numero_camiseta) : undefined,
+    }
+  })
+
+  let winners: MvpWinner[] = []
+  let allVoteResults: { player_id: string; full_name: string; vote_count: number }[] = []
+
+  if (!event.mvp_voting_open && event.status === 'finalizado') {
+    const { data: allVotes } = await supabase
+      .from('mvp_votes')
+      .select(`
+        voted_player_id,
+        player:voted_player_id (
+          id,
+          full_name,
+          avatar_url
+        )
+      `)
+      .eq('event_id', id)
+
+    if (allVotes && allVotes.length > 0) {
+      const counts: Record<string, { count: number; name: string; avatar: string | null }> = {}
+      for (const v of allVotes) {
+        const p = v.player as unknown as { id: string; full_name: string; avatar_url: string | null } | null
+        const pId = v.voted_player_id
+        if (!counts[pId]) {
+          counts[pId] = {
+            count: 0,
+            name: p?.full_name || 'Socio',
+            avatar: p?.avatar_url || null,
+          }
+        }
+        counts[pId].count += 1
+      }
+
+      let maxVotes = 0
+      allVoteResults = Object.entries(counts)
+        .map(([pId, info]) => {
+          if (info.count > maxVotes) maxVotes = info.count
+          return { player_id: pId, full_name: info.name, vote_count: info.count }
+        })
+        .sort((a, b) => b.vote_count - a.vote_count)
+
+      if (maxVotes > 0) {
+        winners = Object.entries(counts)
+          .filter(([, info]) => info.count === maxVotes)
+          .map(([pId, info]) => ({
+            id: pId,
+            full_name: info.name,
+            avatar_url: info.avatar,
+            vote_count: info.count,
+          }))
+      }
+    }
+  }
+
   const formatEventDate = (isoString: string) => {
     const date = new Date(isoString)
     return date.toLocaleDateString('es-AR', {
@@ -259,6 +335,20 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           <EventAdminControls eventId={event.id} currentStatus={event.status} />
         </div>
       )}
+
+      {/* MVP Voting & Results Section */}
+      <MvpVotingSection
+        eventId={event.id}
+        mvpVotingOpen={event.mvp_voting_open}
+        mvpDeadline={event.mvp_voting_deadline}
+        isConfirmedAttendee={userStatus === 'confirmado'}
+        hasVoted={hasVoted}
+        candidates={candidates}
+        currentUserId={user.id}
+        isAdmin={isAdmin}
+        winners={winners}
+        allVoteResults={allVoteResults}
+      />
 
       {/* Confirmed Players List (Includes Socios and Approved Guests) */}
       <div className="mt-5 space-y-3">

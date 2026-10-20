@@ -1,0 +1,41 @@
+# 07. Sistema de Encuestas MVP y Motor de Estadísticas
+
+Especificación funcional del flujo post-partido para la elección democrática del jugador del partido (MVP), reglas anti-autovoto, resolución de empates compartidos y agregación de métricas en la tabla de líderes.
+
+---
+
+## 1. Reglas de Votación MVP
+
+1. **Apertura de la Convocatoria de Voto**:
+   - Al concluir el encuentro, el administrador presiona **"Finalizar Partido"**.
+   - Se activa la bandera `mvp_voting_open = true` y se establece un plazo límite de 24 horas (`mvp_voting_deadline`).
+2. **Elegibilidad**:
+   - **Votantes**: Únicamente los socios con estado `confirmado` que asistieron al evento.
+   - **Candidatos**: Únicamente los demás jugadores confirmados del partido.
+   - **Anti-Autovoto**: Deshabilitado en la interfaz (se filtra al usuario actual) y reforzado en PostgreSQL mediante la restricción:
+     ```sql
+     CONSTRAINT mvp_votes_no_self_vote CHECK (voter_id <> voted_player_id)
+     ```
+   - **Voto Único**: Se restringe a un voto por socio por evento:
+     ```sql
+     CONSTRAINT mvp_votes_event_voter_key UNIQUE (event_id, voter_id)
+     ```
+3. **Anonimato**:
+   - Durante la ventana abierta, los votos son anónimos. Ningún usuario ni administrador puede ver el desglose en vivo para evitar sesgos.
+4. **Cierre y Computación Atómica (`finalize_event_mvp`)**:
+   - Al cumplirse el plazo o cerrarse manualmente por un admin:
+     - Se calcula el jugador o jugadores con la mayor cantidad de votos (`max_votes`).
+     - **Empates**: Si dos o más jugadores empatan en el primer puesto, ambos reciben el galardón y comparten el MVP.
+     - Se incrementa `mvp_count = mvp_count + 1` en `user_stats`.
+     - Se incrementa `mvp_votes_received` por los votos recibidos por cada candidato.
+     - Se incrementa `matches_played = matches_played + 1` a todos los jugadores confirmados.
+     - Los resultados y el desglose de votos se hacen públicos en el resumen del partido.
+
+---
+
+## 2. Tabla de Líderes / Leaderboard (`/ranking`)
+
+La pantalla móvil de ranking expone dos vistas clave:
+- **Ranking MVP**: Clasificación ordenada por `mvp_count DESC`, desempate por `mvp_votes_received DESC`, y luego por `matches_played DESC`.
+- **Más Presencias**: Reconocimiento a los socios con mayor compromiso de asistencia (`matches_played DESC`).
+- **Podio Mobile**: Diseño con los puestos #1 (Oro), #2 (Plata) y #3 (Bronce).
