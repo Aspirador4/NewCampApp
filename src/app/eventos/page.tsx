@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { Plus, Calendar, MapPin, Users, ChevronRight, CheckCircle2, Clock, CircleDollarSign, User } from 'lucide-react'
 import { EventType } from '@/types/database.types'
@@ -26,6 +27,7 @@ interface EventWithAttendees {
   cost_per_player: number
   total_cost: number | null
   status: string
+  financial_closed?: boolean | null
   event_attendees: AttendeeSummary[] | null
   event_guests: GuestSummary[] | null
   creator?: {
@@ -52,11 +54,22 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
   if (user) {
     const { data: prof } = await supabase
       .from('profiles')
-      .select('system_role')
+      .select('system_role, approval_status')
       .eq('id', user.id)
       .single()
+
+    if (prof?.approval_status !== 'aprobado') {
+      redirect('/')
+    }
     isAdmin = prof?.system_role === 'admin'
   }
+
+  // Count pending financial closures
+  const { count: pendingClosureCount } = await supabase
+    .from('events')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'finalizado')
+    .eq('financial_closed', false)
 
   // Fetch events
   let query = supabase
@@ -80,12 +93,14 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         status
       )
     `)
-    .order('start_time', { ascending: filtro === 'finalizados' ? false : true })
+    .order('start_time', { ascending: filtro === 'finalizados' || filtro === 'pendientes_cierre' ? false : true })
 
   if (filtro === 'finalizados') {
     query = query.eq('status', 'finalizado')
   } else if (filtro === 'pendientes') {
     query = query.eq('status', 'pendiente_aprobacion')
+  } else if (filtro === 'pendientes_cierre') {
+    query = query.eq('status', 'finalizado').eq('financial_closed', false)
   } else {
     query = query.in('status', ['convocado', 'en_curso'])
   }
@@ -152,6 +167,21 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         >
           Finalizados
         </Link>
+        {isAdmin && pendingClosureCount && pendingClosureCount > 0 && (
+          <Link
+            href={`/eventos?filtro=pendientes_cierre${tipo ? `&tipo=${tipo}` : ''}`}
+            className={`px-3 py-1.5 rounded-full whitespace-nowrap transition flex items-center gap-1.5 ${
+              filtro === 'pendientes_cierre'
+                ? 'bg-amber-600 text-white font-bold'
+                : 'bg-amber-50 text-amber-900 border border-amber-300 font-semibold'
+            }`}
+          >
+            <span>⚠️ Cierre Pendiente</span>
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-200 text-amber-900">
+              {pendingClosureCount}
+            </span>
+          </Link>
+        )}
         {isAdmin && (
           <Link
             href={`/eventos?filtro=pendientes${tipo ? `&tipo=${tipo}` : ''}`}
@@ -261,9 +291,14 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                         Por Aprobar
                       </span>
                     )}
-                    {event.status === 'finalizado' && (
+                    {event.status === 'finalizado' && !event.financial_closed && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1">
+                        <span>⚠️ Cierre Pendiente</span>
+                      </span>
+                    )}
+                    {event.status === 'finalizado' && event.financial_closed && (
                       <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-neutral-200 text-neutral-700">
-                        Finalizado
+                        Finalizado ✓
                       </span>
                     )}
                     {event.status === 'convocado' && (

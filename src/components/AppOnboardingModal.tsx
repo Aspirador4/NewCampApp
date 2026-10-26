@@ -12,17 +12,21 @@ interface BeforeInstallPromptEvent extends Event {
 
 interface AppOnboardingModalProps {
   isLoggedIn: boolean
+  userId?: string
+  hasPushSub?: boolean
 }
 
-export function AppOnboardingModal({ isLoggedIn }: AppOnboardingModalProps) {
+export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: AppOnboardingModalProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [pushStatus, setPushStatus] = useState<'default' | 'granted' | 'denied' | 'unsupported'>('default')
   const [pushLoading, setPushLoading] = useState(false)
-  const [pushSuccess, setPushSuccess] = useState(false)
+  const [pushSuccess, setPushSuccess] = useState(Boolean(hasPushSub))
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [isIos, setIsIos] = useState(false)
   const [isStandalone, setIsStandalone] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const dismissalKey = userId ? `campapp_onboarding_dismissed_${userId}` : 'campapp_onboarding_dismissed'
 
   useEffect(() => {
     if (!isLoggedIn) return
@@ -40,7 +44,7 @@ export function AppOnboardingModal({ isLoggedIn }: AppOnboardingModalProps) {
     const ua = window.navigator.userAgent.toLowerCase()
     setIsIos(/iphone|ipad|ipod/.test(ua))
 
-    // Check notification permission
+    // Check browser notification permission
     let currentPerm: 'default' | 'granted' | 'denied' | 'unsupported' = 'default'
     if (!('Notification' in window) || !('serviceWorker' in navigator)) {
       currentPerm = 'unsupported'
@@ -56,13 +60,37 @@ export function AppOnboardingModal({ isLoggedIn }: AppOnboardingModalProps) {
     }
     window.addEventListener('beforeinstallprompt', handlePrompt)
 
-    // Check dismissal in localStorage
-    const dismissedAt = localStorage.getItem('campapp_onboarding_dismissed')
+    // Check account-scoped dismissal in localStorage
+    const dismissedAt = localStorage.getItem(dismissalKey)
     const threeDaysMs = 3 * 24 * 60 * 60 * 1000
     const isDismissedRecently = dismissedAt && Date.now() - parseInt(dismissedAt, 10) < threeDaysMs
 
-    // Show popup if notifications are not granted AND not recently dismissed
-    if (currentPerm !== 'granted' && !isDismissedRecently) {
+    // If browser permission is already granted but this account does not have a DB subscription,
+    // attempt auto-registration in the background for a seamless experience
+    if (currentPerm === 'granted' && !hasPushSub && !pushSuccess) {
+      subscribeToPushNotifications().then(async (res) => {
+        if (res.success && res.subscription) {
+          const subJSON = res.subscription.toJSON()
+          if (subJSON.endpoint && subJSON.keys?.p256dh && subJSON.keys?.auth) {
+            const saveRes = await savePushSubscription({
+              endpoint: subJSON.endpoint,
+              keys: {
+                p256dh: subJSON.keys.p256dh,
+                auth: subJSON.keys.auth,
+              },
+            })
+            if (saveRes?.success) {
+              setPushSuccess(true)
+              return
+            }
+          }
+        }
+      })
+    }
+
+    // Show popup if account is not subscribed or permission not granted, and not recently dismissed
+    const needsSetup = (!hasPushSub && !pushSuccess) || currentPerm !== 'granted'
+    if (needsSetup && !isDismissedRecently) {
       const timer = setTimeout(() => {
         setIsOpen(true)
       }, 1200)
@@ -73,10 +101,10 @@ export function AppOnboardingModal({ isLoggedIn }: AppOnboardingModalProps) {
     }
 
     return () => window.removeEventListener('beforeinstallprompt', handlePrompt)
-  }, [isLoggedIn])
+  }, [isLoggedIn, userId, hasPushSub, pushSuccess, dismissalKey])
 
   const handleDismiss = () => {
-    localStorage.setItem('campapp_onboarding_dismissed', Date.now().toString())
+    localStorage.setItem(dismissalKey, Date.now().toString())
     setIsOpen(false)
   }
 
@@ -187,10 +215,10 @@ export function AppOnboardingModal({ isLoggedIn }: AppOnboardingModalProps) {
 
         {/* Action 1: Notifications */}
         <div>
-          {pushSuccess || pushStatus === 'granted' ? (
+          {pushSuccess ? (
             <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-center gap-2 text-emerald-800 text-xs font-bold">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span>¡Notificaciones push activadas!</span>
+              <span>¡Notificaciones activadas en tu cuenta!</span>
             </div>
           ) : (
             <button
@@ -204,7 +232,11 @@ export function AppOnboardingModal({ isLoggedIn }: AppOnboardingModalProps) {
               ) : (
                 <Bell className="w-4 h-4" />
               )}
-              <span>Activar Notificaciones Push</span>
+              <span>
+                {pushStatus === 'granted'
+                  ? 'Vincular Notificaciones a mi Cuenta'
+                  : 'Activar Notificaciones Push'}
+              </span>
             </button>
           )}
         </div>

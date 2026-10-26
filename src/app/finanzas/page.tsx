@@ -24,9 +24,13 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
   // Fetch profile
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, system_role')
+    .select('full_name, system_role, approval_status')
     .eq('id', user.id)
     .single()
+
+  if (profile?.approval_status !== 'aprobado') {
+    redirect('/')
+  }
 
   const isAdmin = profile?.system_role === 'admin'
 
@@ -55,39 +59,87 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
 
   const myDebts = (myDebtsRaw || []) as unknown as MemberDebtItem[]
 
-  // If admin, fetch all club debts
+  // If admin, fetch all club debts and pending closure events
   let allDebts: AdminDebtItem[] = []
+  let pendingClosureEvents: {
+    id: string
+    title: string
+    start_time: string
+    event_type: string
+    total_cost: number | null
+    cost_per_player: number
+    confirmed_count: number
+  }[] = []
+
   if (isAdmin) {
-    const { data: allDebtsRaw, error: allDebtsErr } = await supabase
-      .from('member_debts')
-      .select(`
-        id,
-        event_id,
-        user_id,
-        guest_id,
-        debt_type,
-        description,
-        amount,
-        status,
-        created_at,
-        paid_at,
-        events (
-          title,
-          start_time
-        ),
-        profiles:user_id (
+    const [allDebtsRes, pEventsRes] = await Promise.all([
+      supabase
+        .from('member_debts')
+        .select(`
           id,
-          full_name,
-          avatar_url
-        )
-      `)
-      .order('created_at', { ascending: false })
+          event_id,
+          user_id,
+          guest_id,
+          debt_type,
+          description,
+          amount,
+          status,
+          created_at,
+          paid_at,
+          events (
+            title,
+            start_time
+          ),
+          profiles:user_id (
+            id,
+            full_name,
+            avatar_url
+          )
+        `)
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('events')
+        .select(`
+          id,
+          title,
+          start_time,
+          event_type,
+          total_cost,
+          cost_per_player,
+          event_attendees (
+            id,
+            status
+          ),
+          event_guests (
+            id,
+            status
+          )
+        `)
+        .eq('status', 'finalizado')
+        .eq('financial_closed', false)
+        .order('start_time', { ascending: false }),
+    ])
 
-    if (allDebtsErr) {
-      console.error('Error fetching admin debts:', allDebtsErr)
+    if (allDebtsRes.error) {
+      console.error('Error fetching admin debts:', allDebtsRes.error)
     }
+    allDebts = (allDebtsRes.data || []) as unknown as AdminDebtItem[]
 
-    allDebts = (allDebtsRaw || []) as unknown as AdminDebtItem[]
+    if (pEventsRes.data) {
+      pendingClosureEvents = pEventsRes.data.map((pe) => {
+        const confAttendees = pe.event_attendees?.filter((a: { status: string }) => a.status === 'confirmado').length || 0
+        const appGuests = pe.event_guests?.filter((g: { status: string }) => g.status === 'aprobado').length || 0
+        return {
+          id: pe.id,
+          title: pe.title,
+          start_time: pe.start_time,
+          event_type: pe.event_type,
+          total_cost: pe.total_cost,
+          cost_per_player: pe.cost_per_player,
+          confirmed_count: confAttendees + appGuests,
+        }
+      })
+    }
   }
 
   // Fetch bank details from club_settings
@@ -171,7 +223,11 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
       {/* Main View */}
       <div className="mt-2 flex-1">
         {activeView === 'admin' ? (
-          <FinanzasAdminPanel debts={allDebts} initialBankDetails={bankDetails} />
+          <FinanzasAdminPanel
+            debts={allDebts}
+            initialBankDetails={bankDetails}
+            pendingClosureEvents={pendingClosureEvents}
+          />
         ) : (
           <FinanzasMemberView
             debts={myDebts}

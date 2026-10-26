@@ -15,9 +15,13 @@ export default async function MiembrosPage() {
   // Check current user profile
   const { data: currentProfile } = await supabase
     .from('profiles')
-    .select('system_role')
+    .select('system_role, approval_status')
     .eq('id', user.id)
     .single()
+
+  if (currentProfile?.approval_status !== 'aprobado') {
+    redirect('/')
+  }
 
   const isAdmin = currentProfile?.system_role === 'admin'
 
@@ -28,12 +32,12 @@ export default async function MiembrosPage() {
       id,
       full_name,
       email,
-      phone,
       avatar_url,
       birth_date,
       system_role,
       sports_role,
       approval_status,
+      motivation,
       custom_attributes,
       user_stats (
         matches_played,
@@ -48,12 +52,12 @@ export default async function MiembrosPage() {
     id: string
     full_name: string
     email: string
-    phone: string | null
     avatar_url: string | null
     birth_date: string | null
     system_role: 'admin' | 'member'
     sports_role: 'jugador' | 'hincha' | 'ambos'
     approval_status: 'pendiente' | 'aprobado' | 'rechazado'
+    motivation: string | null
     custom_attributes: Record<string, unknown>
     user_stats: {
       matches_played: number
@@ -74,12 +78,12 @@ export default async function MiembrosPage() {
       id: p.id,
       full_name: p.full_name,
       email: p.email,
-      phone: p.phone,
       avatar_url: p.avatar_url,
       birth_date: p.birth_date,
       system_role: p.system_role,
       sports_role: p.sports_role,
       approval_status: p.approval_status || 'aprobado',
+      motivation: p.motivation || null,
       custom_attributes: p.custom_attributes || {},
       stats: rawStats || null,
     }

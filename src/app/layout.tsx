@@ -50,6 +50,16 @@ export default async function RootLayout({
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  let isApproved = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('approval_status')
+      .eq('id', user.id)
+      .single();
+    isApproved = profile?.approval_status === 'aprobado';
+  }
+
   return (
     <html lang="es">
       <head>
@@ -61,7 +71,9 @@ export default async function RootLayout({
         <div className="w-full max-w-md min-h-screen bg-neutral-50 flex flex-col shadow-2xl relative">
           <NavigationProgressBar />
           {children}
-          <BottomNav isAuthenticated={Boolean(user)} />
+          {(!user || isApproved) && (
+            <BottomNav isAuthenticated={Boolean(user)} />
+          )}
         </div>
       </body>
     </html>

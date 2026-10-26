@@ -37,6 +37,7 @@ export default async function PerfilPage() {
       system_role: 'member',
       sports_role: 'jugador',
       approval_status: 'pendiente',
+      motivation: null,
       custom_attributes: {},
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -44,6 +45,11 @@ export default async function PerfilPage() {
 
     await supabase.from('profiles').insert(defaultProfile)
     profile = defaultProfile
+  }
+
+  // Gatekeeper: Pending approval
+  if (profile.approval_status !== 'aprobado') {
+    redirect('/')
   }
 
   // Fetch field definitions

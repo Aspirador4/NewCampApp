@@ -10,12 +10,12 @@ export interface MemberItem {
   id: string
   full_name: string
   email: string
-  phone: string | null
   avatar_url: string | null
   birth_date: string | null
   system_role: 'admin' | 'member'
   sports_role: 'jugador' | 'hincha' | 'ambos'
   approval_status: 'pendiente' | 'aprobado' | 'rechazado'
+  motivation?: string | null
   custom_attributes: Record<string, unknown>
   stats: {
     matches_played: number
@@ -176,12 +176,23 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
           <div className="divide-y divide-amber-200/60 bg-white rounded-xl border border-amber-200/80 overflow-hidden">
             {pendingMembers.map((pm) => (
-              <div key={pm.id} className="p-3 flex items-center justify-between gap-3">
-                <div className="min-w-0">
+              <div key={pm.id} className="p-3 flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
                   <p className="text-xs font-bold text-neutral-900 truncate">{pm.full_name}</p>
                   <p className="text-[11px] text-neutral-500 truncate">{pm.email}</p>
+                  {pm.motivation ? (
+                    <div className="mt-1.5 p-2 rounded-lg bg-amber-50 border border-amber-200/80 text-[11px] text-amber-900 flex items-start gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <span className="font-semibold block text-[10px] uppercase text-amber-800">Motivación:</span>
+                        <span className="italic">&ldquo;{pm.motivation}&rdquo;</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-[10px] text-neutral-400 italic mt-0.5">Sin carta de motivación</p>
+                  )}
                 </div>
-                <div className="flex items-center gap-1.5 flex-shrink-0">
+                <div className="flex items-center gap-1.5 flex-shrink-0 mt-0.5">
                   <button
                     type="button"
                     onClick={() => handleApprove(pm.id)}
@@ -472,14 +483,6 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                   <span className="font-bold text-neutral-900">
                     {getAgeString(activeMember.birth_date)}
                   </span>
-                </div>
-              )}
-
-              {/* Teléfono */}
-              {activeMember.phone && (
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/80">
-                  <span className="text-neutral-500 font-medium">Contacto:</span>
-                  <span className="font-bold text-neutral-900">{activeMember.phone}</span>
                 </div>
               )}
             </div>

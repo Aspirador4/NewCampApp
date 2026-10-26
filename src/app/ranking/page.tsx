@@ -37,6 +37,17 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
     redirect('/login?next=/ranking')
   }
 
+  // Gatekeeper: Pending approval
+  const { data: currentProfile } = await supabase
+    .from('profiles')
+    .select('approval_status')
+    .eq('id', user.id)
+    .single()
+
+  if (currentProfile?.approval_status !== 'aprobado') {
+    redirect('/')
+  }
+
   // Fetch all user stats with profiles
   const { data: statsRaw } = await supabase
     .from('user_stats')

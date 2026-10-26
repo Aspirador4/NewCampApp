@@ -46,7 +46,6 @@ export async function updateProfile(formData: FormData) {
   }
 
   const fullName = formData.get('full_name') as string
-  const phone = (formData.get('phone') as string) || null
   const birthDate = (formData.get('birth_date') as string) || null
   const sportsRole = (formData.get('sports_role') as SportsRole) || 'jugador'
   const customAttributesRaw = formData.get('custom_attributes') as string
@@ -66,15 +65,13 @@ export async function updateProfile(formData: FormData) {
 
   const { error } = await supabase
     .from('profiles')
-    .upsert({
-      id: user.id,
-      email: user.email ?? '',
+    .update({
       full_name: fullName.trim(),
-      phone,
       birth_date: birthDate || null,
       sports_role: sportsRole,
       custom_attributes: customAttributes,
     })
+    .eq('id', user.id)
 
   if (error) {
     return { error: `Error al actualizar el perfil: ${error.message}` }

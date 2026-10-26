@@ -23,12 +23,12 @@ export default async function AdminInvitadosPage() {
   // Check admin privileges
   const { data: profile } = await supabase
     .from('profiles')
-    .select('system_role')
+    .select('system_role, approval_status')
     .eq('id', user.id)
     .single()
 
-  if (profile?.system_role !== 'admin') {
-    redirect('/eventos')
+  if (profile?.approval_status !== 'aprobado' || profile?.system_role !== 'admin') {
+    redirect('/')
   }
 
   // Fetch all pending guests across upcoming events

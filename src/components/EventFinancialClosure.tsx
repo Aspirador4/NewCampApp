@@ -28,6 +28,7 @@ interface EventFinancialClosureProps {
   financialClosedAt: string | null
   confirmedAttendees: AttendeeItem[]
   approvedGuests: GuestItem[]
+  existingDebts?: { userId: string; guestId?: string | null; amount: number }[]
   canManage: boolean
   isAdmin: boolean
 }
@@ -41,6 +42,7 @@ export function EventFinancialClosure({
   financialClosedAt,
   confirmedAttendees,
   approvedGuests,
+  existingDebts,
   canManage,
   isAdmin,
 }: EventFinancialClosureProps) {
@@ -54,10 +56,12 @@ export function EventFinancialClosure({
   // key for guest: `guest_${guestId}`
   const initialAmounts: Record<string, number> = {}
   for (const a of confirmedAttendees) {
-    initialAmounts[`member_${a.userId}`] = baseCostPerPlayer
+    const existing = existingDebts?.find((x) => x.userId === a.userId && !x.guestId)
+    initialAmounts[`member_${a.userId}`] = existing !== undefined ? existing.amount : baseCostPerPlayer
   }
   for (const g of approvedGuests) {
-    initialAmounts[`guest_${g.guestId}`] = baseCostPerPlayer
+    const existing = existingDebts?.find((x) => x.guestId === g.guestId)
+    initialAmounts[`guest_${g.guestId}`] = existing !== undefined ? existing.amount : baseCostPerPlayer
   }
 
   const [amounts, setAmounts] = useState<Record<string, number>>(initialAmounts)
@@ -147,13 +151,24 @@ export function EventFinancialClosure({
             </div>
           </div>
 
-          <Link
-            href={isAdmin ? "/finanzas?tab=admin" : "/finanzas"}
-            className="py-1.5 px-3 rounded-xl bg-white border border-emerald-300 text-emerald-800 font-bold text-xs hover:bg-emerald-100 transition flex items-center gap-1 shadow-xs flex-shrink-0"
-          >
-            <span>Ver Finanzas</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            {canManage && (
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="py-1.5 px-2.5 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold text-xs transition active:scale-95 border border-emerald-300/80"
+              >
+                Ajustar
+              </button>
+            )}
+            <Link
+              href={isAdmin ? "/finanzas?tab=admin" : "/finanzas"}
+              className="py-1.5 px-3 rounded-xl bg-white border border-emerald-300 text-emerald-800 font-bold text-xs hover:bg-emerald-100 transition flex items-center gap-1 shadow-xs"
+            >
+              <span>Finanzas</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
       ) : (
         /* Pending Closure State */

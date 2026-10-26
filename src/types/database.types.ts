@@ -39,6 +39,7 @@ export interface Database {
           system_role: SystemRole
           sports_role: SportsRole
           approval_status: ApprovalStatus
+          motivation: string | null
           custom_attributes: Record<string, Json>
           created_at: string
           updated_at: string
@@ -53,6 +54,7 @@ export interface Database {
           system_role?: SystemRole
           sports_role?: SportsRole
           approval_status?: ApprovalStatus
+          motivation?: string | null
           custom_attributes?: Record<string, Json>
           created_at?: string
           updated_at?: string
@@ -67,6 +69,7 @@ export interface Database {
           system_role?: SystemRole
           sports_role?: SportsRole
           approval_status?: ApprovalStatus
+          motivation?: string | null
           custom_attributes?: Record<string, Json>
           created_at?: string
           updated_at?: string

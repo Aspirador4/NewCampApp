@@ -5,7 +5,7 @@ import { updateProfile, signOut } from '@/app/auth/actions'
 import { AvatarUpload } from '@/components/AvatarUpload'
 import { DynamicProfileFields } from '@/components/DynamicProfileFields'
 import { Database, Json, SportsRole } from '@/types/database.types'
-import { Loader2, CheckCircle2, AlertCircle, LogOut, Save, Edit3, X, ShieldCheck, Mail, Phone, Calendar, UserCheck } from 'lucide-react'
+import { Loader2, CheckCircle2, AlertCircle, LogOut, Save, Edit3, X, ShieldCheck, Mail, Calendar, UserCheck } from 'lucide-react'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 type FieldDefinition = Database['public']['Tables']['profile_field_definitions']['Row']
@@ -20,7 +20,6 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
 
   // Form states
   const [fullName, setFullName] = useState(profile.full_name || '')
-  const [phone, setPhone] = useState(profile.phone || '')
   const [birthDate, setBirthDate] = useState(profile.birth_date || '')
   const [sportsRole, setSportsRole] = useState<SportsRole>(profile.sports_role || 'jugador')
   const [customAttributes, setCustomAttributes] = useState<Record<string, Json>>(
@@ -42,7 +41,6 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
   const handleCancel = () => {
     // Revert form state to saved profile
     setFullName(profile.full_name || '')
-    setPhone(profile.phone || '')
     setBirthDate(profile.birth_date || '')
     setSportsRole(profile.sports_role || 'jugador')
     setCustomAttributes((profile.custom_attributes as Record<string, Json>) || {})
@@ -58,7 +56,6 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
 
     const formData = new FormData()
     formData.append('full_name', fullName)
-    formData.append('phone', phone)
     formData.append('birth_date', birthDate)
     formData.append('sports_role', sportsRole)
     formData.append('custom_attributes', JSON.stringify(customAttributes))
@@ -151,16 +148,6 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
               <span className="font-medium text-neutral-800">{profile.email}</span>
             </div>
 
-            <div className="flex items-center justify-between text-xs py-1 border-b border-neutral-200/60">
-              <div className="flex items-center gap-2 text-neutral-500 font-medium">
-                <Phone className="w-4 h-4 text-neutral-400" />
-                <span>Teléfono</span>
-              </div>
-              <span className="font-medium text-neutral-800">
-                {phone || <span className="text-neutral-400 italic">No registrado</span>}
-              </span>
-            </div>
-
             <div className="flex items-center justify-between text-xs py-1">
               <div className="flex items-center gap-2 text-neutral-500 font-medium">
                 <Calendar className="w-4 h-4 text-neutral-400" />
@@ -241,33 +228,17 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label htmlFor="phone" className="block text-xs font-semibold text-neutral-700 mb-1">
-                  Teléfono / WhatsApp
-                </label>
-                <input
-                  id="phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+56 9 1234 5678"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="birth_date" className="block text-xs font-semibold text-neutral-700 mb-1">
-                  Fecha de Nacimiento
-                </label>
-                <input
-                  id="birth_date"
-                  type="date"
-                  value={birthDate}
-                  onChange={(e) => setBirthDate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900"
-                />
-              </div>
+            <div>
+              <label htmlFor="birth_date" className="block text-xs font-semibold text-neutral-700 mb-1">
+                Fecha de Nacimiento
+              </label>
+              <input
+                id="birth_date"
+                type="date"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900"
+              />
             </div>
 
             {/* Sports Role Selector */}

@@ -8,6 +8,7 @@ import { EventGuestsSection, EventGuestItem } from '@/components/EventGuestsSect
 import { MvpVotingSection, MvpCandidate, MvpWinner } from '@/components/MvpVotingSection'
 import { EventRealtimeListener } from '@/components/EventRealtimeListener'
 import { ShareEventButton } from '@/components/ShareEventButton'
+import { AddToCalendarButton } from '@/components/AddToCalendarButton'
 import { EventFinancialClosure } from '@/components/EventFinancialClosure'
 import { ArrowLeft, Calendar, MapPin, Users, History, Clock, User, UserCheck, CircleDollarSign } from 'lucide-react'
 
@@ -81,15 +82,30 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
     sports_role: string
   } | null
 
-  // Check admin
+  // Check profile & approval
   const { data: userProfile } = await supabase
     .from('profiles')
-    .select('system_role')
+    .select('system_role, approval_status')
     .eq('id', user.id)
     .single()
+
+  if (userProfile?.approval_status !== 'aprobado') {
+    redirect('/')
+  }
+
   const isAdmin = userProfile?.system_role === 'admin'
   const isCreator = event.created_by === user.id
   const canManageEvent = isAdmin || isCreator
+
+  // Fetch debts for this event to reflect exact amounts charged per player
+  const { data: debtsRaw } = await supabase
+    .from('member_debts')
+    .select('id, user_id, guest_id, debt_type, amount, status')
+    .eq('event_id', id)
+
+  const eventDebts = debtsRaw || []
+  const userOwnDebt = eventDebts.find((d) => d.user_id === user.id && d.debt_type === 'partido_propio')
+  const userGuestDebts = eventDebts.filter((d) => d.user_id === user.id && d.debt_type === 'invitado')
 
   // Fetch attendees with profile details
   const { data: attendeesRaw } = await supabase
@@ -294,22 +310,31 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         </Link>
         <div className="flex items-center gap-2">
           {event.status !== 'pendiente_aprobacion' && event.status !== 'cancelado' && (
-            <ShareEventButton
-              eventId={event.id}
-              title={event.title}
-              eventType={event.event_type}
-              startFormatted={formatEventDate(event.start_time)}
-              location={event.location}
-              costFormatted={
-                event.total_cost && event.total_cost > 0
-                  ? `~$${Math.round(event.total_cost / (maxCap || 14)).toLocaleString('es-CL')} p/jugador`
-                  : event.cost_per_player > 0
-                  ? `$${event.cost_per_player.toLocaleString('es-CL')} p/jugador`
-                  : 'Gratis'
-              }
-              confirmedCount={totalConfirmedCount}
-              maxCapacity={maxCap}
-            />
+            <>
+              <AddToCalendarButton
+                title={event.title}
+                description={event.description}
+                location={event.location}
+                startTime={event.start_time}
+                endTime={event.end_time}
+              />
+              <ShareEventButton
+                eventId={event.id}
+                title={event.title}
+                eventType={event.event_type}
+                startFormatted={formatEventDate(event.start_time)}
+                location={event.location}
+                costFormatted={
+                  event.total_cost && event.total_cost > 0
+                    ? `~$${Math.round(event.total_cost / (maxCap || 14)).toLocaleString('es-CL')} p/jugador`
+                    : event.cost_per_player > 0
+                    ? `$${event.cost_per_player.toLocaleString('es-CL')} p/jugador`
+                    : 'Gratis'
+                }
+                confirmedCount={totalConfirmedCount}
+                maxCapacity={maxCap}
+              />
+            </>
           )}
           <span className="text-[11px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-800 tracking-wider">
             {event.event_type}
@@ -397,7 +422,34 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             </div>
           )}
 
-          {(Boolean(event.total_cost && event.total_cost > 0) || Boolean(event.cost_per_player && event.cost_per_player > 0)) && (
+          {event.financial_closed ? (
+            <div className="flex items-center gap-2">
+              <CircleDollarSign className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <div className="text-xs">
+                {userOwnDebt ? (
+                  <span className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/80 inline-flex flex-wrap items-center gap-1.5">
+                    <span>Tu cuota liquidada:</span>
+                    <span className="font-bold">
+                      ${userOwnDebt.amount.toLocaleString('es-CL')}
+                    </span>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+                      userOwnDebt.status === 'pagado' ? 'bg-emerald-200 text-emerald-900' : 'bg-amber-100 text-amber-900 border border-amber-300'
+                    }`}>
+                      {userOwnDebt.status === 'pagado' ? '✓ Al día' : 'Pendiente'}
+                    </span>
+                  </span>
+                ) : userAttendee?.status === 'confirmado' ? (
+                  <span className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/80">
+                    Cuota eximida ($0)
+                  </span>
+                ) : (
+                  <span className="font-semibold text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded-lg border border-neutral-200">
+                    Cierre financiero liquidado
+                  </span>
+                )}
+              </div>
+            </div>
+          ) : (Boolean(event.total_cost && event.total_cost > 0) || Boolean(event.cost_per_player && event.cost_per_player > 0)) && (
             <div className="flex items-center gap-2">
               <CircleDollarSign className="w-4 h-4 text-emerald-600 flex-shrink-0" />
               <div className="text-xs">
@@ -479,6 +531,41 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         />
       </div>
 
+      {/* Personalized Settled Quota Callout */}
+      {event.financial_closed && userAttendee?.status === 'confirmado' && (
+        <div className="my-2 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200/90 shadow-2xs space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CircleDollarSign className="w-4 h-4 text-emerald-700" />
+              <span className="text-xs font-bold text-emerald-950">Tu cuota por este partido:</span>
+            </div>
+            <span className="text-sm font-black text-emerald-950">
+              {userOwnDebt ? `$${userOwnDebt.amount.toLocaleString('es-CL')}` : '$0 (Eximido)'}
+            </span>
+          </div>
+          {userGuestDebts.length > 0 && (
+            <div className="flex items-center justify-between text-[11px] text-emerald-800 pt-1 border-t border-emerald-200/70">
+              <span>+ {userGuestDebts.length} invitado(s) a tu cargo:</span>
+              <span className="font-bold">
+                ${userGuestDebts.reduce((a, b) => a + b.amount, 0).toLocaleString('es-CL')}
+              </span>
+            </div>
+          )}
+          {userOwnDebt && (
+            <div className="flex items-center justify-between pt-1 border-t border-emerald-200/70 text-[11px]">
+              <span className="text-emerald-800 font-medium">Estado en Tesorería:</span>
+              <span className={`font-bold px-2 py-0.5 rounded-full text-[10px] ${
+                userOwnDebt.status === 'pagado'
+                  ? 'bg-emerald-200 text-emerald-900'
+                  : 'bg-amber-100 text-amber-900 border border-amber-300'
+              }`}>
+                {userOwnDebt.status === 'pagado' ? '✓ Pagado' : 'Pendiente de pago en Finanzas'}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Event Management Controls (Admin or Organizer) */}
       {canManageEvent && (
         <div className="my-3">
@@ -509,6 +596,11 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             guestName: g.guest_name,
             invitedByUserId: g.invited_by_user_id,
             inviterName: g.inviter?.full_name || 'Socio',
+          }))}
+          existingDebts={eventDebts.map((d) => ({
+            userId: d.user_id,
+            guestId: d.guest_id,
+            amount: d.amount,
           }))}
           canManage={canManageEvent}
           isAdmin={isAdmin}
@@ -605,12 +697,22 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                     </div>
                   </div>
 
-                  <span className="text-[10px] text-neutral-400 font-mono">
-                    {new Date(attendee.registered_at).toLocaleTimeString('es-AR', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {event.financial_closed && (
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        {(() => {
+                          const attDebt = eventDebts.find((d) => d.user_id === attendee.user_id && d.debt_type === 'partido_propio')
+                          return attDebt ? `$${attDebt.amount.toLocaleString('es-CL')}` : '$0'
+                        })()}
+                      </span>
+                    )}
+                    <span className="text-[10px] text-neutral-400 font-mono">
+                      {new Date(attendee.registered_at).toLocaleTimeString('es-AR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  </div>
                 </div>
               )
             })}
@@ -645,12 +747,22 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                   </div>
                 </div>
 
-                <span className="text-[10px] text-neutral-400 font-mono">
-                  {new Date(guest.created_at).toLocaleTimeString('es-AR', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </span>
+                <div className="flex items-center gap-2">
+                  {event.financial_closed && (
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+                      {(() => {
+                        const gDebt = eventDebts.find((d) => d.guest_id === guest.id)
+                        return gDebt ? `$${gDebt.amount.toLocaleString('es-CL')}` : '$0'
+                      })()}
+                    </span>
+                  )}
+                  <span className="text-[10px] text-neutral-400 font-mono">
+                    {new Date(guest.created_at).toLocaleTimeString('es-AR', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </span>
+                </div>
               </div>
             ))}
           </div>

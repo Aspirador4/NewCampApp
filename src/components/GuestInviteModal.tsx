@@ -113,20 +113,6 @@ export function GuestInviteModal({ eventId, eventClosed }: GuestInviteModalProps
                   />
                 </div>
 
-                <div>
-                  <label htmlFor="guest_contact" className="block text-xs font-semibold text-neutral-700 mb-1">
-                    Teléfono / WhatsApp (opcional)
-                  </label>
-                  <input
-                    id="guest_contact"
-                    type="tel"
-                    value={guestContact}
-                    onChange={(e) => setGuestContact(e.target.value)}
-                    placeholder="+56 9 8765 4321"
-                    className="w-full px-3 py-2 rounded-xl border border-neutral-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900"
-                  />
-                </div>
-
                 <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-[11px] text-neutral-500">
                   Los invitados son revisados por los administradores del club y suman al cupo del evento una vez aprobados.
                 </div>

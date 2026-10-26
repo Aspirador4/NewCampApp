@@ -1,8 +1,19 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { settleMemberDebtsAction, revertDebtAction, updateBankDetailsAction, BankDetails } from '@/app/finanzas/actions'
-import { CheckCircle2, ChevronDown, ChevronUp, Loader2, AlertCircle, RefreshCw, UserCheck, Shield, Settings2, X, Save } from 'lucide-react'
+import { CheckCircle2, ChevronDown, ChevronUp, ChevronRight, Loader2, AlertCircle, RefreshCw, UserCheck, Shield, Settings2, X, Save } from 'lucide-react'
+
+export interface PendingClosureEventItem {
+  id: string
+  title: string
+  start_time: string
+  event_type: string
+  total_cost: number | null
+  cost_per_player: number
+  confirmed_count: number
+}
 
 export interface AdminDebtItem {
   id: string
@@ -39,9 +50,10 @@ export interface PlayerDebtSummary {
 interface FinanzasAdminPanelProps {
   debts: AdminDebtItem[]
   initialBankDetails: BankDetails
+  pendingClosureEvents?: PendingClosureEventItem[]
 }
 
-export function FinanzasAdminPanel({ debts, initialBankDetails }: FinanzasAdminPanelProps) {
+export function FinanzasAdminPanel({ debts, initialBankDetails, pendingClosureEvents = [] }: FinanzasAdminPanelProps) {
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null)
   const [loadingDebtId, setLoadingDebtId] = useState<string | null>(null)
   const [expandedUser, setExpandedUser] = useState<string | null>(null)
@@ -200,6 +212,48 @@ export function FinanzasAdminPanel({ debts, initialBankDetails }: FinanzasAdminP
           </button>
         </div>
       </div>
+
+      {/* Partidos Pendientes de Cierre Financiero */}
+      {pendingClosureEvents.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-3 shadow-xs">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-700 flex-shrink-0" />
+              <h4 className="text-xs font-bold uppercase tracking-wider text-amber-950">
+                Partidos Pendientes de Cierre ({pendingClosureEvents.length})
+              </h4>
+            </div>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">
+              Por Liquidar
+            </span>
+          </div>
+
+          <p className="text-xs text-amber-800 leading-relaxed">
+            Los siguientes partidos finalizaron en cancha pero aún no se han liquidado las cuotas a los jugadores. Haz clic en <strong>Cerrar Finanzas</strong> para liquidar los cobros.
+          </p>
+
+          <div className="divide-y divide-amber-200/80 bg-white rounded-xl border border-amber-200 overflow-hidden">
+            {pendingClosureEvents.map((ev) => (
+              <div key={ev.id} className="p-3 flex items-center justify-between gap-3 hover:bg-amber-50/50 transition">
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-neutral-900 truncate">{ev.title}</p>
+                  <p className="text-[11px] text-neutral-500">
+                    {new Date(ev.start_time).toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short' })} • {ev.confirmed_count} jugadores
+                    {ev.total_cost ? ` • Total Cancha: $${ev.total_cost.toLocaleString('es-CL')}` : ''}
+                  </p>
+                </div>
+                <Link
+                  href={`/eventos/${ev.id}`}
+                  className="py-1.5 px-3 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center gap-1 transition active:scale-95 shadow-xs flex-shrink-0"
+                >
+                  <span>Cerrar Finanzas</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Bank Details Modal */}
       {isEditingBank && (

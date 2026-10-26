@@ -158,3 +158,30 @@ export async function updateMemberRoleAction(targetUserId: string, newRole: Syst
   revalidatePath('/perfil')
   return { success: true }
 }
+
+export async function submitMotivationAction(motivationText: string) {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: 'No autorizado' }
+  }
+
+  const cleanText = motivationText.trim().slice(0, 50)
+  if (!cleanText) {
+    return { error: 'Por favor escribe una breve motivación (máximo 50 caracteres)' }
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ motivation: cleanText, updated_at: new Date().toISOString() })
+    .eq('id', user.id)
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  revalidatePath('/')
+  revalidatePath('/miembros')
+  return { success: true }
+}

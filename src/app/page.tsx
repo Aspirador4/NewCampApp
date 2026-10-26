@@ -1,13 +1,16 @@
 import { createClient } from "@/utils/supabase/server";
-import { Flame, ArrowRight, UserCircle2, Calendar, MapPin, Users, Wallet, CircleDollarSign, Clock, User } from "lucide-react";
+import { Flame, ArrowRight, UserCircle2, Calendar, MapPin, Users, Wallet, CircleDollarSign, User } from "lucide-react";
 import Link from "next/link";
 import { AppOnboardingModal } from "@/components/AppOnboardingModal";
+import { PendingApprovalScreen } from "@/components/PendingApprovalScreen";
 
 export default async function Home() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   let profile = null;
+  let hasPushSub = false;
+
   if (user) {
     const { data } = await supabase
       .from('profiles')
@@ -15,6 +18,25 @@ export default async function Home() {
       .eq('id', user.id)
       .single();
     profile = data;
+
+    // Check if account has an active push subscription
+    const { count } = await supabase
+      .from('push_subscriptions')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+    hasPushSub = (count ?? 0) > 0;
+  }
+
+  // Gatekeeper: If user is logged in but not yet approved by club admins,
+  // they ONLY see the pending approval screen with their motivation letter.
+  if (user && profile?.approval_status !== 'aprobado') {
+    return (
+      <PendingApprovalScreen
+        fullName={profile?.full_name || user.user_metadata?.full_name || 'Nuevo Miembro'}
+        email={user.email ?? ''}
+        initialMotivation={profile?.motivation}
+      />
+    );
   }
 
   // Fetch next upcoming event
@@ -126,20 +148,11 @@ export default async function Home() {
           </div>
         )}
 
-        {/* Pending Admission Notice */}
-        {profile?.approval_status === 'pendiente' && (
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 shadow-xs space-y-1.5">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-600 flex-shrink-0" />
-              <p className="text-xs font-bold text-amber-900">Solicitud de Admisión en Revisión</p>
-            </div>
-            <p className="text-[11px] text-amber-800 leading-normal">
-              Tu cuenta está pendiente de ser admitida por los administradores del club. Te notificaremos en cuanto puedas confirmar asistencias a partidos y entrenamientos.
-            </p>
-          </div>
-        )}
-
-        <AppOnboardingModal isLoggedIn={Boolean(user)} />
+        <AppOnboardingModal
+          isLoggedIn={Boolean(user)}
+          userId={user?.id}
+          hasPushSub={hasPushSub}
+        />
 
         {/* Next Event Highlight Card */}
         {nextEvent ? (

@@ -12,6 +12,16 @@ export default async function NuevoEventoPage() {
     redirect('/login')
   }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('approval_status')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.approval_status !== 'aprobado') {
+    redirect('/')
+  }
+
   return (
     <div className="flex-1 flex flex-col p-5 pb-24">
       {/* Header */}
