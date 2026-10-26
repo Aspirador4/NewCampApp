@@ -45,12 +45,13 @@ Al registrarse un nuevo socio, el perfil se crea automáticamente con:
 - **Barra de Navegación Móvil (`BottomNav`)**: En [`RootLayout`](../../src/app/layout.tsx), la barra inferior solo se monta si el usuario no tiene sesión o si su perfil está debidamente `aprobado`.
 - **Rutas Protegidas**: Todas las páginas (`/eventos`, `/eventos/[id]`, `/eventos/nuevo`, `/finanzas`, `/miembros`, `/ranking`, `/perfil`, `/admin/invitados`) verifican el estado en la base de datos y redirigen a `/` si el socio no está aprobado.
 
-### 3. Carta de Motivación y Re-postulación (Evitar Blacklist)
-Dentro de la pantalla de espera, el postulante dispone de un formulario interactivo para comunicarse con los administradores:
-- **Límite Estricto**: Máximo 50 caracteres con contador en tiempo real `(X/50)`.
-- **Socio Pendiente**: Puede enviar o actualizar su carta de motivación.
-- **Socio Rechazado**: No queda bloqueado permanentemente. La pantalla le notifica con badge *"Solicitud No Aprobada"* y le permite actualizar su mensaje y pulsar **"Reenviar Postulación al Club"**, lo cual restaura su estado a `pendiente` mediante [`submitMotivationAction`](../../src/app/miembros/actions.ts), permitiendo que los administradores reconsideren su ingreso.
-- **Panel Administrativo**: Los administradores disponen de secciones separadas en `/miembros` para solicitudes pendientes y solicitudes rechazadas, con botones de *Aprobar*, *Reconsiderar* y *Eliminar*.
+### 3. Ficha de Acreditación Física y Re-postulación (Evitar Blacklist)
+La pantalla [`PendingApprovalScreen`](../../src/components/PendingApprovalScreen.tsx) está diseñada bajo la metáfora de un **Pase Provisional / Credencial de Admisión**:
+- **Estética de Credencial**: Formato ticket con recortes físicos laterales, avatar enmarcado de 2px, tipografía atlética condensada e insignia de estado (`PASE PROVISIONAL` o `PASE DENEGADO`).
+- **Límite Estricto de Motivación**: Máximo 50 caracteres con contador en tiempo real `(X/50)` utilizando campos `.input-tactile`.
+- **Socio Pendiente**: Puede redactar o actualizar su carta de motivación.
+- **Socio Rechazado**: No queda bloqueado permanentemente. La credencial le notifica formalmente el rechazo y le permite actualizar su mensaje y pulsar **"Reenviar Postulación al Club"**, lo cual restaura su estado a `pendiente` mediante [`submitMotivationAction`](../../src/app/miembros/actions.ts), permitiendo que los administradores reconsideren su ingreso.
+- **Panel Administrativo**: Los administradores disponen de secciones separadas en `/miembros` para solicitudes pendientes y solicitudes rechazadas, con botones táctiles de *Aprobar*, *Reconsiderar* y *Eliminar*.
 
 ---
 

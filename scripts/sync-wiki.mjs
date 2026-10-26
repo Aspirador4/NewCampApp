@@ -84,6 +84,7 @@ try {
       .replace(/\.\/08_PWA_Y_WEB_PUSH\.md/g, '08-PWA-y-Web-Push')
       .replace(/\.\/09_ADMISION_DIRECTORIO_Y_ROLES\.md/g, '09-Admision-Directorio-y-Roles')
       .replace(/\.\/10_ARQUITECTURA_MULTICLUB\.md/g, '10-Arquitectura-MultiClub')
+      .replace(/\.\/11_DISENO_Y_UX_MOBILE_FIRST\.md/g, '11-Diseno-y-UX-Mobile-First')
       .replace(/\.\/INDEX\.md/g, 'Home')
       // Enlaces a archivos de código fuente deben apuntar al repo principal de GitHub
       .replace(/\.\.\/\.\.\/src\//g, `https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/src/`)
@@ -106,6 +107,7 @@ try {
 * [[8. PWA y Web Push|08-PWA-y-Web-Push]]
 * [[9. Admisión, Miembros y Roles|09-Admision-Directorio-y-Roles]]
 * [[10. Arquitectura Multi-Club|10-Arquitectura-MultiClub]]
+* [[11. Sistema de Diseño Táctil y UX|11-Diseno-y-UX-Mobile-First]]
 
 ---
 * 🌐 [App en Vercel](https://new-camp-app.vercel.app)
