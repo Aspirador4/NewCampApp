@@ -17,9 +17,20 @@ Documentación técnica del soporte PWA standalone, Service Worker y entrega de 
 
 ---
 
-## 2. Web Push Notifications (VAPID)
+## 2. Web Push Notifications (VAPID) y Vinculación a Nivel de Cuenta
 
 La plataforma utiliza el estándar **Web Push W3C** firmado criptográficamente con claves VAPID (Voluntary Application Server Identification), permitiendo enviar notificaciones push en segundo plano sin depender de tiendas de aplicaciones (App Store / Google Play).
+
+### Desacople entre Permiso del Navegador y Cuenta de Usuario
+Un error común en PWAs compartidas o al probar múltiples perfiles en un mismo dispositivo es asumir que si `Notification.permission === 'granted'`, el usuario actual ya está suscrito. 
+- `Notification.permission` es una propiedad **del dispositivo/origen**, no de la cuenta.
+- Si el usuario A activó notificaciones y luego el usuario B inicia sesión en ese mismo teléfono, la app validaba incorrectamente que las notificaciones estaban listas, impidiendo que el usuario B guardara su suscripción en la base de datos.
+
+### Solución Implementada ([`AppOnboardingModal.tsx`](../../src/components/AppOnboardingModal.tsx)):
+1. **Comprobación en Servidor**: El servidor consulta la tabla `push_subscriptions` filtrando por `user_id = user.id` (`hasPushSub`).
+2. **Auto-Sincronización Silenciosa**: Si el navegador ya tiene permisos (`permission === 'granted'`) pero la cuenta no registra suscripción en la BD, la aplicación registra el endpoint del dispositivo y lo asocia automáticamente a la cuenta activa en segundo plano.
+3. **Botón Dinámico de Vinculación**: Si se requiere acción manual, el botón cambia a *"Vincular Notificaciones a mi Cuenta"*.
+4. **Caché de Descarte Scoped**: El descarte del modal se guarda en `localStorage` con la clave `campapp_onboarding_dismissed_${userId}`, asegurando que cada nuevo jugador que ingrese al dispositivo reciba su respectivo onboarding y recordatorio para completar sus datos.
 
 ```mermaid
 sequenceDiagram
@@ -36,7 +47,7 @@ sequenceDiagram
     SW->>PushService: Registra dispositivo
     PushService-->>SW: Retorna Endpoint + Keys (p256dh, auth)
     App->>Server: savePushSubscription()
-    Server->>DB: UPSERT push_subscriptions
+    Server->>DB: UPSERT push_subscriptions (user_id, endpoint)
     Note over Server,PushService: DISPARADORES AUTOMÁTICOS
     Server->>PushService: webpush.sendNotification()
     PushService->>SW: Dispara evento 'push'

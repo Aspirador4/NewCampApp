@@ -15,23 +15,63 @@ erDiagram
     profiles ||--o{ mvp_votes : "vota / recibe"
     profiles ||--o{ user_stats : "acumula métricas"
     profiles ||--o{ push_subscriptions : "dispositivos"
+    profiles ||--o{ member_debts : "deudas y cuotas"
     events ||--o{ event_attendees : "participantes"
     events ||--o{ event_attendance_logs : "historial"
     events ||--o{ mvp_votes : "votos MVP"
     events ||--o{ event_guests : "invitados"
+    events ||--o{ member_debts : "liquidación"
     profiles ||--o{ event_guests : "invita"
 
     profiles {
         uuid id PK "FK auth.users"
         string full_name
         string email
-        string phone
         string avatar_url
         date birth_date
         string system_role "admin | member"
         string sports_role "jugador | hincha | ambos"
+        string approval_status "pendiente | aprobado | rechazado"
+        string motivation "Carta de motivación máx 50 car."
         jsonb custom_attributes "Campos dinámicos"
         timestamp created_at
+        timestamp updated_at
+    }
+
+    events {
+        uuid id PK
+        string title
+        string description
+        string event_type "partido | entrenamiento | otro"
+        timestamp start_time
+        timestamp end_time
+        string location
+        int max_capacity
+        string status "pendiente_aprobacion | convocado | en_curso | finalizado | cancelado"
+        decimal cost_per_player "Cuota base por jugador"
+        decimal total_cost "Costo total de cancha / evento"
+        boolean financial_closed "Indica si se emitieron las deudas"
+        timestamp financial_closed_at
+        jsonb custom_fields "Campos mutables para eventos tipo otro"
+        uuid created_by FK "Usuario convocante"
+    }
+
+    member_debts {
+        uuid id PK
+        uuid event_id FK
+        uuid user_id FK
+        uuid guest_id FK "Opcional (si es invitado a cargo)"
+        string debt_type "partido_propio | invitado"
+        string description
+        decimal amount "Monto real cobrado"
+        string status "pendiente | pagado"
+        timestamp paid_at
+        timestamp created_at
+    }
+
+    club_settings {
+        string key PK "Ej: bank_details"
+        jsonb value "Datos de transferencia, parámetros"
         timestamp updated_at
     }
 
@@ -51,19 +91,38 @@ erDiagram
 ## 2. Catálogo de Tablas
 
 ### `profiles`
-Extensión de `auth.users`. Almacena la identidad deportiva del usuario.
+Extensión de `auth.users`. Almacena la identidad deportiva y de membresía del usuario.
 - **`system_role`**: Controla privilegios de administración (`admin` o `member`).
 - **`sports_role`**: Tipo de afiliación (`jugador`, `hincha`, `ambos`).
-- **`custom_attributes`**: Contenedor `JSONB` indexable que almacena los valores correspondientes a `profile_field_definitions` (ej: posición, dorsal, pierna hábil).
+- **`approval_status`**: Estado de admisión en el club (`pendiente`, `aprobado`, `rechazado`). Controla el acceso global (gatekeeper).
+- **`motivation`**: Carta de motivación breve enviada por el postulante (máximo 50 caracteres).
+- **`custom_attributes`**: Contenedor `JSONB` indexable que almacena los valores correspondientes a `profile_field_definitions` (ej: posición, dorsal, pie hábil).
 
 ### `profile_field_definitions`
 Configuración administrable de campos de perfil adicionales. Permite agregar nuevos campos sin alterar el esquema SQL.
 
 ### `events`
 Partidos, entrenamientos o eventos sociales.
+- **`event_type`**: `partido`, `entrenamiento`, `otro`.
 - **`max_capacity`**: Cupo máximo permitido. Si es `NULL`, no tiene límite.
-- **`status`**: `convocado`, `en_curso`, `finalizado`, `cancelado`.
+- **`status`**: `pendiente_aprobacion`, `convocado`, `en_curso`, `finalizado`, `cancelado`.
+- **`cost_per_player`**: Monto base o ejecutado por jugador.
+- **`total_cost`**: Costo global de la cancha o evento para prorrateo automático.
+- **`financial_closed`**: Booleano que indica si el partido ya tuvo su liquidación financiera emitida.
+- **`financial_closed_at`**: Timestamp de la emisión del cierre financiero.
+- **`created_by`**: ID del usuario que convocó el evento (requiere aprobación si no es admin).
+- **`custom_fields`**: Contenedor `JSONB` mutable para campos dinámicos en eventos de tipo "otro" (ej: cuota asado, lugar quincho, encargado de compras).
 - **`mvp_voting_open`**: Bandera booleana para abrir o cerrar la ventana de votación de jugador del partido.
+
+### `member_debts`
+Control de deudas individuales por eventos deportivos o sociales.
+- **`debt_type`**: `partido_propio` (asistencia del socio) o `invitado` (invitado a cargo del socio).
+- **`amount`**: Monto real liquidado por el administrador tras el cierre.
+- **`status`**: `pendiente` o `pagado`.
+- **`paid_at`**: Timestamp en el que un administrador marcó la deuda como saldada.
+
+### `club_settings`
+Configuración centralizada en pares clave/valor `JSONB`. Almacena los datos bancarios del club (`key = 'bank_details'`) para transferencias y parámetros globales.
 
 ### `event_attendees`
 Inscripciones de los socios.
@@ -84,7 +143,7 @@ Métricas consolidadas de rendimiento y asistencia por jugador.
 - **`mutable_stats`**: Objeto `JSONB` con victorias, derrotas, empates, goles, etc.
 
 ### `push_subscriptions`
-Endpoints y credenciales criptográficas de dispositivos móviles para Web Push.
+Endpoints y credenciales criptográficas de dispositivos móviles para Web Push vinculadas a cada cuenta de usuario (`user_id`).
 
 ---
 
@@ -98,10 +157,17 @@ Para evitar condiciones de carrera (*race conditions*) con múltiples usuarios c
 2. **`leave_event(p_event_id, p_user_id, p_actor_id, p_reason)`**:
    Cancela la asistencia del usuario. Si estaba confirmado, selecciona con bloqueo exclusivo (`FOR UPDATE SKIP LOCKED`) al primer integrante de la lista de espera por orden de registro (`registered_at ASC`), lo promueve a `confirmado`, registra el log y retorna su `user_id` para disparar la notificación Push.
 
-3. **`finalize_event_mvp(p_event_id)`**:
+3. **`close_event_finances(p_event_id, p_custom_debts)`**:
+   Realiza la liquidación financiera manual del partido en una única transacción:
+   - Procesa un arreglo de cargos personalizados (`userId`, `guestId`, `amount`, `description`).
+   - Maneja exenciones ($0) eliminando cargos pendientes si fueron perdonados o becados.
+   - Inserta o actualiza las deudas en `member_debts`.
+   - Calcula el promedio real ejecutado y actualiza `events.cost_per_player` y marca `events.financial_closed = true`.
+
+4. **`finalize_event_mvp(p_event_id)`**:
    Cierra la votación, computa el jugador o jugadores con mayor cantidad de votos (soporta empates compartidos), incrementa `mvp_count`, `mvp_votes_received` y `matches_played` en `user_stats`.
 
-4. **`is_admin(user_id)`**:
+5. **`is_admin(user_id)`**:
    Función con atributo `SECURITY DEFINER` que consulta el rol del usuario sin disparar recursiones infinitas dentro de las políticas de RLS.
 
 ---

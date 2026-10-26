@@ -32,7 +32,29 @@ sequenceDiagram
 
 ---
 
-## 3. Manejo de Perfiles y Atributos Mutables (JSONB)
+## 3. Flujo de Admisión y Gatekeeper (`PendingApprovalScreen`)
+
+Para proteger la privacidad de las convocatorias y garantizar que solo socios admitidos participen de las actividades:
+
+### 1. Estado de Admisión Inicial
+Al registrarse un nuevo socio, el perfil se crea automáticamente con:
+- `approval_status = 'pendiente'`
+- `system_role = 'member'`
+
+### 2. Bloqueo Global de Navegación (Gatekeeper)
+- **Ruta Raíz (`/`)**: Si el usuario está autenticado pero su estado es `pendiente` o `rechazado`, el servidor intercepta el renderizado y retorna exclusivamente [`PendingApprovalScreen`](../../src/components/PendingApprovalScreen.tsx). No se cargan partidos, accesos ni métricas.
+- **Barra de Navegación Móvil (`BottomNav`)**: En [`RootLayout`](../../src/app/layout.tsx), la barra inferior solo se monta si el usuario no tiene sesión o si su perfil está debidamente `aprobado`.
+- **Rutas Protegidas**: Todas las páginas (`/eventos`, `/eventos/[id]`, `/eventos/nuevo`, `/finanzas`, `/miembros`, `/ranking`, `/perfil`, `/admin/invitados`) verifican el estado en la base de datos y redirigen a `/` si el socio no está aprobado.
+
+### 3. Carta de Motivación Breve (Máx. 50 caracteres)
+Dentro de la pantalla de espera, el postulante dispone de un campo interactivo para enviar un mensaje directo a la comisión o administradores (ej: su posición en cancha, quién lo recomendó, etc.):
+- **Límite Estricto**: Máximo 50 caracteres con contador en tiempo real `(X/50)`.
+- **Acción Server**: [`submitMotivationAction`](../../src/app/miembros/actions.ts) actualiza la columna `profiles.motivation`.
+- **Visualización en Administración**: Los administradores ven la carta de motivación destacada en la cola de admisión de `/miembros` para aprobar o rechazar con 1 clic.
+
+---
+
+## 4. Manejo de Perfiles y Atributos Mutables (JSONB)
 
 ### Disparador de Creación de Perfil
 Al registrarse un nuevo usuario en `auth.users`, el trigger SQL `on_auth_user_created` inserta automáticamente una fila en `public.profiles` con su nombre y correo, y una fila vacía en `public.user_stats`.
@@ -49,18 +71,23 @@ Los campos adicionales (posición en la cancha, pierna hábil, número de camise
      "pie_habil": "Derecho"
    }
    ```
+*(Nota: Se eliminó el campo de número de WhatsApp / teléfono de los requisitos de registro para agilizar el onboarding).*
 
 ---
 
-## 4. Almacenamiento de Avatares (Supabase Storage)
+## 5. Almacenamiento y Compresión de Avatares (Supabase Storage)
 
+Para evitar el agotamiento prematuro de la cuota de almacenamiento de Supabase:
+- **Compresión Previa en Cliente**: Antes de subir la foto, [`AvatarUpload.tsx`](../../src/components/AvatarUpload.tsx) ejecuta un algoritmo de compresión basado en Canvas:
+  - Redimensiona la imagen a un ancho máximo de 800px preservando el aspect ratio.
+  - Exporta en formato JPEG/WebP optimizado con calidad `0.82`.
 - **Bucket**: `avatars` (público para lectura optimizada de avatares).
-- **Ruta de archivo**: `avatars/{userId}/{timestamp}.{ext}`.
+- **Ruta de archivo**: `avatars/{userId}/{timestamp}.jpg`.
 - **Políticas RLS**: Los usuarios autenticados únicamente pueden insertar y actualizar sus propios archivos de avatar.
 
 ---
 
-## 5. Configuración de Google OAuth en Supabase y Google Cloud Console
+## 6. Configuración de Google OAuth en Supabase y Google Cloud Console
 
 Para activar el inicio de sesión con Google en producción y desarrollo:
 

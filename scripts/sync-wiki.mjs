@@ -60,6 +60,7 @@ try {
     { src: '06_MODULO_INVITADOS_Y_MODERACION.md', dest: '06-Modulo-Invitados-y-Moderacion.md' },
     { src: '07_SISTEMA_MVP_Y_ESTADISTICAS.md', dest: '07-Sistema-MVP-y-Estadisticas.md' },
     { src: '08_PWA_Y_WEB_PUSH.md', dest: '08-PWA-y-Web-Push.md' },
+    { src: '09_ADMISION_DIRECTORIO_Y_ROLES.md', dest: '09-Admision-Directorio-y-Roles.md' },
   ]
 
   // Copiar y adaptar enlaces para formato de GitHub Wiki
@@ -79,6 +80,7 @@ try {
       .replace(/\.\/06_MODULO_INVITADOS_Y_MODERACION\.md/g, '06-Modulo-Invitados-y-Moderacion')
       .replace(/\.\/07_SISTEMA_MVP_Y_ESTADISTICAS\.md/g, '07-Sistema-MVP-y-Estadisticas')
       .replace(/\.\/08_PWA_Y_WEB_PUSH\.md/g, '08-PWA-y-Web-Push')
+      .replace(/\.\/09_ADMISION_DIRECTORIO_Y_ROLES\.md/g, '09-Admision-Directorio-y-Roles')
       .replace(/\.\/INDEX\.md/g, 'Home')
       // Enlaces a archivos de código fuente deben apuntar al repo principal de GitHub
       .replace(/\.\.\/\.\.\/src\//g, `https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/src/`)
@@ -99,6 +101,7 @@ try {
 * [[6. Invitados y Moderación|06-Modulo-Invitados-y-Moderacion]]
 * [[7. MVP y Estadísticas|07-Sistema-MVP-y-Estadisticas]]
 * [[8. PWA y Web Push|08-PWA-y-Web-Push]]
+* [[9. Admisión, Miembros y Roles|09-Admision-Directorio-y-Roles]]
 
 ---
 * 🌐 [App en Vercel](https://new-camp-app.vercel.app)

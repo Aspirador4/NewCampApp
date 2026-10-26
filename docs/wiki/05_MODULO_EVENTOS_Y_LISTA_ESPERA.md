@@ -26,7 +26,39 @@ stateDiagram-v2
 
 ---
 
-## 2. Componentes y Flujos de Pantalla
+## 2. Tipología y Versatilidad de Eventos
+
+La plataforma simplifica la organización reduciendo los tipos principales a tres, con máxima flexibilidad:
+
+1. **Partidos (`partido`)**:
+   - Convocatoria deportiva estándar.
+   - Permite especificar el **costo total de la cancha** y calcula el prorrateo automático sobre la capacidad máxima convocada (ej: Cancha $42.000 ÷ 14 cupos = ~$3.000 p/jugador), permitiendo a los socios conocer la cuota aproximada antes de inscribirse.
+2. **Entrenamientos (`entrenamiento`)**:
+   - Soporta especificar tanto el **costo total de la sesión** como una **cuota fija por jugador**.
+3. **Otros Eventos Mutables (`otro`)**:
+   - Diseñado para juntas, asados, asambleas de directorio o eventos sociales.
+   - **Campos Dinámicos (`custom_fields` JSONB)**: Permite a los organizadores agregar o quitar campos arbitrarios al vuelo (ej: *"Cuota Asado"*, *"Encargado de Bebidas"*, *"Parrilla"*), adaptándose a cualquier necesidad del club sin modificar esquemas SQL.
+
+### Convocatorias y Moderación
+- **Atribución de Creador**: Cada evento muestra claramente quién lo convocó en la cabecera.
+- **Aprobación de Eventos**: Si un socio no-administrador crea un evento, este queda en estado `pendiente_aprobacion` hasta que un administrador lo revise y autorice.
+
+---
+
+## 3. Utilidades de Convocatoria Móvil
+
+### 1. Botón "Add to Calendar" ([`AddToCalendarButton.tsx`](../../src/components/AddToCalendarButton.tsx))
+Ubicado en la cabecera del detalle de cada evento, permite agendar el partido con un toque:
+- **Google Calendar**: Construye una URL con codificación `action=TEMPLATE` incluyendo título, descripción, ubicación y marcas horarias ISO en formato UTC.
+- **Apple Calendar / Outlook (`.ics`)**: Genera y descarga un archivo estándar `iCalendar` (RFC 5545) compatible de forma nativa con iPhone (iOS Calendar), Mac y clientes de escritorio.
+
+### 2. Compartir Convocatoria ([`ShareEventButton.tsx`](../../src/components/ShareEventButton.tsx))
+- En dispositivos móviles utiliza la **Web Share API** nativa (`navigator.share`) para compartir directamente por **WhatsApp**, Telegram o Mensajes con un resumen formateado del partido (lugar, fecha, costo por jugador y cupos disponibles).
+- En navegadores de escritorio cuenta con fallback automático para copiar el enlace y texto al portapapeles.
+
+---
+
+## 4. Componentes y Flujos de Pantalla
 
 | Ruta | Componente | Función |
 | :--- | :--- | :--- |
@@ -38,7 +70,7 @@ stateDiagram-v2
 
 ---
 
-## 3. Bitácora de Auditoría Inmutable (`event_attendance_logs`)
+## 5. Bitácora de Auditoría Inmutable (`event_attendance_logs`)
 
 Todos los movimientos quedan registrados de manera append-only:
 - `confirmo`: El socio confirmó su presencia.

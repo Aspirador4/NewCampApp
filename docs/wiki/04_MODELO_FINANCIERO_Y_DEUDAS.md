@@ -1,69 +1,112 @@
-# 04. Módulo Financiero: Gestión de Deudas y Cobro de Partidos
+# 04. Módulo Financiero: Gestión de Deudas y Cierre de Partidos
 
-Especificación técnica de la arquitectura prevista para el control de aranceles, cobros de canchas, cuenta corriente del socio y estado de deudas por evento deportivo.
-
----
-
-## 1. Viabilidad Arquitectónica
-
-La arquitectura actual está **100% preparada** para incorporar el módulo de deudas sin requerir refactorizaciones destructivas:
-- **Base Relacional**: `events` y `event_attendees` ya identifican con exactitud qué jugadores confirmaron y jugaron cada encuentro.
-- **Auditoría**: `event_attendance_logs` ya registra los presentes y las bajas de último minuto (para saber a quién cobrarle o penalizarle).
-- **Extensibilidad**: El modelo soporta tanto campos directos en `events` y `event_attendees` como una tabla ledger de cuenta corriente.
+Documentación técnica del sistema financiero, liquidación de canchas, cuenta corriente del socio, control de deudas y tesorería administrativa.
 
 ---
 
-## 2. Modelo de Datos Propuesto para Deudas
+## 1. Arquitectura del Modelo Financiero
+
+El sistema gestiona cobros tanto por **partido propio** como por **invitados externos** a cargo de cada socio, permitiendo costos fijos por jugador o prorrateo automático sobre el total de la cancha.
 
 ```mermaid
 erDiagram
-    events ||--o{ event_attendees : "participación"
-    events ||--o{ member_ledger : "origina cargo"
-    profiles ||--o{ member_ledger : "cuenta corriente"
+    events ||--o{ member_debts : "origina deudas"
+    profiles ||--o{ member_debts : "titular del cobro"
+    event_guests ||--o{ member_debts : "cargo por invitado"
+    club_settings ||--|| events : "datos bancarios y config"
 
     events {
         uuid id PK
         string title
-        decimal total_cost "Costo total cancha / arbitraje"
-        decimal price_per_player "Arancel fijo o prorrateado"
-        string payment_collection_type "fijo | prorrateado | gratuito"
+        decimal total_cost "Costo total de la cancha"
+        decimal cost_per_player "Cuota base / promedio ejecutado"
+        boolean financial_closed "Indica si se emitieron cobros"
+        timestamp financial_closed_at
+        uuid created_by FK
     }
 
-    event_attendees {
+    member_debts {
         uuid id PK
         uuid event_id FK
-        uuid user_id FK
-        string status "confirmado | lista_espera | cancelado"
-        string payment_status "pendiente | pagado | exento"
-        decimal amount_due "Monto adeudado"
+        uuid user_id FK "Socio responsable del pago"
+        uuid guest_id FK "Opcional (si proviene de un invitado)"
+        string debt_type "partido_propio | invitado"
+        string description
+        decimal amount "Monto real liquidado"
+        string status "pendiente | pagado"
         timestamp paid_at
+        timestamp created_at
     }
 
-    member_ledger {
-        uuid id PK
-        uuid user_id FK
-        uuid event_id FK "Opcional (si proviene de partido)"
-        string type "cargo_partido | pago_transferencia | pago_efectivo | ajuste"
-        decimal amount "Positivo = cargo, Negativo = abono"
-        string status "pendiente | verificado | rechazado"
-        string receipt_url "Foto del comprobante de transferencia"
-        uuid verified_by FK "Admin que validó el pago"
-        timestamp created_at
+    club_settings {
+        string key PK "bank_details"
+        jsonb value "Banco, tipo cuenta, rut, titular, email"
     }
 ```
 
 ---
 
-## 3. Flujo Funcional de Cobro
+## 2. Flujo de Cierre Financiero Manual e Interactivo
 
-1. **Configuración del Evento**:
-   - Al crear el partido, el administrador define el costo:
-     - *Opción A (Monto Fijo)*: Ej. $3.500 por jugador.
-     - *Opción B (Prorrateado)*: Ej. Cancha de $42.000 dividido entre los 14 jugadores confirmados ($3.000 c/u).
-2. **Generación Automática del Cargo**:
-   - Al finalizar el partido (`status = 'finalizado'`), se generan los cargos a los jugadores que asistieron.
-3. **Experiencia del Jugador (Mobile PWA)**:
-   - En su **Perfil** o **Dashboard**: Banner visible *"Tienes 1 partido pendiente de pago: $3.500"*.
-   - Botón *"Subir comprobante de transferencia"* o integración directa con pasarela de pago (ej. Mercado Pago).
-4. **Validación del Administrador**:
-   - Pestaña administrativa *"Finanzas / Cobranzas"* donde el tesorero o admin ve la lista de socios con saldo deudor y valida transferencias con un click.
+Para evitar cobros rígidos y dar flexibilidad ante imprevistos (lesiones tempranas, becas, o invitados que pagan menos):
+
+```mermaid
+flowchart TD
+    A["Partido Finalizado (status = 'finalizado')"] --> B{"¿Tiene cierre financiero?"}
+    B -- No --> C["Alerta: 'Cierre Pendiente' en /eventos y /finanzas"]
+    C --> D["Admin o Creador abre Modal de Cierre"]
+    D --> E["Ajuste de cuotas individuales (descuentos / $0)"]
+    E --> F["RPC atómico: close_event_finances()"]
+    F --> G["Deudas generadas en member_debts"]
+    F --> H["Evento marcado como financial_closed = true"]
+    B -- Sí --> I["Socios ven su cuota real asignada"]
+    I --> J["Admin puede 'Ajustar Cuotas' si requiere corregir"]
+```
+
+1. **Finalización del Encuentro**: El partido concluye en cancha (`status = 'finalizado'`), pero los cobros **no se emiten automáticamente** para dar margen al organizador de verificar quién asistió.
+2. **Alertas de Partidos Pendientes**:
+   - En [`/eventos`](../../src/app/eventos/page.tsx): Las tarjetas de partidos muestran la insignia `⚠️ Cierre Pendiente` y un filtro dedicado para administradores.
+   - En [`/finanzas?tab=admin`](../../src/app/finanzas/page.tsx): Se despliega una tarjeta de alerta con los partidos sin liquidar y un botón directo **"Cerrar Finanzas"**.
+3. **Personalización de Cuotas**:
+   - En el modal de cierre ([`EventFinancialClosure.tsx`](../../src/components/EventFinancialClosure.tsx)), el creador o administrador puede modificar la cuota persona por persona (ej: rebajar a alguien de $3.000 a $2.000 o eximirlo a $0).
+4. **Ejecución Atómica (`close_event_finances`)**:
+   - Genera o actualiza las filas en `member_debts`.
+   - Si un monto es $0, elimina cualquier cargo pendiente previo.
+   - Actualiza `events.cost_per_player` con el promedio real ejecutado y marca `events.financial_closed = true`.
+
+---
+
+## 3. Resolución del Descalce de Montos
+
+Anteriormente, la vista de evento calculaba el costo dividiendo el valor de la cancha sobre la capacidad máxima teórica (`total_cost / max_capacity`), lo que generaba un descalce si un administrador le había rebajado la cuota manualmente a un socio.
+
+### Solución Implementada:
+- [`src/app/eventos/[id]/page.tsx`](../../src/app/eventos/[id]/page.tsx) consulta directamente la tabla `member_debts` para el socio autenticado.
+- Si el partido ya fue cerrado financieramente, se visualiza:
+  - En la cabecera: **Tu cuota liquidada: $2.000 (✓ Al día / Pendiente)**.
+  - En el listado de jugadores confirmados e invitados: Se muestra el monto exacto asignado a cada participante.
+- En [`src/app/finanzas`](../../src/app/finanzas/page.tsx), tanto el socio como el tesorero ven exactamente la misma cifra sin discrepancias.
+
+---
+
+## 4. Panel de Tesorería Administrativa (`FinanzasAdminPanel`)
+
+Ubicado en la pestaña `/finanzas?tab=admin`:
+1. **KPIs Globales**: Total acumulado por cobrar y número de cargos pendientes.
+2. **Partidos Pendientes de Cierre**: Lista con accesos directos para liquidar eventos finalizados.
+3. **Saneamiento de Deudas**:
+   - Agrupación por socio con desglose de partidos propios e invitados.
+   - Botón **"Marcar al Día"** (`settleMemberDebtsAction`) para registrar pagos por transferencia o efectivo.
+   - Botón de reversión individual por si se cometió un error.
+4. **Configuración de Cuenta Bancaria**:
+   - Modal para actualizar banco, tipo de cuenta, número, titular, RUT y correo sin acceder a consolas de base de datos.
+   - Los datos se guardan en `club_settings` con la clave `bank_details`.
+
+---
+
+## 5. Experiencia del Socio (`FinanzasMemberView`)
+
+Ubicado en la pestaña `/finanzas?tab=socio`:
+- **Estado de Cuenta Personal**: Resumen de total adeudado.
+- **Detalle de Partidos**: Desglose claro indicando si la deuda corresponde a la propia asistencia o a un invitado que el socio trajo al club.
+- **Botón "Copiar Datos de Transferencia"**: Permite copiar al portapapeles en un toque todos los datos bancarios del club para transferir desde la app del banco sin fricciones.
