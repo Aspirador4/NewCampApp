@@ -974,9 +974,10 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 ALTER TABLE public.clubs ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Clubs are viewable by authenticated users" ON public.clubs;
-CREATE POLICY "Clubs are viewable by authenticated users"
+DROP POLICY IF EXISTS "Clubs are viewable by anyone" ON public.clubs;
+CREATE POLICY "Clubs are viewable by anyone"
   ON public.clubs FOR SELECT
-  TO authenticated
+  TO public
   USING (true);
 
 DROP POLICY IF EXISTS "Authenticated users can create a club" ON public.clubs;
