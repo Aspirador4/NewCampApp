@@ -1,12 +1,17 @@
 import { createClient } from "@/utils/supabase/server";
-import { Flame, ArrowRight, UserCircle2, Calendar, MapPin, Users, Wallet, CircleDollarSign, User } from "lucide-react";
+import { ArrowRight, UserCircle2, Calendar, MapPin, Users, CircleDollarSign, User, Plus, Wallet } from "lucide-react";
 import Link from "next/link";
 import { AppOnboardingModal } from "@/components/AppOnboardingModal";
 import { PendingApprovalScreen } from "@/components/PendingApprovalScreen";
+import { ClubSwitcher } from "@/components/ClubSwitcher";
+import { getActiveClub } from "@/utils/club";
 
 export default async function Home() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+
+  // Get active club & membership context
+  const { club, membership, userClubs, isApproved } = await getActiveClub(supabase);
 
   let profile = null;
   let hasPushSub = false;
@@ -27,20 +32,22 @@ export default async function Home() {
     hasPushSub = (count ?? 0) > 0;
   }
 
-  // Gatekeeper: If user is logged in but not yet approved by club admins,
-  // they ONLY see the pending approval screen with their motivation letter.
-  if (user && profile?.approval_status !== 'aprobado') {
+  // Gatekeeper: If user is logged in but not yet approved in this club,
+  // they see the pending approval screen with club motivation options.
+  if (user && !isApproved) {
     return (
       <PendingApprovalScreen
         fullName={profile?.full_name || user.user_metadata?.full_name || 'Nuevo Miembro'}
         email={user.email ?? ''}
-        initialMotivation={profile?.motivation}
-        approvalStatus={profile?.approval_status || 'pendiente'}
+        initialMotivation={membership?.motivation || profile?.motivation}
+        approvalStatus={membership?.approval_status || 'pendiente'}
+        clubName={club.name}
+        clubId={club.id}
       />
     );
   }
 
-  // Fetch next upcoming event
+  // Fetch next upcoming event for the active club
   const { data: upcomingEvents } = await supabase
     .from('events')
     .select(`
@@ -57,6 +64,7 @@ export default async function Home() {
         status
       )
     `)
+    .eq('club_id', club.id)
     .in('status', ['convocado', 'en_curso'])
     .order('start_time', { ascending: true })
     .limit(1);
@@ -72,25 +80,24 @@ export default async function Home() {
 
   return (
     <div className="flex-1 flex flex-col p-5 pb-24">
-      {/* Mobile Header */}
-      <header className="pt-4 pb-5 border-b border-neutral-200">
+      {/* Mobile Header with Club Switcher */}
+      <header className="pt-2 pb-4 border-b border-neutral-200">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-md">
-              <Flame className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="font-bold text-lg leading-tight text-neutral-900">
-                Club Deportivo
-              </h1>
-              <p className="text-xs text-neutral-500 font-medium">
-                App Oficial
-              </p>
-            </div>
-          </div>
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-            Temporada 2026
-          </span>
+          <ClubSwitcher
+            currentClub={club}
+            userClubs={userClubs}
+            currentRole={membership?.system_role}
+            currentApproval={membership?.approval_status}
+            isAuthenticated={Boolean(user)}
+          />
+
+          <Link
+            href="/club/nuevo"
+            className="p-2 rounded-2xl text-neutral-500 hover:text-emerald-700 hover:bg-neutral-100 transition"
+            title="Crear o unirme a otro club"
+          >
+            <Plus className="w-5 h-5" />
+          </Link>
         </div>
       </header>
 
@@ -105,7 +112,7 @@ export default async function Home() {
               </div>
               <div>
                 <p className="text-xs text-emerald-700 font-semibold uppercase tracking-wider">
-                  Socio Activo
+                  Socio Activo • {club.name}
                 </p>
                 <p className="text-sm font-bold text-neutral-900">
                   {profile?.full_name || user.email}
@@ -115,7 +122,7 @@ export default async function Home() {
                     ? Array.isArray((profile.custom_attributes as Record<string, unknown>).posicion)
                       ? ((profile.custom_attributes as Record<string, unknown>).posicion as string[]).join(', ')
                       : String((profile.custom_attributes as Record<string, unknown>).posicion)
-                    : `Rol: ${profile?.sports_role || 'Jugador'}`}
+                    : `Rol: ${membership?.sports_role || profile?.sports_role || 'Jugador'}`}
                 </p>
               </div>
             </div>
@@ -133,7 +140,7 @@ export default async function Home() {
                 Acceso Exclusivo
               </span>
               <h2 className="text-lg font-extrabold leading-snug">
-                Bienvenido al Club Deportivo
+                Bienvenido a {club.name}
               </h2>
               <p className="text-xs text-emerald-100 mt-1">
                 Inicia sesión con tu correo o Google para confirmar asistencias, entrar a listas de espera y votar MVP.
@@ -242,7 +249,7 @@ export default async function Home() {
               </div>
               <div>
                 <p className="text-xs font-bold text-neutral-900">
-                  Explorar Convocatorias
+                  Explorar Convocatorias en {club.name}
                 </p>
                 <p className="text-[11px] text-neutral-500">
                   Revisa los próximos partidos y entrenamientos

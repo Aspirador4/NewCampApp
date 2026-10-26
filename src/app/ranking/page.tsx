@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { createClient } from '@/utils/supabase/server'
 import { Trophy, CalendarCheck, User, Flame, ArrowLeft } from 'lucide-react'
 import { Json } from '@/types/database.types'
+import { getActiveClub } from '@/utils/club'
 
 interface RankingPageProps {
   searchParams: Promise<{
@@ -37,22 +38,19 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
     redirect('/login?next=/ranking')
   }
 
-  // Gatekeeper: Pending approval
-  const { data: currentProfile } = await supabase
-    .from('profiles')
-    .select('approval_status')
-    .eq('id', user.id)
-    .single()
+  // Get active club & permissions
+  const { club, isApproved } = await getActiveClub(supabase)
 
-  if (currentProfile?.approval_status !== 'aprobado') {
+  if (!isApproved) {
     redirect('/')
   }
 
-  // Fetch all user stats with profiles
+  // Fetch all user stats with profiles for the active club
   const { data: statsRaw } = await supabase
     .from('user_stats')
     .select(`
       id,
+      club_id,
       user_id,
       matches_played,
       mvp_count,
@@ -67,6 +65,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
         custom_attributes
       )
     `)
+    .eq('club_id', club.id)
 
   const allStats = (statsRaw || []) as unknown as UserStatItem[]
 
@@ -116,10 +115,10 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
           </Link>
           <div>
             <h1 className="font-extrabold text-xl text-neutral-900 leading-tight">
-              Tabla de Líderes
+              Ranking: {club.name}
             </h1>
             <p className="text-xs text-neutral-500 font-medium">
-              Rankings y estadísticas del club
+              Estadísticas oficiales del club activo
             </p>
           </div>
         </div>

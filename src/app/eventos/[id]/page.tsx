@@ -82,18 +82,19 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
     sports_role: string
   } | null
 
-  // Check profile & approval
-  const { data: userProfile } = await supabase
-    .from('profiles')
+  // Check membership in the event's club
+  const { data: membership } = await supabase
+    .from('club_members')
     .select('system_role, approval_status')
-    .eq('id', user.id)
-    .single()
+    .eq('club_id', event.club_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
 
-  if (userProfile?.approval_status !== 'aprobado') {
+  if (membership && membership.approval_status !== 'aprobado') {
     redirect('/')
   }
 
-  const isAdmin = userProfile?.system_role === 'admin'
+  const isAdmin = membership?.system_role === 'admin'
   const isCreator = event.created_by === user.id
   const canManageEvent = isAdmin || isCreator
 

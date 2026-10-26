@@ -17,6 +17,7 @@ Bienvenido a la documentación técnica de la plataforma móvil para el Club Dep
 | [07. Sistema MVP y Estadísticas](./07_SISTEMA_MVP_Y_ESTADISTICAS.md) | Votación democrática de MVP, prevención de autovoto, empates y tabla de líderes. |
 | [08. PWA y Notificaciones Web Push](./08_PWA_Y_WEB_PUSH.md) | Instalación standalone, Service Worker, Web Push VAPID y vinculación de suscripción por cuenta. |
 | [09. Directorio de Miembros y Roles](./09_ADMISION_DIRECTORIO_Y_ROLES.md) | Plantilla activa de socios, filtros por posición deportiva, asignación de roles de admin y cola de admisión. |
+| [10. Arquitectura Multi-Club](./10_ARQUITECTURA_MULTICLUB.md) | Multi-tenancy a nivel de filas, selector de clubes, membresías independientes, creación y admisión por slug. |
 
 ---
 

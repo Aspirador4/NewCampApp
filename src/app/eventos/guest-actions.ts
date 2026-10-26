@@ -23,7 +23,7 @@ export async function requestGuest(formData: FormData) {
   // Check event exists and is open
   const { data: event, error: eventErr } = await supabase
     .from('events')
-    .select('status')
+    .select('status, club_id')
     .eq('id', eventId)
     .single()
 
@@ -98,25 +98,34 @@ export async function approveGuest(guestId: string, eventId: string) {
     return { error: 'No autorizado' }
   }
 
-  // Verify admin
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('system_role')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.system_role !== 'admin') {
-    return { error: 'Solo los administradores pueden aprobar invitados' }
-  }
-
-  // Fetch event to verify capacity
+  // Fetch event and club name
   const { data: event } = await supabase
     .from('events')
-    .select('max_capacity')
+    .select('club_id, max_capacity, clubs(name)')
     .eq('id', eventId)
     .single()
 
-  if (event?.max_capacity) {
+  if (!event) {
+    return { error: 'Evento no encontrado' }
+  }
+
+  const clubName = (event.clubs as unknown as { name?: string })?.name || 'Club Deportivo'
+
+  // Verify caller is admin of the event's club
+  const { data: member } = await supabase
+    .from('club_members')
+    .select('system_role, approval_status')
+    .eq('club_id', event.club_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  const isAdmin = member?.system_role === 'admin' && member?.approval_status === 'aprobado'
+
+  if (!isAdmin) {
+    return { error: 'Solo los administradores del club pueden aprobar invitados' }
+  }
+
+  if (event.max_capacity) {
     // Count confirmed attendees + approved guests
     const { count: confirmedCount } = await supabase
       .from('event_attendees')
@@ -164,11 +173,11 @@ export async function approveGuest(guestId: string, eventId: string) {
     reason: `Invitado aprobado: ${updatedGuest?.guest_name}`,
   })
 
-  // Send push notification to the member who made the invitation
+  // Send push notification with club name
   if (updatedGuest?.invited_by_user_id) {
     try {
       await sendPushToUser(updatedGuest.invited_by_user_id, {
-        title: '¡Invitado Aprobado! ✅',
+        title: `[${clubName}] ¡Invitado Aprobado! ✅`,
         body: `Tu invitado ${updatedGuest.guest_name} fue aprobado y confirmado para el partido.`,
         url: `/eventos/${eventId}`,
       })
@@ -190,15 +199,30 @@ export async function rejectGuest(guestId: string, eventId: string) {
     return { error: 'No autorizado' }
   }
 
-  // Verify admin
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('system_role')
-    .eq('id', user.id)
+  // Fetch event and club name
+  const { data: event } = await supabase
+    .from('events')
+    .select('club_id, clubs(name)')
+    .eq('id', eventId)
     .single()
 
-  if (profile?.system_role !== 'admin') {
-    return { error: 'Solo los administradores pueden rechazar invitados' }
+  if (!event) {
+    return { error: 'Evento no encontrado' }
+  }
+
+  const clubName = (event.clubs as unknown as { name?: string })?.name || 'Club Deportivo'
+
+  const { data: member } = await supabase
+    .from('club_members')
+    .select('system_role, approval_status')
+    .eq('club_id', event.club_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  const isAdmin = member?.system_role === 'admin' && member?.approval_status === 'aprobado'
+
+  if (!isAdmin) {
+    return { error: 'Solo los administradores del club pueden rechazar invitados' }
   }
 
   const { data: rejectedGuest, error: updateErr } = await supabase
@@ -225,11 +249,11 @@ export async function rejectGuest(guestId: string, eventId: string) {
     reason: `Invitado rechazado: ${rejectedGuest?.guest_name}`,
   })
 
-  // Send push notification to the member who made the invitation
+  // Send push notification with club name
   if (rejectedGuest?.invited_by_user_id) {
     try {
       await sendPushToUser(rejectedGuest.invited_by_user_id, {
-        title: 'Solicitud de Invitado ❌',
+        title: `[${clubName}] Solicitud de Invitado ❌`,
         body: `La postulación de ${rejectedGuest.guest_name} no pudo ser aprobada.`,
         url: `/eventos/${eventId}`,
       })

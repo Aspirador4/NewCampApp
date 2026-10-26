@@ -2,7 +2,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 import { MembersDirectory, MemberItem } from '@/components/MembersDirectory'
-import { Users, Trophy, ArrowLeft } from 'lucide-react'
+import { Users, ArrowLeft } from 'lucide-react'
+import { getActiveClub } from '@/utils/club'
 
 export default async function MiembrosPage() {
   const supabase = await createClient()
@@ -12,85 +13,89 @@ export default async function MiembrosPage() {
     redirect('/login?next=/miembros')
   }
 
-  // Check current user profile
-  const { data: currentProfile } = await supabase
-    .from('profiles')
-    .select('system_role, approval_status')
-    .eq('id', user.id)
-    .single()
+  // Get active club & check caller permissions
+  const { club, isAdmin, isApproved } = await getActiveClub(supabase)
 
-  if (currentProfile?.approval_status !== 'aprobado') {
+  if (!isApproved) {
     redirect('/')
   }
 
-  const isAdmin = currentProfile?.system_role === 'admin'
-
-  // Fetch all profiles and their stats
-  const { data: profilesRaw } = await supabase
-    .from('profiles')
+  // Fetch all members of the active club with their profiles
+  const { data: clubMembersRaw } = await supabase
+    .from('club_members')
     .select(`
       id,
-      full_name,
-      email,
-      avatar_url,
-      birth_date,
-      gender,
+      club_id,
+      user_id,
       system_role,
       sports_role,
       approval_status,
       motivation,
       custom_attributes,
-      user_stats (
-        matches_played,
-        mvp_count,
-        mvp_votes_received,
-        social_events_attended
+      profiles (
+        id,
+        full_name,
+        email,
+        avatar_url,
+        birth_date,
+        gender
       )
     `)
-    .order('full_name', { ascending: true })
+    .eq('club_id', club.id)
 
-  interface RawProfileItem {
+  // Fetch stats for members in this club
+  const { data: statsRaw } = await supabase
+    .from('user_stats')
+    .select('user_id, matches_played, mvp_count, mvp_votes_received, social_events_attended')
+    .eq('club_id', club.id)
+
+  const statsMap = new Map<string, { matches_played: number; mvp_count: number; mvp_votes_received: number; social_events_attended: number }>()
+  for (const s of statsRaw || []) {
+    statsMap.set(s.user_id, s)
+  }
+
+  interface RawClubMemberWithProfile {
     id: string
-    full_name: string
-    email: string
-    avatar_url: string | null
-    birth_date: string | null
-    gender: string | null
+    club_id: string
+    user_id: string
     system_role: 'admin' | 'member'
     sports_role: 'jugador' | 'hincha' | 'ambos'
     approval_status: 'pendiente' | 'aprobado' | 'rechazado'
     motivation: string | null
     custom_attributes: Record<string, unknown>
-    user_stats: {
-      matches_played: number
-      mvp_count: number
-      mvp_votes_received: number
-      social_events_attended: number
-    }[] | {
-      matches_played: number
-      mvp_count: number
-      mvp_votes_received: number
-      social_events_attended: number
+    profiles: {
+      id: string
+      full_name: string
+      email: string
+      avatar_url: string | null
+      birth_date: string | null
+      gender: string | null
     } | null
   }
 
-  const members: MemberItem[] = ((profilesRaw || []) as unknown as RawProfileItem[]).map((p) => {
-    const rawStats = Array.isArray(p.user_stats) ? p.user_stats[0] : p.user_stats
+  const rawList = (clubMembersRaw || []) as unknown as RawClubMemberWithProfile[]
+
+  const members: MemberItem[] = rawList.map((m) => {
+    const prof = m.profiles
+    const memberStats = statsMap.get(m.user_id) || null
     return {
-      id: p.id,
-      full_name: p.full_name,
-      email: p.email,
-      avatar_url: p.avatar_url,
-      birth_date: p.birth_date,
-      gender: p.gender,
-      system_role: p.system_role,
-      sports_role: p.sports_role,
-      approval_status: p.approval_status || 'aprobado',
-      motivation: p.motivation || null,
-      custom_attributes: p.custom_attributes || {},
-      stats: rawStats || null,
+      id: m.user_id, // keep user_id as member ID for actions
+      full_name: prof?.full_name || 'Socio',
+      email: prof?.email || '',
+      avatar_url: prof?.avatar_url || null,
+      birth_date: prof?.birth_date || null,
+      gender: prof?.gender || null,
+      system_role: m.system_role,
+      sports_role: m.sports_role,
+      approval_status: m.approval_status,
+      motivation: m.motivation,
+      custom_attributes: m.custom_attributes || {},
+      stats: memberStats,
     }
   })
+
+  // Sort alphabetically
+  members.sort((a, b) => a.full_name.localeCompare(b.full_name))
 
   return (
     <div className="flex-1 flex flex-col p-5 pb-28">
@@ -104,32 +109,28 @@ export default async function MiembrosPage() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-emerald-600 text-white shadow-xs">
+            <div className="p-2 rounded-xl bg-blue-600 text-white shadow-xs">
               <Users className="w-5 h-5" />
             </div>
             <div>
               <h1 className="font-extrabold text-lg text-neutral-900 leading-tight">
-                Miembros del Club
+                Miembros: {club.name}
               </h1>
               <p className="text-xs text-neutral-500 font-medium">
-                Directorio y fichas deportivas
+                Directorio oficial y gestión de socios
               </p>
             </div>
           </div>
         </div>
-
-        <Link
-          href="/ranking"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs transition active:scale-95"
-        >
-          <Trophy className="w-3.5 h-3.5" />
-          <span>Ranking</span>
-        </Link>
       </div>
 
       {/* Directory Component */}
       <div className="mt-4 flex-1">
-        <MembersDirectory members={members} isAdmin={isAdmin} currentUserId={user.id} />
+        <MembersDirectory
+          members={members}
+          isAdmin={isAdmin}
+          currentUserId={user.id}
+        />
       </div>
     </div>
   )

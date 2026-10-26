@@ -2,8 +2,10 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
+import { getActiveClub } from '@/utils/club'
+import { Json } from '@/types/database.types'
 
-export async function settleMemberDebtsAction(targetUserId: string, debtIds?: string[]) {
+export async function settleMemberDebtsAction(targetUserId: string, debtIds?: string[], targetClubId?: string) {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -11,20 +13,28 @@ export async function settleMemberDebtsAction(targetUserId: string, debtIds?: st
     return { error: 'No autorizado' }
   }
 
-  // Check admin
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('system_role')
-    .eq('id', user.id)
-    .single()
+  const { club, isAdmin: isClubAdminActive } = await getActiveClub(supabase)
+  const clubId = targetClubId || club.id
 
-  if (profile?.system_role !== 'admin') {
-    return { error: 'Solo los administradores pueden marcar jugadores al día' }
+  let isAdmin = isClubAdminActive && clubId === club.id
+  if (!isAdmin) {
+    const { data: callerMember } = await supabase
+      .from('club_members')
+      .select('system_role, approval_status')
+      .eq('club_id', clubId)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    isAdmin = callerMember?.system_role === 'admin' && callerMember?.approval_status === 'aprobado'
+  }
+
+  if (!isAdmin) {
+    return { error: 'Solo los administradores del club pueden marcar jugadores al día' }
   }
 
   const { data, error } = await supabase.rpc('settle_member_debts', {
     p_user_id: targetUserId,
     p_debt_ids: debtIds && debtIds.length > 0 ? debtIds : undefined,
+    p_club_id: clubId,
   })
 
   if (error) {
@@ -45,14 +55,29 @@ export async function revertDebtAction(debtId: string) {
     return { error: 'No autorizado' }
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('system_role')
-    .eq('id', user.id)
+  const { club, isAdmin: isClubAdminActive } = await getActiveClub(supabase)
+
+  const { data: debt } = await supabase
+    .from('member_debts')
+    .select('club_id')
+    .eq('id', debtId)
     .single()
 
-  if (profile?.system_role !== 'admin') {
-    return { error: 'Solo los administradores pueden revertir deudas' }
+  const targetClubId = debt?.club_id || club.id
+
+  let isAdmin = isClubAdminActive && targetClubId === club.id
+  if (!isAdmin) {
+    const { data: callerMember } = await supabase
+      .from('club_members')
+      .select('system_role, approval_status')
+      .eq('club_id', targetClubId)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    isAdmin = callerMember?.system_role === 'admin' && callerMember?.approval_status === 'aprobado'
+  }
+
+  if (!isAdmin) {
+    return { error: 'Solo los administradores del club pueden revertir deudas' }
   }
 
   const { error } = await supabase.rpc('revert_debt_to_pending', {
@@ -98,7 +123,7 @@ export interface BankDetails {
   email: string
 }
 
-export async function updateBankDetailsAction(details: BankDetails) {
+export async function updateBankDetailsAction(details: BankDetails, targetClubId?: string) {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -106,28 +131,58 @@ export async function updateBankDetailsAction(details: BankDetails) {
     return { error: 'No autorizado' }
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('system_role')
-    .eq('id', user.id)
-    .single()
+  const { club, isAdmin: isClubAdminActive } = await getActiveClub(supabase)
+  const clubId = targetClubId || club.id
 
-  if (profile?.system_role !== 'admin') {
-    return { error: 'Solo los administradores pueden modificar los datos bancarios' }
+  let isAdmin = isClubAdminActive && clubId === club.id
+  if (!isAdmin) {
+    const { data: callerMember } = await supabase
+      .from('club_members')
+      .select('system_role, approval_status')
+      .eq('club_id', clubId)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    isAdmin = callerMember?.system_role === 'admin' && callerMember?.approval_status === 'aprobado'
   }
 
-  const { error } = await supabase
-    .from('club_settings')
-    .upsert({
+  if (!isAdmin) {
+    return { error: 'Solo los administradores pueden modificar los datos bancarios de este club' }
+  }
+
+  // Update in clubs.settings
+  const { data: currentClub } = await supabase
+    .from('clubs')
+    .select('settings')
+    .eq('id', clubId)
+    .single()
+
+  const currentSettings = (currentClub?.settings as Record<string, Json>) || {}
+  const updatedSettings = {
+    ...currentSettings,
+    bank_details: details as unknown as Json,
+  }
+
+  const { error: clubErr } = await supabase
+    .from('clubs')
+    .update({
+      settings: updatedSettings,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', clubId)
+
+  if (clubErr) {
+    return { error: clubErr.message }
+  }
+
+  // Also update legacy club_settings if available
+  try {
+    await supabase.from('club_settings').upsert({
       key: 'bank_details',
       value: details as unknown as Record<string, string>,
       updated_at: new Date().toISOString(),
       updated_by: user.id,
     })
-
-  if (error) {
-    return { error: error.message }
-  }
+  } catch {}
 
   revalidatePath('/finanzas')
   return { success: true }

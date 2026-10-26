@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 import { CreateEventForm } from '@/components/CreateEventForm'
 import { ArrowLeft } from 'lucide-react'
+import { getActiveClub } from '@/utils/club'
 
 export default async function NuevoEventoPage() {
   const supabase = await createClient()
@@ -12,13 +13,9 @@ export default async function NuevoEventoPage() {
     redirect('/login')
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('approval_status')
-    .eq('id', user.id)
-    .single()
+  const { club, isApproved } = await getActiveClub(supabase)
 
-  if (profile?.approval_status !== 'aprobado') {
+  if (!isApproved) {
     redirect('/')
   }
 
@@ -37,7 +34,7 @@ export default async function NuevoEventoPage() {
             Crear Nuevo Evento
           </h1>
           <p className="text-xs text-neutral-500 font-medium">
-            Convoca a los socios del club
+            Convoca a los socios de {club.name}
           </p>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { PwaPrompt } from '@/components/PwaPrompt'
 import { Trophy, CalendarCheck, Award, ArrowLeft, Wallet } from 'lucide-react'
 import Link from 'next/link'
 import { Database } from '@/types/database.types'
+import { getActiveClub } from '@/utils/club'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 type FieldDefinition = Database['public']['Tables']['profile_field_definitions']['Row']
@@ -18,6 +19,13 @@ export default async function PerfilPage() {
     redirect('/login')
   }
 
+  // Get active club & check approval
+  const { club, membership, isApproved } = await getActiveClub(supabase)
+
+  if (!isApproved) {
+    redirect('/')
+  }
+
   // Fetch or upsert profile
   let { data: profile } = await supabase
     .from('profiles')
@@ -26,7 +34,6 @@ export default async function PerfilPage() {
     .single()
 
   if (!profile) {
-    // Fallback if trigger hasn't fired
     const defaultProfile: Profile = {
       id: user.id,
       email: user.email ?? '',
@@ -35,10 +42,10 @@ export default async function PerfilPage() {
       avatar_url: (user.user_metadata?.avatar_url as string) || (user.user_metadata?.picture as string) || null,
       birth_date: null,
       gender: null,
-      system_role: 'member',
-      sports_role: 'jugador',
-      approval_status: 'pendiente',
-      motivation: null,
+      system_role: membership?.system_role || 'member',
+      sports_role: membership?.sports_role || 'jugador',
+      approval_status: membership?.approval_status || 'pendiente',
+      motivation: membership?.motivation || null,
       custom_attributes: {},
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -48,20 +55,17 @@ export default async function PerfilPage() {
     profile = defaultProfile
   }
 
-  // Gatekeeper: Pending approval
-  if (profile.approval_status !== 'aprobado') {
-    redirect('/')
-  }
-
-  // Fetch field definitions
+  // Fetch field definitions for this club
   const { data: fieldDefs } = await supabase
     .from('profile_field_definitions')
     .select('*')
+    .eq('club_id', club.id)
     .order('display_order', { ascending: true })
 
-  const definitions: FieldDefinition[] = fieldDefs || [
+  const definitions: FieldDefinition[] = (fieldDefs && fieldDefs.length > 0) ? fieldDefs : [
     {
       id: '1',
+      club_id: club.id,
       field_key: 'posicion',
       label: 'Posición(es) en la cancha',
       field_type: 'multiselect',
@@ -72,6 +76,7 @@ export default async function PerfilPage() {
     },
     {
       id: '2',
+      club_id: club.id,
       field_key: 'numero_camiseta',
       label: 'Número de camiseta preferido',
       field_type: 'number',
@@ -82,6 +87,7 @@ export default async function PerfilPage() {
     },
     {
       id: '3',
+      club_id: club.id,
       field_key: 'pie_habil',
       label: 'Pie hábil',
       field_type: 'select',
@@ -92,15 +98,17 @@ export default async function PerfilPage() {
     },
   ]
 
-  // Fetch user stats
+  // Fetch user stats for active club
   const { data: stats } = await supabase
     .from('user_stats')
     .select('*')
     .eq('user_id', user.id)
-    .single()
+    .eq('club_id', club.id)
+    .maybeSingle()
 
   const userStats: UserStats = stats || {
     id: '0',
+    club_id: club.id,
     user_id: user.id,
     matches_played: 0,
     mvp_count: 0,
@@ -110,101 +118,99 @@ export default async function PerfilPage() {
     updated_at: new Date().toISOString(),
   }
 
-  // Fetch pending debts count
+  // Fetch pending debts count for active club
   const { count: pendingDebtsCount } = await supabase
     .from('member_debts')
-    .select('*', { count: 'exact', head: true })
+    .select('id, events!inner(club_id)', { count: 'exact', head: true })
     .eq('user_id', user.id)
+    .eq('events.club_id', club.id)
     .eq('status', 'pendiente')
 
   return (
     <div className="flex-1 flex flex-col p-5 pb-24">
       {/* Top Header */}
       <div className="flex items-center justify-between pt-2 pb-4 border-b border-neutral-200">
-        <Link
-          href="/"
-          className="p-2 -ml-2 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <h1 className="font-bold text-base text-neutral-900">Mi Perfil Deportivo</h1>
-        <span className="text-[11px] font-semibold uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-          {profile.system_role === 'admin' ? 'Admin' : 'Socio'}
-        </span>
-      </div>
-
-      {/* Quick Stats Pill */}
-      <div className="grid grid-cols-3 gap-2.5 my-4">
-        <div className="bg-white rounded-xl p-2.5 border border-neutral-200/80 shadow-sm text-center">
-          <div className="flex items-center justify-center text-emerald-600 mb-1">
-            <CalendarCheck className="w-4 h-4" />
+        <div className="flex items-center gap-2.5">
+          <Link
+            href="/"
+            className="p-2 -ml-2 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <div>
+            <h1 className="font-extrabold text-xl text-neutral-900 leading-tight">
+              Mi Perfil
+            </h1>
+            <p className="text-xs text-neutral-500 font-medium">
+              Socio en {club.name}
+            </p>
           </div>
-          <span className="text-base font-extrabold text-neutral-900 leading-tight block">
-            {userStats.matches_played}
-          </span>
-          <span className="text-[10px] text-neutral-500 font-medium">Partidos</span>
         </div>
 
-        <div className="bg-white rounded-xl p-2.5 border border-neutral-200/80 shadow-sm text-center">
-          <div className="flex items-center justify-center text-amber-500 mb-1">
+        {/* Financial shortcut badge */}
+        <Link
+          href="/finanzas"
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition active:scale-95 ${
+            (pendingDebtsCount || 0) > 0
+              ? 'bg-amber-50 text-amber-800 border-amber-300 shadow-xs animate-pulse'
+              : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+          }`}
+          title="Ver estado de cuenta"
+        >
+          <Wallet className="w-3.5 h-3.5" />
+          <span>
+            {(pendingDebtsCount || 0) > 0
+              ? `${pendingDebtsCount} ${(pendingDebtsCount || 0) === 1 ? 'deuda' : 'deudas'}`
+              : 'Al día'}
+          </span>
+        </Link>
+      </div>
+
+      {/* Stats Summary Cards */}
+      <div className="grid grid-cols-3 gap-2.5 my-4">
+        <div className="bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-xs flex flex-col items-center text-center">
+          <div className="p-2 rounded-xl bg-amber-50 text-amber-600 mb-1">
             <Trophy className="w-4 h-4" />
           </div>
-          <span className="text-base font-extrabold text-neutral-900 leading-tight block">
+          <span className="text-base font-extrabold text-neutral-900 leading-none">
             {userStats.mvp_count}
           </span>
-          <span className="text-[10px] text-neutral-500 font-medium">MVPs</span>
+          <span className="text-[10px] text-neutral-400 font-medium mt-1">
+            MVPs Ganados
+          </span>
         </div>
 
-        <div className="bg-white rounded-xl p-2.5 border border-neutral-200/80 shadow-sm text-center">
-          <div className="flex items-center justify-center text-blue-500 mb-1">
+        <div className="bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-xs flex flex-col items-center text-center">
+          <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 mb-1">
+            <CalendarCheck className="w-4 h-4" />
+          </div>
+          <span className="text-base font-extrabold text-neutral-900 leading-none">
+            {userStats.matches_played}
+          </span>
+          <span className="text-[10px] text-neutral-400 font-medium mt-1">
+            Partidos
+          </span>
+        </div>
+
+        <div className="bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-xs flex flex-col items-center text-center">
+          <div className="p-2 rounded-xl bg-blue-50 text-blue-600 mb-1">
             <Award className="w-4 h-4" />
           </div>
-          <span className="text-base font-extrabold text-neutral-900 leading-tight block">
+          <span className="text-base font-extrabold text-neutral-900 leading-none">
             {userStats.mvp_votes_received}
           </span>
-          <span className="text-[10px] text-neutral-500 font-medium">Votos MVP</span>
+          <span className="text-[10px] text-neutral-400 font-medium mt-1">
+            Votos MVP
+          </span>
         </div>
       </div>
 
-      {/* Financial Status Quick Banner */}
-      <Link
-        href="/finanzas"
-        className={`mb-4 p-3 rounded-2xl border flex items-center justify-between transition shadow-xs ${
-          (pendingDebtsCount || 0) > 0
-            ? 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100/80'
-            : 'bg-emerald-50 border-emerald-200 text-emerald-900 hover:bg-emerald-100/80'
-        }`}
-      >
-        <div className="flex items-center gap-2.5">
-          <div
-            className={`p-2 rounded-xl text-white ${
-              (pendingDebtsCount || 0) > 0 ? 'bg-amber-500' : 'bg-emerald-600'
-            }`}
-          >
-            <Wallet className="w-4 h-4" />
-          </div>
-          <div>
-            <p className="text-xs font-bold leading-tight">
-              {(pendingDebtsCount || 0) > 0
-                ? `${pendingDebtsCount} partido(s) pendiente(s) de pago`
-                : 'Cuenta al día'}
-            </p>
-            <p className="text-[10px] text-neutral-500 mt-0.5">
-              {(pendingDebtsCount || 0) > 0
-                ? 'Revisa el detalle y datos de transferencia'
-                : 'No registras deudas pendientes'}
-            </p>
-          </div>
-        </div>
-        <span className="text-xs font-bold text-emerald-700">Ver &rarr;</span>
-      </Link>
-
-      {/* Profile Form Card */}
-      <div className="bg-white rounded-2xl p-5 border border-neutral-200/80 shadow-sm">
+      {/* Main Profile Form */}
+      <div className="flex-1 bg-white rounded-2xl p-4 border border-neutral-200/80 shadow-xs">
         <ProfileForm profile={profile} fieldDefinitions={definitions} />
       </div>
 
-      {/* PWA & Push Notifications Manager */}
+      {/* PWA Push Notification & Installation Section */}
       <div className="mt-4">
         <PwaPrompt />
       </div>

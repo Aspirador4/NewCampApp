@@ -4,8 +4,9 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
 import { sendPushToUser } from '@/app/api/push/actions'
 import { SystemRole } from '@/types/database.types'
+import { getActiveClub } from '@/utils/club'
 
-export async function approveMemberAction(targetUserId: string) {
+export async function approveMemberAction(targetUserId: string, targetClubId?: string) {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -13,30 +14,51 @@ export async function approveMemberAction(targetUserId: string) {
     return { error: 'No autorizado' }
   }
 
-  // Check admin
-  const { data: adminProfile } = await supabase
-    .from('profiles')
-    .select('system_role')
-    .eq('id', user.id)
-    .single()
+  const { club, isAdmin: isClubAdminActive } = await getActiveClub(supabase)
+  const clubId = targetClubId || club.id
 
-  if (adminProfile?.system_role !== 'admin') {
-    return { error: 'Solo los administradores pueden admitir nuevos miembros' }
+  // Verify caller is admin in this specific club
+  let isAdmin = isClubAdminActive && clubId === club.id
+  if (!isAdmin) {
+    const { data: callerMember } = await supabase
+      .from('club_members')
+      .select('system_role, approval_status')
+      .eq('club_id', clubId)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    isAdmin = callerMember?.system_role === 'admin' && callerMember?.approval_status === 'aprobado'
   }
 
+  if (!isAdmin) {
+    return { error: 'Solo los administradores del club pueden admitir nuevos miembros' }
+  }
+
+  // Update membership in club_members
   const { error } = await supabase
-    .from('profiles')
-    .update({ approval_status: 'aprobado', updated_at: new Date().toISOString() })
-    .eq('id', targetUserId)
+    .from('club_members')
+    .update({ approval_status: 'aprobado' })
+    .eq('club_id', clubId)
+    .eq('user_id', targetUserId)
 
   if (error) {
     return { error: error.message }
   }
 
+  // Backwards compatibility: also update profile approval_status
+  await supabase
+    .from('profiles')
+    .update({ approval_status: 'aprobado', updated_at: new Date().toISOString() })
+    .eq('id', targetUserId)
+
+  // Ensure user_stats row exists for this club
+  await supabase
+    .from('user_stats')
+    .upsert({ user_id: targetUserId, club_id: clubId }, { onConflict: 'user_id,club_id' })
+
   try {
     await sendPushToUser(targetUserId, {
-      title: '¡Bienvenido al Club! 🎉',
-      body: 'Tu cuenta ha sido admitida oficialmente. Ya puedes inscribirte a partidos y eventos.',
+      title: `[${club.name}] ¡Bienvenido al Club! 🎉`,
+      body: `Tu cuenta ha sido admitida en ${club.name}. Ya puedes inscribirte a partidos y eventos.`,
       url: '/eventos',
     })
   } catch (e) {
@@ -48,7 +70,7 @@ export async function approveMemberAction(targetUserId: string) {
   return { success: true }
 }
 
-export async function rejectMemberAction(targetUserId: string) {
+export async function rejectMemberAction(targetUserId: string, targetClubId?: string) {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -56,20 +78,29 @@ export async function rejectMemberAction(targetUserId: string) {
     return { error: 'No autorizado' }
   }
 
-  const { data: adminProfile } = await supabase
-    .from('profiles')
-    .select('system_role')
-    .eq('id', user.id)
-    .single()
+  const { club, isAdmin: isClubAdminActive } = await getActiveClub(supabase)
+  const clubId = targetClubId || club.id
 
-  if (adminProfile?.system_role !== 'admin') {
-    return { error: 'Solo los administradores pueden rechazar miembros' }
+  let isAdmin = isClubAdminActive && clubId === club.id
+  if (!isAdmin) {
+    const { data: callerMember } = await supabase
+      .from('club_members')
+      .select('system_role, approval_status')
+      .eq('club_id', clubId)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    isAdmin = callerMember?.system_role === 'admin' && callerMember?.approval_status === 'aprobado'
+  }
+
+  if (!isAdmin) {
+    return { error: 'Solo los administradores del club pueden rechazar miembros' }
   }
 
   const { error } = await supabase
-    .from('profiles')
-    .update({ approval_status: 'rechazado', updated_at: new Date().toISOString() })
-    .eq('id', targetUserId)
+    .from('club_members')
+    .update({ approval_status: 'rechazado' })
+    .eq('club_id', clubId)
+    .eq('user_id', targetUserId)
 
   if (error) {
     return { error: error.message }
@@ -79,7 +110,7 @@ export async function rejectMemberAction(targetUserId: string) {
   return { success: true }
 }
 
-export async function deleteMemberAction(targetUserId: string) {
+export async function deleteMemberAction(targetUserId: string, targetClubId?: string) {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -87,24 +118,33 @@ export async function deleteMemberAction(targetUserId: string) {
     return { error: 'No autorizado' }
   }
 
+  const { club, isAdmin: isClubAdminActive } = await getActiveClub(supabase)
+  const clubId = targetClubId || club.id
+
   if (user.id === targetUserId) {
-    return { error: 'No puedes eliminarte a ti mismo del club' }
+    return { error: 'No puedes eliminarte a ti mismo del club desde aquí' }
   }
 
-  const { data: adminProfile } = await supabase
-    .from('profiles')
-    .select('system_role')
-    .eq('id', user.id)
-    .single()
+  let isAdmin = isClubAdminActive && clubId === club.id
+  if (!isAdmin) {
+    const { data: callerMember } = await supabase
+      .from('club_members')
+      .select('system_role, approval_status')
+      .eq('club_id', clubId)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    isAdmin = callerMember?.system_role === 'admin' && callerMember?.approval_status === 'aprobado'
+  }
 
-  if (adminProfile?.system_role !== 'admin') {
-    return { error: 'Solo los administradores pueden eliminar miembros' }
+  if (!isAdmin) {
+    return { error: 'Solo los administradores del club pueden eliminar miembros' }
   }
 
   const { error } = await supabase
-    .from('profiles')
+    .from('club_members')
     .delete()
-    .eq('id', targetUserId)
+    .eq('club_id', clubId)
+    .eq('user_id', targetUserId)
 
   if (error) {
     return { error: error.message }
@@ -115,7 +155,7 @@ export async function deleteMemberAction(targetUserId: string) {
   return { success: true }
 }
 
-export async function updateMemberRoleAction(targetUserId: string, newRole: SystemRole) {
+export async function updateMemberRoleAction(targetUserId: string, newRole: SystemRole, targetClubId?: string) {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -123,21 +163,30 @@ export async function updateMemberRoleAction(targetUserId: string, newRole: Syst
     return { error: 'No autorizado' }
   }
 
-  const { data: adminProfile } = await supabase
-    .from('profiles')
-    .select('system_role')
-    .eq('id', user.id)
-    .single()
+  const { club, isAdmin: isClubAdminActive } = await getActiveClub(supabase)
+  const clubId = targetClubId || club.id
 
-  if (adminProfile?.system_role !== 'admin') {
+  let isAdmin = isClubAdminActive && clubId === club.id
+  if (!isAdmin) {
+    const { data: callerMember } = await supabase
+      .from('club_members')
+      .select('system_role, approval_status')
+      .eq('club_id', clubId)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    isAdmin = callerMember?.system_role === 'admin' && callerMember?.approval_status === 'aprobado'
+  }
+
+  if (!isAdmin) {
     return { error: 'Solo los administradores pueden asignar roles' }
   }
 
-  // If removing admin from oneself, ensure there is at least one other admin
+  // If removing admin from oneself, ensure there is at least one other admin in this club
   if (user.id === targetUserId && newRole === 'member') {
     const { count } = await supabase
-      .from('profiles')
+      .from('club_members')
       .select('*', { count: 'exact', head: true })
+      .eq('club_id', clubId)
       .eq('system_role', 'admin')
 
     if ((count || 0) <= 1) {
@@ -146,9 +195,10 @@ export async function updateMemberRoleAction(targetUserId: string, newRole: Syst
   }
 
   const { error } = await supabase
-    .from('profiles')
-    .update({ system_role: newRole, updated_at: new Date().toISOString() })
-    .eq('id', targetUserId)
+    .from('club_members')
+    .update({ system_role: newRole })
+    .eq('club_id', clubId)
+    .eq('user_id', targetUserId)
 
   if (error) {
     return { error: error.message }
@@ -159,7 +209,7 @@ export async function updateMemberRoleAction(targetUserId: string, newRole: Syst
   return { success: true }
 }
 
-export async function reconsiderMemberAction(targetUserId: string) {
+export async function reconsiderMemberAction(targetUserId: string, targetClubId?: string) {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -167,20 +217,29 @@ export async function reconsiderMemberAction(targetUserId: string) {
     return { error: 'No autorizado' }
   }
 
-  const { data: adminProfile } = await supabase
-    .from('profiles')
-    .select('system_role')
-    .eq('id', user.id)
-    .single()
+  const { club, isAdmin: isClubAdminActive } = await getActiveClub(supabase)
+  const clubId = targetClubId || club.id
 
-  if (adminProfile?.system_role !== 'admin') {
+  let isAdmin = isClubAdminActive && clubId === club.id
+  if (!isAdmin) {
+    const { data: callerMember } = await supabase
+      .from('club_members')
+      .select('system_role, approval_status')
+      .eq('club_id', clubId)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    isAdmin = callerMember?.system_role === 'admin' && callerMember?.approval_status === 'aprobado'
+  }
+
+  if (!isAdmin) {
     return { error: 'Solo los administradores pueden cambiar el estado' }
   }
 
   const { error } = await supabase
-    .from('profiles')
-    .update({ approval_status: 'pendiente', updated_at: new Date().toISOString() })
-    .eq('id', targetUserId)
+    .from('club_members')
+    .update({ approval_status: 'pendiente' })
+    .eq('club_id', clubId)
+    .eq('user_id', targetUserId)
 
   if (error) {
     return { error: error.message }
@@ -191,7 +250,7 @@ export async function reconsiderMemberAction(targetUserId: string) {
   return { success: true }
 }
 
-export async function submitMotivationAction(motivationText: string) {
+export async function submitMotivationAction(motivationText: string, targetClubId?: string) {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -199,24 +258,41 @@ export async function submitMotivationAction(motivationText: string) {
     return { error: 'No autorizado' }
   }
 
-  const cleanText = motivationText.trim().slice(0, 50)
+  const cleanText = motivationText.trim().slice(0, 100)
   if (!cleanText) {
-    return { error: 'Por favor escribe una breve motivación (máximo 50 caracteres)' }
+    return { error: 'Por favor escribe una breve motivación (máximo 100 caracteres)' }
   }
 
-  // Update motivation AND reset approval_status to 'pendiente' so rejected users can re-apply
+  const { club } = await getActiveClub(supabase)
+  const clubId = targetClubId || club.id
+
+  // Update motivation AND reset approval_status to 'pendiente' in club_members
   const { error } = await supabase
-    .from('profiles')
-    .update({
-      motivation: cleanText,
-      approval_status: 'pendiente',
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', user.id)
+    .from('club_members')
+    .upsert(
+      {
+        club_id: clubId,
+        user_id: user.id,
+        motivation: cleanText,
+        approval_status: 'pendiente',
+        joined_at: new Date().toISOString(),
+      },
+      { onConflict: 'club_id,user_id' }
+    )
 
   if (error) {
     return { error: error.message }
   }
+
+  // Also update profiles for compatibility
+  await supabase
+    .from('profiles')
+    .update({
+      motivation: cleanText,
+      approval_status: 'pendiente',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', user.id)
 
   revalidatePath('/')
   revalidatePath('/miembros')

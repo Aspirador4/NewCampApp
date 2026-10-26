@@ -6,6 +6,7 @@ import { createClient } from '@/utils/supabase/server'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { Database, EventStatus, EventType, GenderCategory, Json } from '@/types/database.types'
 import { sendPushToUser } from '@/app/api/push/actions'
+import { getActiveClub } from '@/utils/club'
 
 export async function createEvent(formData: FormData) {
   const supabase = await createClient()
@@ -15,19 +16,14 @@ export async function createEvent(formData: FormData) {
     return { error: 'Debes iniciar sesión para crear un evento' }
   }
 
-  // Check creator profile and approval status
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('system_role, approval_status')
-    .eq('id', user.id)
-    .single()
+  // Get active club context
+  const { club, isAdmin: isClubAdminActive, isApproved } = await getActiveClub(supabase)
 
-  if (profile?.approval_status === 'pendiente') {
-    return { error: 'Tu cuenta está pendiente de admisión por los administradores del club.' }
+  if (!isApproved) {
+    return { error: `Tu cuenta está pendiente de admisión por los administradores de ${club.name}.` }
   }
 
-  const isAdmin = profile?.system_role === 'admin'
-  const initialStatus: EventStatus = isAdmin ? 'convocado' : 'pendiente_aprobacion'
+  const initialStatus: EventStatus = isClubAdminActive ? 'convocado' : 'pendiente_aprobacion'
 
   const title = (formData.get('title') as string)?.trim()
   const description = (formData.get('description') as string)?.trim() || null
@@ -66,6 +62,7 @@ export async function createEvent(formData: FormData) {
   const { data: newEvent, error: insertError } = await supabase
     .from('events')
     .insert({
+      club_id: club.id,
       title,
       description,
       event_type: eventType,
@@ -99,28 +96,48 @@ export async function joinEvent(eventId: string) {
     return { error: 'Debes iniciar sesión para inscribirte' }
   }
 
-  // Check approval status & gender
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('approval_status, gender')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.approval_status === 'pendiente') {
-    return { error: 'Tu cuenta está pendiente de admisión por los administradores del club.' }
-  }
-  if (profile?.approval_status === 'rechazado') {
-    return { error: 'Tu cuenta no ha sido admitida en el club.' }
-  }
-
-  // Check event gender category compatibility
-  const { data: targetEvent } = await supabase
+  // Fetch event and club info
+  const { data: targetEvent, error: eventErr } = await supabase
     .from('events')
-    .select('gender_category')
+    .select(`
+      club_id,
+      gender_category,
+      clubs (
+        name
+      )
+    `)
     .eq('id', eventId)
     .single()
 
-  if (targetEvent?.gender_category && targetEvent.gender_category !== 'mixto') {
+  if (eventErr || !targetEvent) {
+    return { error: 'Evento no encontrado' }
+  }
+
+  const clubName = (targetEvent.clubs as unknown as { name?: string })?.name || 'Club Deportivo'
+
+  // Check user membership in the event's club
+  const { data: membership } = await supabase
+    .from('club_members')
+    .select('approval_status')
+    .eq('club_id', targetEvent.club_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (!membership || membership.approval_status === 'pendiente') {
+    return { error: `Tu cuenta está pendiente de admisión en ${clubName}.` }
+  }
+  if (membership.approval_status === 'rechazado') {
+    return { error: `Tu cuenta no ha sido admitida en ${clubName}.` }
+  }
+
+  // Check event gender category compatibility
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('gender')
+    .eq('id', user.id)
+    .single()
+
+  if (targetEvent.gender_category && targetEvent.gender_category !== 'mixto') {
     if (!profile?.gender) {
       return { error: 'Para inscribirte a este evento debes indicar tu género en tu perfil.' }
     }
@@ -137,7 +154,6 @@ export async function joinEvent(eventId: string) {
   })
 
   if (error) {
-    // Fallback if RPC encounters issues
     return fallbackJoinEvent(supabase, eventId, user.id)
   }
 
@@ -215,6 +231,15 @@ export async function leaveEvent(eventId: string, reason?: string) {
     return { error: 'Debes iniciar sesión' }
   }
 
+  // Fetch event and club name for notification
+  const { data: event } = await supabase
+    .from('events')
+    .select('club_id, clubs(name)')
+    .eq('id', eventId)
+    .maybeSingle()
+
+  const clubName = (event?.clubs as unknown as { name?: string })?.name || 'Club Deportivo'
+
   // Call atomic leave_event RPC
   const { data, error } = await supabase.rpc('leave_event', {
     p_event_id: eventId,
@@ -224,14 +249,14 @@ export async function leaveEvent(eventId: string, reason?: string) {
   })
 
   if (error) {
-    return fallbackLeaveEvent(supabase, eventId, user.id, reason)
+    return fallbackLeaveEvent(supabase, eventId, user.id, reason, clubName)
   }
 
   // Trigger Web Push Notification if a player was promoted from waitlist
   if (data && typeof data === 'object' && 'promoted_user_id' in data && data.promoted_user_id) {
     try {
       await sendPushToUser(data.promoted_user_id as string, {
-        title: '¡Subiste de Lista de Espera! 🎉',
+        title: `[${clubName}] ¡Subiste de Lista de Espera! 🎉`,
         body: 'Se liberó un cupo en el partido y quedaste confirmado automáticamente.',
         url: `/eventos/${eventId}`,
       })
@@ -246,7 +271,13 @@ export async function leaveEvent(eventId: string, reason?: string) {
   return { success: true, data }
 }
 
-async function fallbackLeaveEvent(supabase: SupabaseClient<Database>, eventId: string, userId: string, reason?: string) {
+async function fallbackLeaveEvent(
+  supabase: SupabaseClient<Database>,
+  eventId: string,
+  userId: string,
+  reason?: string,
+  clubName = 'Club Deportivo'
+) {
   const { data: attendee } = await supabase
     .from('event_attendees')
     .select('status')
@@ -300,6 +331,16 @@ async function fallbackLeaveEvent(supabase: SupabaseClient<Database>, eventId: s
         action: 'subio_espera',
         reason: 'Promovido automáticamente por baja de cupo',
       })
+
+      try {
+        await sendPushToUser(nextInLine.user_id, {
+          title: `[${clubName}] ¡Subiste de Lista de Espera! 🎉`,
+          body: 'Se liberó un cupo en el partido y quedaste confirmado automáticamente.',
+          url: `/eventos/${eventId}`,
+        })
+      } catch (e) {
+        console.error('Error sending push to promoted user:', e)
+      }
     }
   }
 
@@ -316,24 +357,31 @@ export async function updateEventStatus(eventId: string, newStatus: EventStatus)
     return { error: 'No autorizado' }
   }
 
-  // Check if user is admin OR creator of the event
+  // Check if user is admin of the event's club OR creator of the event
   const { data: event } = await supabase
     .from('events')
-    .select('created_by, event_type')
+    .select('club_id, created_by, event_type, clubs(name)')
     .eq('id', eventId)
     .single()
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('system_role')
-    .eq('id', user.id)
-    .single()
+  if (!event) {
+    return { error: 'Evento no encontrado' }
+  }
 
-  const isAdmin = profile?.system_role === 'admin'
-  const isCreator = event?.created_by === user.id
+  const clubName = (event.clubs as unknown as { name?: string })?.name || 'Club Deportivo'
+
+  const { data: member } = await supabase
+    .from('club_members')
+    .select('system_role, approval_status')
+    .eq('club_id', event.club_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  const isAdmin = member?.system_role === 'admin' && member?.approval_status === 'aprobado'
+  const isCreator = event.created_by === user.id
 
   if (!isAdmin && !isCreator) {
-    return { error: 'Solo el creador del evento o un administrador pueden cambiar el estado' }
+    return { error: 'Solo el creador del evento o un administrador del club pueden cambiar el estado' }
   }
 
   const updatePayload: Database['public']['Tables']['events']['Update'] = {
@@ -341,9 +389,8 @@ export async function updateEventStatus(eventId: string, newStatus: EventStatus)
   }
 
   // If finalized, automatically open MVP voting ONLY for matches
-  if (newStatus === 'finalizado' && event?.event_type === 'partido') {
+  if (newStatus === 'finalizado' && event.event_type === 'partido') {
     updatePayload.mvp_voting_open = true
-    // Set 24 hour deadline for voting
     const deadline = new Date()
     deadline.setHours(deadline.getHours() + 24)
     updatePayload.mvp_voting_deadline = deadline.toISOString()
@@ -361,11 +408,8 @@ export async function updateEventStatus(eventId: string, newStatus: EventStatus)
     return { error: error.message }
   }
 
-  // Note: Debt generation is now handled via manual Financial Closure (closeEventFinancesAction)
-  // allowing custom per-player pricing before issuing debts.
-
-  // If finalized match, dispatch push notification to all confirmed attendees to vote for MVP
-  if (newStatus === 'finalizado' && event?.event_type === 'partido') {
+  // If finalized match, dispatch push notification to all confirmed attendees with club name
+  if (newStatus === 'finalizado' && event.event_type === 'partido') {
     const { data: attendees } = await supabase
       .from('event_attendees')
       .select('user_id')
@@ -375,7 +419,7 @@ export async function updateEventStatus(eventId: string, newStatus: EventStatus)
     for (const att of attendees || []) {
       try {
         await sendPushToUser(att.user_id, {
-          title: '¡Vota al MVP del Partido! 🏆',
+          title: `[${clubName}] ¡Vota al MVP del Partido! 🏆`,
           body: 'El partido finalizó. Tienes 24hs para elegir a la figura del encuentro.',
           url: `/eventos/${eventId}`,
         })
@@ -398,24 +442,29 @@ export async function approveEventAction(eventId: string) {
     return { error: 'No autorizado' }
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('system_role')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.system_role !== 'admin') {
-    return { error: 'Solo los administradores pueden aprobar eventos' }
-  }
-
   const { data: event, error: eventErr } = await supabase
     .from('events')
-    .select('title, created_by')
+    .select('club_id, title, created_by, clubs(name)')
     .eq('id', eventId)
     .single()
 
   if (eventErr || !event) {
     return { error: 'Evento no encontrado' }
+  }
+
+  const clubName = (event.clubs as unknown as { name?: string })?.name || 'Club Deportivo'
+
+  const { data: member } = await supabase
+    .from('club_members')
+    .select('system_role, approval_status')
+    .eq('club_id', event.club_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  const isAdmin = member?.system_role === 'admin' && member?.approval_status === 'aprobado'
+
+  if (!isAdmin) {
+    return { error: 'Solo los administradores del club pueden aprobar eventos' }
   }
 
   const { error } = await supabase
@@ -430,7 +479,7 @@ export async function approveEventAction(eventId: string) {
   if (event.created_by) {
     try {
       await sendPushToUser(event.created_by, {
-        title: '¡Tu Convocatoria fue Aprobada! ⚽',
+        title: `[${clubName}] ¡Tu Convocatoria fue Aprobada! ⚽`,
         body: `"${event.title}" ya está visible y abierta para inscripciones de los socios.`,
         url: `/eventos/${eventId}`,
       })
@@ -453,14 +502,27 @@ export async function rejectEventAction(eventId: string) {
     return { error: 'No autorizado' }
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('system_role')
-    .eq('id', user.id)
+  const { data: event } = await supabase
+    .from('events')
+    .select('club_id')
+    .eq('id', eventId)
     .single()
 
-  if (profile?.system_role !== 'admin') {
-    return { error: 'Solo los administradores pueden rechazar eventos' }
+  if (!event) {
+    return { error: 'Evento no encontrado' }
+  }
+
+  const { data: member } = await supabase
+    .from('club_members')
+    .select('system_role, approval_status')
+    .eq('club_id', event.club_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  const isAdmin = member?.system_role === 'admin' && member?.approval_status === 'aprobado'
+
+  if (!isAdmin) {
+    return { error: 'Solo los administradores del club pueden rechazar eventos' }
   }
 
   const { error } = await supabase
@@ -495,21 +557,25 @@ export async function closeEventFinancesAction(
     return { error: 'No autorizado' }
   }
 
-  // Check admin or creator
   const { data: event } = await supabase
     .from('events')
-    .select('created_by')
+    .select('club_id, created_by')
     .eq('id', eventId)
     .single()
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('system_role')
-    .eq('id', user.id)
-    .single()
+  if (!event) {
+    return { error: 'Evento no encontrado' }
+  }
 
-  const isAdmin = profile?.system_role === 'admin'
-  const isCreator = event?.created_by === user.id
+  const { data: member } = await supabase
+    .from('club_members')
+    .select('system_role, approval_status')
+    .eq('club_id', event.club_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  const isAdmin = member?.system_role === 'admin' && member?.approval_status === 'aprobado'
+  const isCreator = event.created_by === user.id
 
   if (!isAdmin && !isCreator) {
     return { error: 'Solo el creador del evento o un administrador pueden emitir el cierre financiero' }

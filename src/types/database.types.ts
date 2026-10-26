@@ -30,6 +30,101 @@ export type FieldType = 'text' | 'number' | 'select' | 'multiselect' | 'boolean'
 export interface Database {
   public: {
     Tables: {
+      clubs: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          logo_url: string | null
+          description: string | null
+          settings: Record<string, Json>
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          logo_url?: string | null
+          description?: string | null
+          settings?: Record<string, Json>
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          logo_url?: string | null
+          description?: string | null
+          settings?: Record<string, Json>
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clubs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      club_members: {
+        Row: {
+          id: string
+          club_id: string
+          user_id: string
+          system_role: SystemRole
+          sports_role: SportsRole
+          approval_status: ApprovalStatus
+          motivation: string | null
+          custom_attributes: Record<string, Json>
+          joined_at: string
+        }
+        Insert: {
+          id?: string
+          club_id: string
+          user_id: string
+          system_role?: SystemRole
+          sports_role?: SportsRole
+          approval_status?: ApprovalStatus
+          motivation?: string | null
+          custom_attributes?: Record<string, Json>
+          joined_at?: string
+        }
+        Update: {
+          id?: string
+          club_id?: string
+          user_id?: string
+          system_role?: SystemRole
+          sports_role?: SportsRole
+          approval_status?: ApprovalStatus
+          motivation?: string | null
+          custom_attributes?: Record<string, Json>
+          joined_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_members_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       profiles: {
         Row: {
           id: string
@@ -84,6 +179,7 @@ export interface Database {
       profile_field_definitions: {
         Row: {
           id: string
+          club_id: string
           field_key: string
           label: string
           field_type: FieldType
@@ -94,6 +190,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          club_id: string
           field_key: string
           label: string
           field_type: FieldType
@@ -104,6 +201,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          club_id?: string
           field_key?: string
           label?: string
           field_type?: FieldType
@@ -112,11 +210,20 @@ export interface Database {
           display_order?: number
           created_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profile_field_definitions_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       events: {
         Row: {
           id: string
+          club_id: string
           title: string
           description: string | null
           event_type: EventType
@@ -139,6 +246,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          club_id: string
           title: string
           description?: string | null
           event_type: EventType
@@ -161,6 +269,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          club_id?: string
           title?: string
           description?: string | null
           event_type?: EventType
@@ -182,6 +291,13 @@ export interface Database {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "events_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "events_created_by_fkey"
             columns: ["created_by"]
@@ -318,6 +434,13 @@ export interface Database {
         }
         Relationships: [
           {
+            foreignKeyName: "event_attendance_logs_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "event_attendance_logs_event_id_fkey"
             columns: ["event_id"]
             isOneToOne: false
@@ -327,13 +450,6 @@ export interface Database {
           {
             foreignKeyName: "event_attendance_logs_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "event_attendance_logs_actor_id_fkey"
-            columns: ["actor_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -389,6 +505,7 @@ export interface Database {
       user_stats: {
         Row: {
           id: string
+          club_id: string
           user_id: string
           matches_played: number
           mvp_count: number
@@ -399,6 +516,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          club_id: string
           user_id: string
           matches_played?: number
           mvp_count?: number
@@ -409,6 +527,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          club_id?: string
           user_id?: string
           matches_played?: number
           mvp_count?: number
@@ -419,9 +538,16 @@ export interface Database {
         }
         Relationships: [
           {
+            foreignKeyName: "user_stats_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "user_stats_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           }
@@ -465,6 +591,7 @@ export interface Database {
       member_debts: {
         Row: {
           id: string
+          club_id: string | null
           event_id: string
           user_id: string
           guest_id: string | null
@@ -479,6 +606,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          club_id?: string | null
           event_id: string
           user_id: string
           guest_id?: string | null
@@ -493,6 +621,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          club_id?: string | null
           event_id?: string
           user_id?: string
           guest_id?: string | null
@@ -506,6 +635,13 @@ export interface Database {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "member_debts_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "member_debts_event_id_fkey"
             columns: ["event_id"]
@@ -569,6 +705,50 @@ export interface Database {
         }
         Returns: boolean
       }
+      is_club_member: {
+        Args: {
+          p_club_id: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
+      is_club_admin: {
+        Args: {
+          p_club_id: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
+      is_event_club_admin: {
+        Args: {
+          p_event_id: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
+      is_event_club_member: {
+        Args: {
+          p_event_id: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
+      create_new_club: {
+        Args: {
+          p_name: string
+          p_slug: string
+          p_description?: string
+          p_logo_url?: string
+        }
+        Returns: Json
+      }
+      request_join_club: {
+        Args: {
+          p_club_id: string
+          p_motivation?: string
+        }
+        Returns: Json
+      }
       join_event: {
         Args: {
           p_event_id: string
@@ -619,6 +799,7 @@ export interface Database {
         Args: {
           p_user_id: string
           p_debt_ids?: string[]
+          p_club_id?: string
         }
         Returns: Json
       }

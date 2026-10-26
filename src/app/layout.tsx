@@ -4,6 +4,7 @@ import "./globals.css";
 import { BottomNav } from "@/components/BottomNav";
 import { NavigationProgressBar } from "@/components/NavigationProgressBar";
 import { createClient } from "@/utils/supabase/server";
+import { getActiveClub } from "@/utils/club";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,12 +53,8 @@ export default async function RootLayout({
 
   let isApproved = false;
   if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('approval_status')
-      .eq('id', user.id)
-      .single();
-    isApproved = profile?.approval_status === 'aprobado';
+    const activeContext = await getActiveClub(supabase);
+    isApproved = activeContext.isApproved;
   }
 
   return (

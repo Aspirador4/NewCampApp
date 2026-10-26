@@ -61,6 +61,7 @@ try {
     { src: '07_SISTEMA_MVP_Y_ESTADISTICAS.md', dest: '07-Sistema-MVP-y-Estadisticas.md' },
     { src: '08_PWA_Y_WEB_PUSH.md', dest: '08-PWA-y-Web-Push.md' },
     { src: '09_ADMISION_DIRECTORIO_Y_ROLES.md', dest: '09-Admision-Directorio-y-Roles.md' },
+    { src: '10_ARQUITECTURA_MULTICLUB.md', dest: '10-Arquitectura-MultiClub.md' },
   ]
 
   // Copiar y adaptar enlaces para formato de GitHub Wiki
@@ -81,6 +82,7 @@ try {
       .replace(/\.\/07_SISTEMA_MVP_Y_ESTADISTICAS\.md/g, '07-Sistema-MVP-y-Estadisticas')
       .replace(/\.\/08_PWA_Y_WEB_PUSH\.md/g, '08-PWA-y-Web-Push')
       .replace(/\.\/09_ADMISION_DIRECTORIO_Y_ROLES\.md/g, '09-Admision-Directorio-y-Roles')
+      .replace(/\.\/10_ARQUITECTURA_MULTICLUB\.md/g, '10-Arquitectura-MultiClub')
       .replace(/\.\/INDEX\.md/g, 'Home')
       // Enlaces a archivos de código fuente deben apuntar al repo principal de GitHub
       .replace(/\.\.\/\.\.\/src\//g, `https://github.com/${REPO_OWNER}/${REPO_NAME}/blob/main/src/`)
@@ -102,6 +104,7 @@ try {
 * [[7. MVP y Estadísticas|07-Sistema-MVP-y-Estadisticas]]
 * [[8. PWA y Web Push|08-PWA-y-Web-Push]]
 * [[9. Admisión, Miembros y Roles|09-Admision-Directorio-y-Roles]]
+* [[10. Arquitectura Multi-Club|10-Arquitectura-MultiClub]]
 
 ---
 * 🌐 [App en Vercel](https://new-camp-app.vercel.app)

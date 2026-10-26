@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { Plus, Calendar, MapPin, Users, ChevronRight, CheckCircle2, Clock, CircleDollarSign, User } from 'lucide-react'
 import { EventType, GenderCategory } from '@/types/database.types'
+import { getActiveClub } from '@/utils/club'
 
 interface AttendeeSummary {
   id: string
@@ -51,28 +52,22 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let isAdmin = false
-  if (user) {
-    const { data: prof } = await supabase
-      .from('profiles')
-      .select('system_role, approval_status')
-      .eq('id', user.id)
-      .single()
+  // Get active club & permissions
+  const { club, isAdmin, isApproved } = await getActiveClub(supabase)
 
-    if (prof?.approval_status !== 'aprobado') {
-      redirect('/')
-    }
-    isAdmin = prof?.system_role === 'admin'
+  if (user && !isApproved) {
+    redirect('/')
   }
 
-  // Count pending financial closures
+  // Count pending financial closures for this club
   const { count: pendingClosureCount } = await supabase
     .from('events')
     .select('id', { count: 'exact', head: true })
+    .eq('club_id', club.id)
     .eq('status', 'finalizado')
     .eq('financial_closed', false)
 
-  // Fetch events
+  // Fetch events for active club
   let query = supabase
     .from('events')
     .select(`
@@ -94,6 +89,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         status
       )
     `)
+    .eq('club_id', club.id)
     .order('start_time', { ascending: filtro === 'finalizados' || filtro === 'pendientes_cierre' ? false : true })
 
   if (filtro === 'finalizados') {
@@ -130,10 +126,10 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
       <div className="flex items-center justify-between pt-2 pb-4 border-b border-neutral-200">
         <div>
           <h1 className="font-extrabold text-xl text-neutral-900 leading-tight">
-            Eventos & Partidos
+            Eventos: {club.name}
           </h1>
           <p className="text-xs text-neutral-500 font-medium">
-            Convocatorias oficiales del club
+            Convocatorias oficiales del club activo
           </p>
         </div>
 

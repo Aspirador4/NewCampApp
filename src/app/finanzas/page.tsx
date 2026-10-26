@@ -1,10 +1,11 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
-import { FinanzasMemberView, MemberDebtItem } from '@/components/FinanzasMemberView'
 import { FinanzasAdminPanel, AdminDebtItem } from '@/components/FinanzasAdminPanel'
-import { BankDetails } from '@/app/finanzas/actions'
-import { Wallet, ShieldCheck, ArrowLeft } from 'lucide-react'
+import { FinanzasMemberView, MemberDebtItem } from '@/components/FinanzasMemberView'
+import { Wallet, ArrowLeft, ShieldCheck } from 'lucide-react'
+import { BankDetails } from './actions'
+import { getActiveClub } from '@/utils/club'
 
 interface FinanzasPageProps {
   searchParams: Promise<{
@@ -21,20 +22,21 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
     redirect('/login?next=/finanzas')
   }
 
-  // Fetch profile
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name, system_role, approval_status')
-    .eq('id', user.id)
-    .single()
+  // Get active club & permissions
+  const { club, isAdmin, isApproved } = await getActiveClub(supabase)
 
-  if (profile?.approval_status !== 'aprobado') {
+  if (!isApproved) {
     redirect('/')
   }
 
-  const isAdmin = profile?.system_role === 'admin'
+  // Fetch user profile
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name')
+    .eq('id', user.id)
+    .single()
 
-  // Fetch user's debts
+  // Fetch user's debts for this club
   const { data: myDebtsRaw } = await supabase
     .from('member_debts')
     .select(`
@@ -48,18 +50,20 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
       status,
       created_at,
       paid_at,
-      events (
+      events!inner (
         id,
+        club_id,
         title,
         start_time
       )
     `)
     .eq('user_id', user.id)
+    .eq('events.club_id', club.id)
     .order('created_at', { ascending: false })
 
   const myDebts = (myDebtsRaw || []) as unknown as MemberDebtItem[]
 
-  // If admin, fetch all club debts and pending closure events
+  // If admin, fetch all club debts and pending closure events for this club
   let allDebts: AdminDebtItem[] = []
   let pendingClosureEvents: {
     id: string
@@ -86,9 +90,10 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
           status,
           created_at,
           paid_at,
-          events (
+          events!inner (
             title,
-            start_time
+            start_time,
+            club_id
           ),
           profiles:user_id (
             id,
@@ -96,6 +101,7 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
             avatar_url
           )
         `)
+        .eq('events.club_id', club.id)
         .order('created_at', { ascending: false }),
       supabase
         .from('events')
@@ -115,6 +121,7 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
             status
           )
         `)
+        .eq('club_id', club.id)
         .eq('status', 'finalizado')
         .eq('financial_closed', false)
         .order('start_time', { ascending: false }),
@@ -142,20 +149,31 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
     }
   }
 
-  // Fetch bank details from club_settings
-  const { data: bankSettingsRaw } = await supabase
-    .from('club_settings')
-    .select('value')
-    .eq('key', 'bank_details')
-    .maybeSingle()
-
-  const bankDetails = (bankSettingsRaw?.value as unknown as BankDetails) || {
+  // Fetch bank details from active club settings, fallback to club_settings
+  let bankDetails: BankDetails = {
     banco: 'Banco Santander',
     tipo_cuenta: 'Cuenta Corriente',
     numero_cuenta: '78-90123-4',
-    titular: 'Club Deportivo',
+    titular: club.name || 'Club Deportivo',
     rut: '76.543.210-K',
     email: 'admin@clubdeportivo.com',
+  }
+
+  if (club.settings?.bank_details && typeof club.settings.bank_details === 'object') {
+    bankDetails = {
+      ...bankDetails,
+      ...(club.settings.bank_details as Partial<BankDetails>),
+    }
+  } else {
+    const { data: bankSettingsRaw } = await supabase
+      .from('club_settings')
+      .select('value')
+      .eq('key', 'bank_details')
+      .maybeSingle()
+
+    if (bankSettingsRaw?.value) {
+      bankDetails = bankSettingsRaw.value as unknown as BankDetails
+    }
   }
 
   const activeView = isAdmin && tab === 'admin' ? 'admin' : 'socio'
@@ -177,10 +195,10 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
             </div>
             <div>
               <h1 className="font-extrabold text-lg text-neutral-900 leading-tight">
-                Finanzas del Club
+                Finanzas: {club.name}
               </h1>
               <p className="text-xs text-neutral-500 font-medium">
-                Control de aranceles y estado de cuenta
+                Control de aranceles y tesorería del club activo
               </p>
             </div>
           </div>

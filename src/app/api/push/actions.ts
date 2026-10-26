@@ -2,6 +2,7 @@
 
 import webpush from 'web-push'
 import { createClient } from '@/utils/supabase/server'
+import { getActiveClub } from '@/utils/club'
 
 // Configure VAPID
 const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
@@ -187,9 +188,11 @@ export async function sendTestPush() {
     return { error: 'Debes iniciar sesión' }
   }
 
+  const { club } = await getActiveClub(supabase)
+
   const res = await sendPushToUser(user.id, {
-    title: '¡Gol! Notificación de Prueba ⚽',
-    body: 'Las notificaciones Web Push de Club Deportivo están funcionando correctamente.',
+    title: `[${club.name}] ¡Gol! Notificación de Prueba ⚽`,
+    body: `Las notificaciones Web Push de ${club.name} están funcionando correctamente.`,
     url: '/',
   })
 

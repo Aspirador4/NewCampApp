@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 import { EventGuestsSection, EventGuestItem } from '@/components/EventGuestsSection'
 import { ArrowLeft, ShieldCheck, Calendar, MapPin } from 'lucide-react'
+import { getActiveClub } from '@/utils/club'
 
 interface EventSummary {
   id: string
@@ -20,18 +21,14 @@ export default async function AdminInvitadosPage() {
     redirect('/login?next=/admin/invitados')
   }
 
-  // Check admin privileges
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('system_role, approval_status')
-    .eq('id', user.id)
-    .single()
+  // Check admin privileges in active club
+  const { club, isAdmin, isApproved } = await getActiveClub(supabase)
 
-  if (profile?.approval_status !== 'aprobado' || profile?.system_role !== 'admin') {
+  if (!isAdmin || !isApproved) {
     redirect('/')
   }
 
-  // Fetch all pending guests across upcoming events
+  // Fetch all pending guests across upcoming events for this club
   const { data: pendingGuestsRaw } = await supabase
     .from('event_guests')
     .select(`
@@ -42,8 +39,9 @@ export default async function AdminInvitadosPage() {
       guest_contact,
       status,
       created_at,
-      events (
+      events!inner (
         id,
+        club_id,
         title,
         start_time,
         location,
@@ -53,6 +51,7 @@ export default async function AdminInvitadosPage() {
         full_name
       )
     `)
+    .eq('events.club_id', club.id)
     .eq('status', 'pendiente_aprobacion')
     .order('created_at', { ascending: false })
 
@@ -97,10 +96,10 @@ export default async function AdminInvitadosPage() {
           </Link>
           <div>
             <h1 className="font-extrabold text-lg text-neutral-900 leading-tight">
-              Moderación de Invitados
+              Invitados: {club.name}
             </h1>
             <p className="text-xs text-neutral-500 font-medium">
-              Panel Administrativo
+              Panel Administrativo de Moderación
             </p>
           </div>
         </div>

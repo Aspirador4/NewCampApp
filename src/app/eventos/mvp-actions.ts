@@ -2,7 +2,6 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
-
 import { SupabaseClient } from '@supabase/supabase-js'
 import { Database } from '@/types/database.types'
 
@@ -22,7 +21,7 @@ export async function castMvpVote(eventId: string, votedPlayerId: string) {
   // Check event exists and voting is open
   const { data: event, error: eventErr } = await supabase
     .from('events')
-    .select('mvp_voting_open, status, event_type')
+    .select('mvp_voting_open, status, event_type, club_id')
     .eq('id', eventId)
     .single()
 
@@ -59,28 +58,28 @@ export async function castMvpVote(eventId: string, votedPlayerId: string) {
     .single()
 
   if (!votedAttendee || votedAttendee.status !== 'confirmado') {
-    return { error: 'El jugador seleccionado no participó del encuentro' }
+    return { error: 'Solo puedes votar por un jugador que haya jugado y confirmado este partido' }
   }
 
-  // Insert vote
-  const { error: insertErr } = await supabase
+  // Upsert vote
+  const { error: voteErr } = await supabase
     .from('mvp_votes')
-    .insert({
-      event_id: eventId,
-      voter_id: user.id,
-      voted_player_id: votedPlayerId,
-    })
+    .upsert(
+      {
+        event_id: eventId,
+        voter_id: user.id,
+        voted_player_id: votedPlayerId,
+        created_at: new Date().toISOString(),
+      },
+      { onConflict: 'event_id,voter_id' }
+    )
 
-  if (insertErr) {
-    if (insertErr.code === '23505') {
-      return { error: 'Ya has emitido tu voto para este partido' }
-    }
-    return { error: `Error al registrar voto: ${insertErr.message}` }
+  if (voteErr) {
+    return { error: `Error al registrar tu voto: ${voteErr.message}` }
   }
 
   revalidatePath(`/eventos/${eventId}`)
-  revalidatePath('/ranking')
-  return { success: true, message: '¡Voto registrado con éxito!' }
+  return { success: true }
 }
 
 export async function closeMvpVoting(eventId: string) {
@@ -88,27 +87,32 @@ export async function closeMvpVoting(eventId: string) {
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
   if (authError || !user) {
-    return { error: 'No autorizado' }
+    return { success: false, error: 'No autorizado' }
   }
 
-  // Verify admin OR event creator
+  // Check if user is admin of the event's club OR creator of the event
   const { data: event } = await supabase
     .from('events')
-    .select('created_by')
+    .select('club_id, created_by, event_type')
     .eq('id', eventId)
     .single()
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('system_role')
-    .eq('id', user.id)
-    .single()
+  if (!event) {
+    return { success: false, error: 'Evento no encontrado' }
+  }
 
-  const isAdmin = profile?.system_role === 'admin'
-  const isCreator = event?.created_by === user.id
+  const { data: member } = await supabase
+    .from('club_members')
+    .select('system_role, approval_status')
+    .eq('club_id', event.club_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  const isAdmin = member?.system_role === 'admin' && member?.approval_status === 'aprobado'
+  const isCreator = event.created_by === user.id
 
   if (!isAdmin && !isCreator) {
-    return { success: false, error: 'Solo el creador del evento o un administrador pueden cerrar la votación' }
+    return { success: false, error: 'Solo el creador del evento o un administrador del club pueden cerrar la votación' }
   }
 
   // Ensure debts are generated if they weren't generated before
@@ -125,7 +129,7 @@ export async function closeMvpVoting(eventId: string) {
 
   if (rpcErr) {
     // Fallback: update status and compute manually
-    return fallbackCloseMvp(supabase, eventId)
+    return fallbackCloseMvp(supabase, eventId, event.club_id)
   }
 
   revalidatePath(`/eventos/${eventId}`)
@@ -135,7 +139,7 @@ export async function closeMvpVoting(eventId: string) {
   return { success: true, error: null, data: rpcRes }
 }
 
-async function fallbackCloseMvp(supabase: SupabaseClient<Database>, eventId: string) {
+async function fallbackCloseMvp(supabase: SupabaseClient<Database>, eventId: string, clubId: string) {
   // Close voting
   await supabase
     .from('events')
@@ -169,15 +173,20 @@ async function fallbackCloseMvp(supabase: SupabaseClient<Database>, eventId: str
       .from('user_stats')
       .select('mvp_count')
       .eq('user_id', winnerId)
+      .eq('club_id', clubId)
       .maybeSingle()
 
     await supabase
       .from('user_stats')
-      .upsert({
-        user_id: winnerId,
-        mvp_count: (currentStats?.mvp_count || 0) + 1,
-        updated_at: new Date().toISOString(),
-      })
+      .upsert(
+        {
+          user_id: winnerId,
+          club_id: clubId,
+          mvp_count: (currentStats?.mvp_count || 0) + 1,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id,club_id' }
+      )
   }
 
   // Update votes received
@@ -186,15 +195,20 @@ async function fallbackCloseMvp(supabase: SupabaseClient<Database>, eventId: str
       .from('user_stats')
       .select('mvp_votes_received')
       .eq('user_id', playerId)
+      .eq('club_id', clubId)
       .maybeSingle()
 
     await supabase
       .from('user_stats')
-      .upsert({
-        user_id: playerId,
-        mvp_votes_received: (currentStats?.mvp_votes_received || 0) + count,
-        updated_at: new Date().toISOString(),
-      })
+      .upsert(
+        {
+          user_id: playerId,
+          club_id: clubId,
+          mvp_votes_received: (currentStats?.mvp_votes_received || 0) + count,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id,club_id' }
+      )
   }
 
   // Increment matches played for confirmed attendees
@@ -209,15 +223,20 @@ async function fallbackCloseMvp(supabase: SupabaseClient<Database>, eventId: str
       .from('user_stats')
       .select('matches_played')
       .eq('user_id', att.user_id)
+      .eq('club_id', clubId)
       .maybeSingle()
 
     await supabase
       .from('user_stats')
-      .upsert({
-        user_id: att.user_id,
-        matches_played: (currentStats?.matches_played || 0) + 1,
-        updated_at: new Date().toISOString(),
-      })
+      .upsert(
+        {
+          user_id: att.user_id,
+          club_id: clubId,
+          matches_played: (currentStats?.matches_played || 0) + 1,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id,club_id' }
+      )
   }
 
   revalidatePath(`/eventos/${eventId}`)
