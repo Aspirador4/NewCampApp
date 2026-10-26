@@ -6,11 +6,15 @@ Especificación funcional del flujo post-partido para la elección democrática 
 
 ## 1. Reglas de Votación MVP
 
-1. **Apertura de la Convocatoria de Voto**:
-   - Al concluir el encuentro, el administrador presiona **"Finalizar Partido"**.
+1. **Exclusividad para Partidos (`event_type = 'partido'`)**:
+   - La votación de MVP aplica **únicamente a partidos**.
+   - Los eventos de entrenamiento, juntas, asados o sociales no habilitan votación de MVP, no renderizan la sección interactiva en la vista de detalle y no disparan notificaciones de votación al ser finalizados.
+2. **Apertura de la Convocatoria de Voto**:
+   - Al concluir el encuentro, el administrador presiona **"Finalizar y Abrir MVP"**.
    - Se activa la bandera `mvp_voting_open = true` y se establece un plazo límite de 24 horas (`mvp_voting_deadline`).
-2. **Elegibilidad**:
-   - **Votantes**: Únicamente los socios con estado `confirmado` que asistieron al evento.
+   - Se despacha notificación Web Push a los jugadores confirmados.
+3. **Elegibilidad**:
+   - **Votantes**: Únicamente los socios con estado `confirmado` que participaron del partido.
    - **Candidatos**: Únicamente los demás jugadores confirmados del partido.
    - **Anti-Autovoto**: Deshabilitado en la interfaz (se filtra al usuario actual) y reforzado en PostgreSQL mediante la restricción:
      ```sql
@@ -20,9 +24,9 @@ Especificación funcional del flujo post-partido para la elección democrática 
      ```sql
      CONSTRAINT mvp_votes_event_voter_key UNIQUE (event_id, voter_id)
      ```
-3. **Anonimato**:
+4. **Anonimato**:
    - Durante la ventana abierta, los votos son anónimos. Ningún usuario ni administrador puede ver el desglose en vivo para evitar sesgos.
-4. **Cierre y Computación Atómica (`finalize_event_mvp`)**:
+5. **Cierre y Computación Atómica (`finalize_event_mvp`)**:
    - Al cumplirse el plazo o cerrarse manualmente por un admin:
      - Se calcula el jugador o jugadores con la mayor cantidad de votos (`max_votes`).
      - **Empates**: Si dos o más jugadores empatan en el primer puesto, ambos reciben el galardón y comparten el MVP.

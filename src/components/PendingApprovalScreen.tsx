@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Flame, Clock, Send, LogOut, CheckCircle2, AlertCircle, Loader2, Sparkles } from 'lucide-react'
+import { Flame, Clock, Send, LogOut, CheckCircle2, AlertCircle, Loader2, Sparkles, UserX } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import { submitMotivationAction } from '@/app/miembros/actions'
@@ -10,14 +10,17 @@ interface PendingApprovalScreenProps {
   fullName: string
   email: string
   initialMotivation?: string | null
+  approvalStatus?: 'pendiente' | 'rechazado' | 'aprobado'
 }
 
 export function PendingApprovalScreen({
   fullName,
   email,
   initialMotivation,
+  approvalStatus = 'pendiente',
 }: PendingApprovalScreenProps) {
   const [motivation, setMotivation] = useState(initialMotivation || '')
+  const [currentStatus, setCurrentStatus] = useState<'pendiente' | 'rechazado' | 'aprobado'>(approvalStatus)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -42,9 +45,12 @@ export function PendingApprovalScreen({
       setError(res.error)
     } else {
       setSuccess(true)
-      setTimeout(() => setSuccess(false), 3000)
+      setCurrentStatus('pendiente')
+      setTimeout(() => setSuccess(false), 4000)
     }
   }
+
+  const isRejected = currentStatus === 'rechazado'
 
   return (
     <div className="min-h-screen bg-neutral-900 text-white flex flex-col justify-between p-6 max-w-md mx-auto">
@@ -70,21 +76,42 @@ export function PendingApprovalScreen({
         </button>
       </div>
 
-      {/* Main Waiting Card */}
+      {/* Main Waiting / Rejected Card */}
       <div className="py-8 space-y-6 text-center">
-        <div className="w-16 h-16 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto shadow-inner animate-pulse">
-          <Clock className="w-8 h-8" />
-        </div>
+        {isRejected ? (
+          <div className="w-16 h-16 rounded-3xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto shadow-inner">
+            <UserX className="w-8 h-8" />
+          </div>
+        ) : (
+          <div className="w-16 h-16 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto shadow-inner animate-pulse">
+            <Clock className="w-8 h-8" />
+          </div>
+        )}
 
         <div className="space-y-2">
-          <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
-            Solicitud Recibida
-          </span>
+          {isRejected ? (
+            <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
+              Solicitud No Aprobada
+            </span>
+          ) : (
+            <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              Solicitud Recibida
+            </span>
+          )}
+
           <h2 className="text-xl font-black text-white leading-tight">
-            Tu aprobación aún está pendiente
+            {isRejected ? 'Tu solicitud anterior fue rechazada' : 'Tu aprobación aún está pendiente'}
           </h2>
           <p className="text-xs text-neutral-400 leading-relaxed max-w-xs mx-auto">
-            Hola, <strong className="text-neutral-200">{fullName}</strong>. Un administrador del club revisará tu postulación para habilitar tu acceso a las convocatorias y partidos.
+            {isRejected ? (
+              <>
+                Hola, <strong className="text-neutral-200">{fullName}</strong>. Tu postulación anterior no fue aceptada. Puedes actualizar tu carta de motivación y volver a enviar tu postulación para que los administradores la revisen nuevamente.
+              </>
+            ) : (
+              <>
+                Hola, <strong className="text-neutral-200">{fullName}</strong>. Un administrador del club revisará tu postulación para habilitar tu acceso a las convocatorias y partidos.
+              </>
+            )}
           </p>
         </div>
 
@@ -93,7 +120,7 @@ export function PendingApprovalScreen({
           <div className="flex items-center justify-between">
             <label htmlFor="motivation" className="text-xs font-bold text-neutral-200 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Carta de motivación breve</span>
+              <span>{isRejected ? 'Nueva carta de motivación' : 'Carta de motivación breve'}</span>
             </label>
             <span className={`text-[10px] font-mono font-bold ${motivation.length >= 50 ? 'text-red-400' : 'text-neutral-400'}`}>
               {motivation.length}/50
@@ -101,7 +128,9 @@ export function PendingApprovalScreen({
           </div>
 
           <p className="text-[11px] text-neutral-400 leading-tight">
-            Escribe un breve mensaje para los administradores (ej: tu posición, si vienes recomendado por alguien, etc.).
+            {isRejected
+              ? 'Indica a los administradores detalles para reconsiderar tu ingreso (posición, quién te invita, etc.).'
+              : 'Escribe un breve mensaje para los administradores (ej: tu posición, si vienes recomendado por alguien, etc.).'}
           </p>
 
           <input
@@ -124,7 +153,7 @@ export function PendingApprovalScreen({
           {success && (
             <div className="flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-950/40 p-2 rounded-lg border border-emerald-900">
               <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
-              <span>¡Carta de motivación enviada con éxito!</span>
+              <span>{isRejected ? '¡Solicitud reenviada con éxito para revisión!' : '¡Carta de motivación enviada con éxito!'}</span>
             </div>
           )}
 
@@ -134,7 +163,7 @@ export function PendingApprovalScreen({
             className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-            <span>{initialMotivation ? 'Actualizar Carta de Motivación' : 'Enviar Carta a los Admin'}</span>
+            <span>{isRejected ? 'Reenviar Postulación al Club' : (initialMotivation ? 'Actualizar Carta de Motivación' : 'Enviar Carta a los Admin')}</span>
           </button>
         </form>
       </div>

@@ -159,6 +159,38 @@ export async function updateMemberRoleAction(targetUserId: string, newRole: Syst
   return { success: true }
 }
 
+export async function reconsiderMemberAction(targetUserId: string) {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: 'No autorizado' }
+  }
+
+  const { data: adminProfile } = await supabase
+    .from('profiles')
+    .select('system_role')
+    .eq('id', user.id)
+    .single()
+
+  if (adminProfile?.system_role !== 'admin') {
+    return { error: 'Solo los administradores pueden cambiar el estado' }
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ approval_status: 'pendiente', updated_at: new Date().toISOString() })
+    .eq('id', targetUserId)
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  revalidatePath('/miembros')
+  revalidatePath('/')
+  return { success: true }
+}
+
 export async function submitMotivationAction(motivationText: string) {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -172,9 +204,14 @@ export async function submitMotivationAction(motivationText: string) {
     return { error: 'Por favor escribe una breve motivación (máximo 50 caracteres)' }
   }
 
+  // Update motivation AND reset approval_status to 'pendiente' so rejected users can re-apply
   const { error } = await supabase
     .from('profiles')
-    .update({ motivation: cleanText, updated_at: new Date().toISOString() })
+    .update({
+      motivation: cleanText,
+      approval_status: 'pendiente',
+      updated_at: new Date().toISOString()
+    })
     .eq('id', user.id)
 
   if (error) {

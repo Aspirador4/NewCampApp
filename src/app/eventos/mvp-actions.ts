@@ -22,12 +22,16 @@ export async function castMvpVote(eventId: string, votedPlayerId: string) {
   // Check event exists and voting is open
   const { data: event, error: eventErr } = await supabase
     .from('events')
-    .select('mvp_voting_open, status')
+    .select('mvp_voting_open, status, event_type')
     .eq('id', eventId)
     .single()
 
   if (eventErr || !event) {
     return { error: 'Evento no encontrado' }
+  }
+
+  if (event.event_type !== 'partido') {
+    return { error: 'La votación de MVP solo está disponible para partidos' }
   }
 
   if (!event.mvp_voting_open) {

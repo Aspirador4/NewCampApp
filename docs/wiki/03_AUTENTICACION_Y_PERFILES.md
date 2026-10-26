@@ -6,9 +6,8 @@ Guía de implementación de autenticación passwordless y el sistema dinámico d
 
 ## 1. Estrategia de Autenticación Mobile-First
 
-En smartphones, recordar contraseñas largas genera fricción y caídas en el registro. Se adoptan dos métodos passwordless:
-1. **Magic Link / Email OTP**: El usuario ingresa su correo electrónico y recibe un enlace directo de acceso de 1-click.
-2. **Google OAuth**: Acceso instantáneo con la cuenta de Google configurada en el dispositivo móvil.
+En smartphones, recordar contraseñas o esperar correos de enlace mágico genera fricción y caídas en el registro. La plataforma utiliza autenticación federada directa:
+- **Google OAuth Exclusivo**: Acceso instantáneo de 1-toque con la cuenta de Google vinculada al dispositivo móvil del socio. Se retiró la opción de enlace mágico para simplificar la interfaz y garantizar una experiencia uniforme.
 
 ---
 
@@ -21,13 +20,13 @@ sequenceDiagram
     participant Middleware as Next.js Middleware
     participant Supabase as Supabase Auth
 
-    Usuario->>App: Ingresa correo o pulsa "Continuar con Google"
-    App->>Supabase: signInWithOtp() / signInWithOAuth()
-    Supabase-->>Usuario: Envía Magic Link o abre Google Consent
-    Usuario->>App: Clic en enlace (/auth/callback?code=...)
+    Usuario->>App: Pulsa "Continuar con Google"
+    App->>Supabase: signInWithOAuth({ provider: 'google' })
+    Supabase-->>Usuario: Pantalla de consentimiento de Google
+    Usuario->>App: Redirección con código (/auth/callback?code=...)
     App->>Supabase: exchangeCodeForSession(code)
     Supabase-->>App: Guarda sesión en cookies HTTP-only
-    Middleware->>App: Valida sesión y redirige a /perfil o /
+    Middleware->>App: Valida sesión y redirige a / o /perfil
 ```
 
 ---
@@ -46,21 +45,31 @@ Al registrarse un nuevo socio, el perfil se crea automáticamente con:
 - **Barra de Navegación Móvil (`BottomNav`)**: En [`RootLayout`](../../src/app/layout.tsx), la barra inferior solo se monta si el usuario no tiene sesión o si su perfil está debidamente `aprobado`.
 - **Rutas Protegidas**: Todas las páginas (`/eventos`, `/eventos/[id]`, `/eventos/nuevo`, `/finanzas`, `/miembros`, `/ranking`, `/perfil`, `/admin/invitados`) verifican el estado en la base de datos y redirigen a `/` si el socio no está aprobado.
 
-### 3. Carta de Motivación Breve (Máx. 50 caracteres)
-Dentro de la pantalla de espera, el postulante dispone de un campo interactivo para enviar un mensaje directo a la comisión o administradores (ej: su posición en cancha, quién lo recomendó, etc.):
+### 3. Carta de Motivación y Re-postulación (Evitar Blacklist)
+Dentro de la pantalla de espera, el postulante dispone de un formulario interactivo para comunicarse con los administradores:
 - **Límite Estricto**: Máximo 50 caracteres con contador en tiempo real `(X/50)`.
-- **Acción Server**: [`submitMotivationAction`](../../src/app/miembros/actions.ts) actualiza la columna `profiles.motivation`.
-- **Visualización en Administración**: Los administradores ven la carta de motivación destacada en la cola de admisión de `/miembros` para aprobar o rechazar con 1 clic.
+- **Socio Pendiente**: Puede enviar o actualizar su carta de motivación.
+- **Socio Rechazado**: No queda bloqueado permanentemente. La pantalla le notifica con badge *"Solicitud No Aprobada"* y le permite actualizar su mensaje y pulsar **"Reenviar Postulación al Club"**, lo cual restaura su estado a `pendiente` mediante [`submitMotivationAction`](../../src/app/miembros/actions.ts), permitiendo que los administradores reconsideren su ingreso.
+- **Panel Administrativo**: Los administradores disponen de secciones separadas en `/miembros` para solicitudes pendientes y solicitudes rechazadas, con botones de *Aprobar*, *Reconsiderar* y *Eliminar*.
 
 ---
 
-## 4. Manejo de Perfiles y Atributos Mutables (JSONB)
+## 4. Manejo de Perfiles, Género y Regla de Edad (+18 años)
 
 ### Disparador de Creación de Perfil
-Al registrarse un nuevo usuario en `auth.users`, el trigger SQL `on_auth_user_created` inserta automáticamente una fila en `public.profiles` con su nombre y correo, y una fila vacía en `public.user_stats`.
+Al registrarse un nuevo usuario en `auth.users`, el trigger SQL `handle_new_user` inserta automáticamente una fila en `public.profiles` con su nombre y correo, y una fila vacía en `public.user_stats`.
 
-### Campos Dinámicos
-Los campos adicionales (posición en la cancha, pierna hábil, número de camiseta preferido) no requieren alterar tablas SQL.
+### Nuevos Atributos de Perfil
+1. **Género (`gender`)**:
+   - Opciones: `masculino` (👨), `femenino` (👩), `otro` (⚧).
+   - Indicador contextual para el socio: *"Relevante para convocatorias y eventos por categoría (femenino, masculino o mixto)"*.
+   - Requerido para inscribirse a partidos categorizados.
+2. **Fecha de Nacimiento (`birth_date`) y Restricción de Mayoría de Edad**:
+   - **Frontend**: El selector `<input type="date">` cuenta con la propiedad `max` calculada al día exacto de 18 años atrás, impidiendo seleccionar fechas menores a 18 años.
+   - **Backend**: [`updateProfile`](../../src/app/auth/actions.ts) valida la diferencia de años y rechaza cualquier intento de registro menor de 18 años.
+
+### Campos Dinámicos Adicionales
+Los campos deportivos complementarios (posición en la cancha, pierna hábil, número de camiseta preferido) no requieren alterar tablas SQL.
 1. Se consultan las definiciones en `public.profile_field_definitions`.
 2. Se renderiza dinámicamente el control de entrada (`text`, `number`, `select`, `boolean`).
 3. El formulario guarda el objeto consolidado en la columna `profiles.custom_attributes (JSONB)`:
@@ -71,7 +80,6 @@ Los campos adicionales (posición en la cancha, pierna hábil, número de camise
      "pie_habil": "Derecho"
    }
    ```
-*(Nota: Se eliminó el campo de número de WhatsApp / teléfono de los requisitos de registro para agilizar el onboarding).*
 
 ---
 

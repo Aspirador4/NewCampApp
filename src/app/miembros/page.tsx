@@ -34,6 +34,7 @@ export default async function MiembrosPage() {
       email,
       avatar_url,
       birth_date,
+      gender,
       system_role,
       sports_role,
       approval_status,
@@ -54,6 +55,7 @@ export default async function MiembrosPage() {
     email: string
     avatar_url: string | null
     birth_date: string | null
+    gender: string | null
     system_role: 'admin' | 'member'
     sports_role: 'jugador' | 'hincha' | 'ambos'
     approval_status: 'pendiente' | 'aprobado' | 'rechazado'
@@ -80,6 +82,7 @@ export default async function MiembrosPage() {
       email: p.email,
       avatar_url: p.avatar_url,
       birth_date: p.birth_date,
+      gender: p.gender,
       system_role: p.system_role,
       sports_role: p.sports_role,
       approval_status: p.approval_status || 'aprobado',

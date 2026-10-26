@@ -21,6 +21,7 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
   // Form states
   const [fullName, setFullName] = useState(profile.full_name || '')
   const [birthDate, setBirthDate] = useState(profile.birth_date || '')
+  const [gender, setGender] = useState<'masculino' | 'femenino' | 'otro' | ''>(profile.gender || '')
   const [sportsRole, setSportsRole] = useState<SportsRole>(profile.sports_role || 'jugador')
   const [customAttributes, setCustomAttributes] = useState<Record<string, Json>>(
     (profile.custom_attributes as Record<string, Json>) || {}
@@ -30,6 +31,12 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
   const [signingOut, setSigningOut] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  const maxBirthDate = new Date(
+    new Date().getFullYear() - 18,
+    new Date().getMonth(),
+    new Date().getDate()
+  ).toISOString().split('T')[0]
 
   const handleCustomFieldChange = (key: string, val: Json) => {
     setCustomAttributes((prev) => ({
@@ -42,6 +49,7 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
     // Revert form state to saved profile
     setFullName(profile.full_name || '')
     setBirthDate(profile.birth_date || '')
+    setGender(profile.gender || '')
     setSportsRole(profile.sports_role || 'jugador')
     setCustomAttributes((profile.custom_attributes as Record<string, Json>) || {})
     setError(null)
@@ -52,11 +60,28 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
     e.preventDefault()
     setError(null)
     setMessage(null)
+
+    // Validate 18+ years
+    if (birthDate) {
+      const birth = new Date(birthDate)
+      const today = new Date()
+      let age = today.getFullYear() - birth.getFullYear()
+      const m = today.getMonth() - birth.getMonth()
+      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+        age--
+      }
+      if (age < 18) {
+        setError('Debes tener al menos 18 años para participar en el club.')
+        return
+      }
+    }
+
     setLoading(true)
 
     const formData = new FormData()
     formData.append('full_name', fullName)
     formData.append('birth_date', birthDate)
+    formData.append('gender', gender)
     formData.append('sports_role', sportsRole)
     formData.append('custom_attributes', JSON.stringify(customAttributes))
 
@@ -148,13 +173,27 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
               <span className="font-medium text-neutral-800">{profile.email}</span>
             </div>
 
-            <div className="flex items-center justify-between text-xs py-1">
+            <div className="flex items-center justify-between text-xs py-1 border-b border-neutral-200/60">
               <div className="flex items-center gap-2 text-neutral-500 font-medium">
                 <Calendar className="w-4 h-4 text-neutral-400" />
                 <span>Nacimiento</span>
               </div>
               <span className="font-medium text-neutral-800">
                 {birthDate || <span className="text-neutral-400 italic">No registrada</span>}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between text-xs py-1">
+              <div className="flex items-center gap-2 text-neutral-500 font-medium">
+                <UserCheck className="w-4 h-4 text-neutral-400" />
+                <span>Género</span>
+              </div>
+              <span className="font-medium text-neutral-800 capitalize">
+                {gender ? (
+                  gender === 'masculino' ? 'Masculino' : gender === 'femenino' ? 'Femenino' : 'Otro'
+                ) : (
+                  <span className="text-neutral-400 italic">No registrado</span>
+                )}
               </span>
             </div>
           </div>
@@ -229,16 +268,60 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
             </div>
 
             <div>
-              <label htmlFor="birth_date" className="block text-xs font-semibold text-neutral-700 mb-1">
-                Fecha de Nacimiento
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label htmlFor="birth_date" className="block text-xs font-semibold text-neutral-700">
+                  Fecha de Nacimiento
+                </label>
+                <span className="text-[10px] text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                  +18 años requeridos
+                </span>
+              </div>
               <input
                 id="birth_date"
                 type="date"
+                max={maxBirthDate}
                 value={birthDate}
                 onChange={(e) => setBirthDate(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900"
               />
+              <p className="text-[11px] text-neutral-500 mt-1">
+                Debes tener al menos 18 años para participar en el club.
+              </p>
+            </div>
+
+            {/* Gender Selector */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-neutral-700">
+                  Género
+                </label>
+                <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  Relevante para convocatorias
+                </span>
+              </div>
+              <p className="text-[11px] text-neutral-500 mb-2">
+                Relevante para convocatorias y eventos por categoría (femenino, masculino o mixto).
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { value: 'masculino', label: '👨 Masculino' },
+                  { value: 'femenino', label: '👩 Femenino' },
+                  { value: 'otro', label: '⚧ Otro' },
+                ].map((g) => (
+                  <button
+                    key={g.value}
+                    type="button"
+                    onClick={() => setGender(g.value as 'masculino' | 'femenino' | 'otro')}
+                    className={`py-2 px-3 rounded-xl text-xs font-semibold border transition text-center ${
+                      gender === g.value
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                        : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50'
+                    }`}
+                  >
+                    {g.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Sports Role Selector */}

@@ -35,6 +35,7 @@ export default async function Home() {
         fullName={profile?.full_name || user.user_metadata?.full_name || 'Nuevo Miembro'}
         email={user.email ?? ''}
         initialMotivation={profile?.motivation}
+        approvalStatus={profile?.approval_status || 'pendiente'}
       />
     );
   }
@@ -158,9 +159,22 @@ export default async function Home() {
         {nextEvent ? (
           <div className="bg-white rounded-2xl p-4 border border-emerald-200 shadow-sm space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 tracking-wider">
-                Próximo {nextEvent.event_type}
-              </span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 tracking-wider">
+                  Próximo {nextEvent.event_type}
+                </span>
+                {nextEvent.gender_category && (
+                  <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border ${
+                    nextEvent.gender_category === 'femenino'
+                      ? 'bg-purple-50 text-purple-700 border-purple-200'
+                      : nextEvent.gender_category === 'masculino'
+                      ? 'bg-blue-50 text-blue-700 border-blue-200'
+                      : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  }`}>
+                    {nextEvent.gender_category === 'femenino' ? '👩 Femenino' : nextEvent.gender_category === 'masculino' ? '👨 Masculino' : '👫 Mixto'}
+                  </span>
+                )}
+              </div>
               <Link
                 href={`/eventos/${nextEvent.id}`}
                 className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"

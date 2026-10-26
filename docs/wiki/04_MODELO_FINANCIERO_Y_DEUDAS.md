@@ -76,16 +76,19 @@ flowchart TD
 
 ---
 
-## 3. Resolución del Descalce de Montos
+## 3. Resolución del Descalce de Montos e Inclusión de Invitados
 
-Anteriormente, la vista de evento calculaba el costo dividiendo el valor de la cancha sobre la capacidad máxima teórica (`total_cost / max_capacity`), lo que generaba un descalce si un administrador le había rebajado la cuota manualmente a un socio.
+Anteriormente, la vista de evento calculaba el costo dividiendo el valor de la cancha sobre la capacidad máxima teórica (`total_cost / max_capacity`), lo que generaba descalce si un administrador rebajaba la cuota, y omitía los cargos de los invitados traídos por el socio.
 
 ### Solución Implementada:
-- [`src/app/eventos/[id]/page.tsx`](../../src/app/eventos/[id]/page.tsx) consulta directamente la tabla `member_debts` para el socio autenticado.
-- Si el partido ya fue cerrado financieramente, se visualiza:
-  - En la cabecera: **Tu cuota liquidada: $2.000 (✓ Al día / Pendiente)**.
-  - En el listado de jugadores confirmados e invitados: Se muestra el monto exacto asignado a cada participante.
-- En [`src/app/finanzas`](../../src/app/finanzas/page.tsx), tanto el socio como el tesorero ven exactamente la misma cifra sin discrepancias.
+- [`src/app/eventos/[id]/page.tsx`](../../src/app/eventos/[id]/page.tsx) consulta todas las deudas registradas en `member_debts` asociadas al `user_id` del socio para ese evento (tanto de tipo `partido_propio` como `invitado`).
+- Si el partido ya fue cerrado financieramente:
+  - **Monto Consolidado**: Se calcula `userTotalDebtAmount = userOwnDebt.amount + SUM(userGuestDebts.amount)`.
+  - **Encabezado**: Muestra **Tu cuota liquidada: $TOTAL**.
+  - **Desglose de Invitados**: Si el socio tiene invitados a cargo, se despliega explícitamente el detalle: `(Propia: $X + N invitado(s): $Y)`.
+  - **Insignia de Pago**: Evalúa todas las deudas del socio para el evento; solo muestra `✓ Al día` si todas las obligaciones (propias y de invitados) están saldadas.
+  - **Cuadro Personalizado**: En la sección de cierre financiero se detallan tanto la cuota personal como el subtotal por los invitados a su cargo.
+- En [`src/app/finanzas`](../../src/app/finanzas/page.tsx), tanto el socio como el tesorero ven exactamente las mismas cifras sin discrepancias.
 
 ---
 

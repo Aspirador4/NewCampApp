@@ -44,7 +44,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       {/* Footer Info */}
       <div className="pb-4 text-center">
         <p className="text-xs text-neutral-400">
-          Acceso seguro sin contraseña mediante Supabase Auth SSR
+          Acceso rápido y seguro mediante Google
         </p>
       </div>
     </div>

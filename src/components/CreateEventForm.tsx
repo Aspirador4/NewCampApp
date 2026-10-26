@@ -8,6 +8,7 @@ export function CreateEventForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [eventType, setEventType] = useState<'partido' | 'entrenamiento' | 'otro'>('partido')
+  const [genderCategory, setGenderCategory] = useState<'mixto' | 'masculino' | 'femenino'>('mixto')
 
   // Cost and capacity states
   const [maxCapacity, setMaxCapacity] = useState<number | ''>(14)
@@ -128,6 +129,34 @@ export function CreateEventForm() {
           <option value="entrenamiento">🏃 Entrenamiento</option>
           <option value="otro">📌 Otro (Asado, Junta, Directorio, etc.)</option>
         </select>
+      </div>
+
+      {/* Gender Category */}
+      <div>
+        <label className="block text-xs font-semibold text-neutral-700 mb-1">
+          Categoría de Género <span className="text-red-500">*</span>
+        </label>
+        <input type="hidden" name="gender_category" value={genderCategory} />
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { value: 'mixto', label: '👫 Mixto' },
+            { value: 'masculino', label: '👨 Masculino' },
+            { value: 'femenino', label: '👩 Femenino' },
+          ].map((cat) => (
+            <button
+              key={cat.value}
+              type="button"
+              onClick={() => setGenderCategory(cat.value as 'mixto' | 'masculino' | 'femenino')}
+              className={`py-2 px-2.5 rounded-xl text-xs font-semibold border transition text-center ${
+                genderCategory === cat.value
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                  : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50'
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Date & Time */}

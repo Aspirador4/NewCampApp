@@ -106,6 +106,11 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
   const eventDebts = debtsRaw || []
   const userOwnDebt = eventDebts.find((d) => d.user_id === user.id && d.debt_type === 'partido_propio')
   const userGuestDebts = eventDebts.filter((d) => d.user_id === user.id && d.debt_type === 'invitado')
+  const userGuestsTotal = userGuestDebts.reduce((sum, d) => sum + d.amount, 0)
+  const userTotalDebtAmount = (userOwnDebt?.amount || 0) + userGuestsTotal
+  const allUserDebts = [...(userOwnDebt ? [userOwnDebt] : []), ...userGuestDebts]
+  const hasUserDebts = allUserDebts.length > 0
+  const isAllDebtsPaid = hasUserDebts && allUserDebts.every((d) => d.status === 'pagado')
 
   // Fetch attendees with profile details
   const { data: attendeesRaw } = await supabase
@@ -339,6 +344,17 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           <span className="text-[11px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-800 tracking-wider">
             {event.event_type}
           </span>
+          {event.gender_category && (
+            <span className={`text-[11px] font-extrabold px-2.5 py-1 rounded-full border ${
+              event.gender_category === 'femenino'
+                ? 'bg-purple-50 text-purple-700 border-purple-200'
+                : event.gender_category === 'masculino'
+                ? 'bg-blue-50 text-blue-700 border-blue-200'
+                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+            }`}>
+              {event.gender_category === 'femenino' ? '👩 Femenino' : event.gender_category === 'masculino' ? '👨 Masculino' : '👫 Mixto'}
+            </span>
+          )}
         </div>
       </div>
 
@@ -426,16 +442,21 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             <div className="flex items-center gap-2">
               <CircleDollarSign className="w-4 h-4 text-emerald-600 flex-shrink-0" />
               <div className="text-xs">
-                {userOwnDebt ? (
+                {hasUserDebts ? (
                   <span className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/80 inline-flex flex-wrap items-center gap-1.5">
                     <span>Tu cuota liquidada:</span>
                     <span className="font-bold">
-                      ${userOwnDebt.amount.toLocaleString('es-CL')}
+                      ${userTotalDebtAmount.toLocaleString('es-CL')}
                     </span>
+                    {userGuestDebts.length > 0 && (
+                      <span className="text-[11px] text-emerald-700 font-normal">
+                        (Propia: ${(userOwnDebt?.amount || 0).toLocaleString('es-CL')} + {userGuestDebts.length} invitado{userGuestDebts.length > 1 ? 's' : ''}: ${userGuestsTotal.toLocaleString('es-CL')})
+                      </span>
+                    )}
                     <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
-                      userOwnDebt.status === 'pagado' ? 'bg-emerald-200 text-emerald-900' : 'bg-amber-100 text-amber-900 border border-amber-300'
+                      isAllDebtsPaid ? 'bg-emerald-200 text-emerald-900' : 'bg-amber-100 text-amber-900 border border-amber-300'
                     }`}>
-                      {userOwnDebt.status === 'pagado' ? '✓ Al día' : 'Pendiente'}
+                      {isAllDebtsPaid ? '✓ Al día' : 'Pendiente'}
                     </span>
                   </span>
                 ) : userAttendee?.status === 'confirmado' ? (
@@ -532,34 +553,40 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       </div>
 
       {/* Personalized Settled Quota Callout */}
-      {event.financial_closed && userAttendee?.status === 'confirmado' && (
+      {event.financial_closed && (userAttendee?.status === 'confirmado' || hasUserDebts) && (
         <div className="my-2 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200/90 shadow-2xs space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CircleDollarSign className="w-4 h-4 text-emerald-700" />
-              <span className="text-xs font-bold text-emerald-950">Tu cuota por este partido:</span>
+              <span className="text-xs font-bold text-emerald-950">Tu cuota liquidada por este evento:</span>
             </div>
             <span className="text-sm font-black text-emerald-950">
-              {userOwnDebt ? `$${userOwnDebt.amount.toLocaleString('es-CL')}` : '$0 (Eximido)'}
+              {hasUserDebts ? `$${userTotalDebtAmount.toLocaleString('es-CL')}` : '$0 (Eximido)'}
             </span>
           </div>
+          {userOwnDebt && userGuestDebts.length > 0 && (
+            <div className="flex items-center justify-between text-[11px] text-emerald-800 pt-1 border-t border-emerald-200/70">
+              <span>Tu cuota personal:</span>
+              <span className="font-bold">${userOwnDebt.amount.toLocaleString('es-CL')}</span>
+            </div>
+          )}
           {userGuestDebts.length > 0 && (
             <div className="flex items-center justify-between text-[11px] text-emerald-800 pt-1 border-t border-emerald-200/70">
               <span>+ {userGuestDebts.length} invitado(s) a tu cargo:</span>
               <span className="font-bold">
-                ${userGuestDebts.reduce((a, b) => a + b.amount, 0).toLocaleString('es-CL')}
+                ${userGuestsTotal.toLocaleString('es-CL')}
               </span>
             </div>
           )}
-          {userOwnDebt && (
+          {hasUserDebts && (
             <div className="flex items-center justify-between pt-1 border-t border-emerald-200/70 text-[11px]">
               <span className="text-emerald-800 font-medium">Estado en Tesorería:</span>
               <span className={`font-bold px-2 py-0.5 rounded-full text-[10px] ${
-                userOwnDebt.status === 'pagado'
+                isAllDebtsPaid
                   ? 'bg-emerald-200 text-emerald-900'
                   : 'bg-amber-100 text-amber-900 border border-amber-300'
               }`}>
-                {userOwnDebt.status === 'pagado' ? '✓ Pagado' : 'Pendiente de pago en Finanzas'}
+                {isAllDebtsPaid ? '✓ Pagado' : 'Pendiente de pago en Finanzas'}
               </span>
             </div>
           )}
@@ -569,7 +596,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       {/* Event Management Controls (Admin or Organizer) */}
       {canManageEvent && (
         <div className="my-3">
-          <EventAdminControls eventId={event.id} currentStatus={event.status} isAdmin={isAdmin} />
+          <EventAdminControls eventId={event.id} currentStatus={event.status} isAdmin={isAdmin} eventType={event.event_type} />
         </div>
       )}
 
@@ -607,19 +634,21 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         />
       )}
 
-      {/* MVP Voting & Results Section */}
-      <MvpVotingSection
-        eventId={event.id}
-        mvpVotingOpen={event.mvp_voting_open}
-        mvpDeadline={event.mvp_voting_deadline}
-        isConfirmedAttendee={userStatus === 'confirmado'}
-        hasVoted={hasVoted}
-        candidates={candidates}
-        currentUserId={user.id}
-        isAdmin={canManageEvent}
-        winners={winners}
-        allVoteResults={allVoteResults}
-      />
+      {/* MVP Voting & Results Section (Only for Matches) */}
+      {event.event_type === 'partido' && (
+        <MvpVotingSection
+          eventId={event.id}
+          mvpVotingOpen={event.mvp_voting_open}
+          mvpDeadline={event.mvp_voting_deadline}
+          isConfirmedAttendee={userStatus === 'confirmado'}
+          hasVoted={hasVoted}
+          candidates={candidates}
+          currentUserId={user.id}
+          isAdmin={canManageEvent}
+          winners={winners}
+          allVoteResults={allVoteResults}
+        />
+      )}
 
       {/* Confirmed Players List (Includes Socios and Approved Guests) */}
       <div className="mt-5 space-y-3">

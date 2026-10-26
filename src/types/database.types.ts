@@ -9,6 +9,8 @@ export type Json =
 export type SystemRole = 'admin' | 'member'
 export type SportsRole = 'jugador' | 'hincha' | 'ambos'
 export type ApprovalStatus = 'pendiente' | 'aprobado' | 'rechazado'
+export type Gender = 'masculino' | 'femenino' | 'otro'
+export type GenderCategory = 'masculino' | 'femenino' | 'mixto'
 export type EventType = 'partido' | 'entrenamiento' | 'torneo' | 'asado' | 'otro'
 export type EventStatus = 'pendiente_aprobacion' | 'convocado' | 'en_curso' | 'finalizado' | 'cancelado'
 export type AttendeeStatus = 'confirmado' | 'lista_espera' | 'cancelado'
@@ -36,6 +38,7 @@ export interface Database {
           phone: string | null
           avatar_url: string | null
           birth_date: string | null
+          gender: Gender | null
           system_role: SystemRole
           sports_role: SportsRole
           approval_status: ApprovalStatus
@@ -51,6 +54,7 @@ export interface Database {
           phone?: string | null
           avatar_url?: string | null
           birth_date?: string | null
+          gender?: Gender | null
           system_role?: SystemRole
           sports_role?: SportsRole
           approval_status?: ApprovalStatus
@@ -66,6 +70,7 @@ export interface Database {
           phone?: string | null
           avatar_url?: string | null
           birth_date?: string | null
+          gender?: Gender | null
           system_role?: SystemRole
           sports_role?: SportsRole
           approval_status?: ApprovalStatus
@@ -115,6 +120,7 @@ export interface Database {
           title: string
           description: string | null
           event_type: EventType
+          gender_category: GenderCategory
           start_time: string
           end_time: string | null
           location: string
@@ -136,6 +142,7 @@ export interface Database {
           title: string
           description?: string | null
           event_type: EventType
+          gender_category: GenderCategory
           start_time: string
           end_time?: string | null
           location: string
@@ -157,6 +164,7 @@ export interface Database {
           title?: string
           description?: string | null
           event_type?: EventType
+          gender_category?: GenderCategory
           start_time?: string
           end_time?: string | null
           location?: string

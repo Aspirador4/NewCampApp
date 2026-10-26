@@ -2,38 +2,15 @@
 
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { signInWithOtp } from '@/app/auth/actions'
-import { Mail, ArrowRight, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
+import { Loader2, AlertCircle } from 'lucide-react'
 
 export function LoginForm({ initialError }: { initialError?: string | null }) {
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(
     initialError === 'auth-code-error'
-      ? 'El enlace de acceso expiró o fue abierto en un navegador diferente. Por favor solicita uno nuevo desde este mismo dispositivo.'
+      ? 'La sesión expiró o fue abierta en un navegador diferente. Por favor vuelve a iniciar sesión con Google.'
       : initialError || null
   )
-
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-    setMessage(null)
-    setLoading(true)
-
-    const formData = new FormData()
-    formData.append('email', email)
-
-    const res = await signInWithOtp(formData)
-    setLoading(false)
-
-    if (res?.error) {
-      setError(res.error)
-    } else if (res?.success) {
-      setMessage(res.message || 'Enlace enviado a tu correo.')
-    }
-  }
 
   const handleGoogleLogin = async () => {
     setError(null)
@@ -55,12 +32,19 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
   }
 
   return (
-    <div className="w-full space-y-5">
+    <div className="w-full space-y-4">
+      {error && (
+        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-red-50 text-red-700 text-xs border border-red-200">
+          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
       {/* Google OAuth Button */}
       <button
         type="button"
         onClick={handleGoogleLogin}
-        disabled={googleLoading || loading}
+        disabled={googleLoading}
         className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800 font-semibold text-sm shadow-sm transition active:scale-[0.98] disabled:opacity-50"
       >
         {googleLoading ? (
@@ -85,69 +69,8 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
             />
           </svg>
         )}
-        <span>Continuar con Google</span>
+        <span>Iniciar sesión con Google</span>
       </button>
-
-      {/* Divider */}
-      <div className="relative flex py-1 items-center">
-        <div className="flex-grow border-t border-neutral-200"></div>
-        <span className="flex-shrink mx-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
-          O con tu email
-        </span>
-        <div className="flex-grow border-t border-neutral-200"></div>
-      </div>
-
-      {/* Magic Link Form */}
-      <form onSubmit={handleEmailSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-xs font-medium text-neutral-700 mb-1.5">
-            Correo electrónico
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
-              <Mail className="w-4 h-4" />
-            </div>
-            <input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="socio@clubdeportivo.com"
-              className="w-full pl-10 pr-3.5 py-3 rounded-xl border border-neutral-300 text-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition bg-white"
-            />
-          </div>
-        </div>
-
-        {error && (
-          <div className="flex items-start gap-2.5 p-3 rounded-xl bg-red-50 text-red-700 text-xs border border-red-200">
-            <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {message && (
-          <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-emerald-50 text-emerald-800 text-xs border border-emerald-200">
-            <CheckCircle2 className="w-4 h-4 mt-0.5 text-emerald-600 flex-shrink-0" />
-            <span>{message}</span>
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading || googleLoading}
-          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-md transition active:scale-[0.98] disabled:opacity-50"
-        >
-          {loading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <>
-              <span>Enviar enlace mágico</span>
-              <ArrowRight className="w-4 h-4" />
-            </>
-          )}
-        </button>
-      </form>
     </div>
   )
 }

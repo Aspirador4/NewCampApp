@@ -26,22 +26,32 @@ stateDiagram-v2
 
 ---
 
-## 2. Tipología y Versatilidad de Eventos
+## 2. Tipología, Categorías de Género y Versatilidad de Eventos
 
 La plataforma simplifica la organización reduciendo los tipos principales a tres, con máxima flexibilidad:
 
 1. **Partidos (`partido`)**:
    - Convocatoria deportiva estándar.
    - Permite especificar el **costo total de la cancha** y calcula el prorrateo automático sobre la capacidad máxima convocada (ej: Cancha $42.000 ÷ 14 cupos = ~$3.000 p/jugador), permitiendo a los socios conocer la cuota aproximada antes de inscribirse.
+   - Al finalizar, es el **único tipo de evento que habilita la votación democrática de MVP**.
 2. **Entrenamientos (`entrenamiento`)**:
    - Soporta especificar tanto el **costo total de la sesión** como una **cuota fija por jugador**.
 3. **Otros Eventos Mutables (`otro`)**:
    - Diseñado para juntas, asados, asambleas de directorio o eventos sociales.
    - **Campos Dinámicos (`custom_fields` JSONB)**: Permite a los organizadores agregar o quitar campos arbitrarios al vuelo (ej: *"Cuota Asado"*, *"Encargado de Bebidas"*, *"Parrilla"*), adaptándose a cualquier necesidad del club sin modificar esquemas SQL.
 
+### Categoría de Género del Evento (`gender_category`)
+Al crear un evento, el convocante define la modalidad:
+- `mixto` (👫 Mixto): Abierto a todos los socios registrados sin distinción.
+- `masculino` (👨 Masculino): Exclusivo para socios con género masculino configurado en su perfil.
+- `femenino` (👩 Femenino): Exclusivo para socias con género femenino configurado en su perfil.
+
+**Validación de Inscripción**: En [`toggleEventAttendance`](../../src/app/eventos/actions.ts), si el evento es categorizado (`masculino` o `femenino`), se exige que el socio tenga definido su género en su perfil y que este coincida con la categoría del evento. En caso contrario, se bloquea la inscripción con un mensaje informativo guiando al socio a completar su perfil.
+
 ### Convocatorias y Moderación
 - **Atribución de Creador**: Cada evento muestra claramente quién lo convocó en la cabecera.
 - **Aprobación de Eventos**: Si un socio no-administrador crea un evento, este queda en estado `pendiente_aprobacion` hasta que un administrador lo revise y autorice.
+- **Ciclo de Estados Simplificado**: Se eliminó el botón intermedio *"Iniciar Partido"*. Las convocatorias pasan directamente de `convocado` a `finalizado` (abriendo el cierre financiero y el MVP en partidos) o `cancelado`.
 
 ---
 
@@ -66,7 +76,7 @@ Ubicado en la cabecera del detalle de cada evento, permite agendar el partido co
 | `/eventos/nuevo` | [`NuevoEventoPage`](../../src/app/eventos/nuevo/page.tsx) | Formulario restringido a administradores para convocar eventos con fecha, hora, lugar y cupo máximo. |
 | `/eventos/[id]` | [`EventDetailPage`](../../src/app/eventos/[id]/page.tsx) | Ficha del evento con botón 1-click CTA, listado de confirmados, lista de espera ordenada y auditoría. |
 | Componente | [`EventAttendanceCTA`](../../src/components/EventAttendanceCTA.tsx) | Control interactivo móvil con confirmación 1-click, advertencia de lista de espera y modal de baja. |
-| Componente | [`EventAdminControls`](../../src/components/EventAdminControls.tsx) | Botones rápidos para que los administradores inicien, finalicen o cancelen el evento. |
+| Componente | [`EventAdminControls`](../../src/components/EventAdminControls.tsx) | Botones rápidos para que los administradores aprueben convocatorias, finalicen o cancelen el evento. |
 
 ---
 

@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { Plus, Calendar, MapPin, Users, ChevronRight, CheckCircle2, Clock, CircleDollarSign, User } from 'lucide-react'
-import { EventType } from '@/types/database.types'
+import { EventType, GenderCategory } from '@/types/database.types'
 
 interface AttendeeSummary {
   id: string
@@ -21,6 +21,7 @@ interface EventWithAttendees {
   title: string
   description: string | null
   event_type: EventType
+  gender_category?: GenderCategory | null
   start_time: string
   location: string
   max_capacity: number | null
@@ -270,6 +271,18 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                         ? '🏃 Entrenamiento'
                         : '✨ ' + event.event_type}
                     </span>
+
+                    {event.gender_category && (
+                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border ${
+                        event.gender_category === 'femenino'
+                          ? 'bg-purple-50 text-purple-700 border-purple-200'
+                          : event.gender_category === 'masculino'
+                          ? 'bg-blue-50 text-blue-700 border-blue-200'
+                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      }`}>
+                        {event.gender_category === 'femenino' ? '👩 Femenino' : event.gender_category === 'masculino' ? '👨 Masculino' : '👫 Mixto'}
+                      </span>
+                    )}
 
                     {(Boolean(event.total_cost && event.total_cost > 0) || Boolean(event.cost_per_player && event.cost_per_player > 0)) && (
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/60 inline-flex items-center gap-1">

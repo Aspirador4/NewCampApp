@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { Search, Trophy, Calendar, User, X, Sparkles, Shield, UserCheck, UserX, Trash2, Check, AlertCircle, Loader2 } from 'lucide-react'
-import { approveMemberAction, rejectMemberAction, deleteMemberAction, updateMemberRoleAction } from '@/app/miembros/actions'
+import { approveMemberAction, rejectMemberAction, reconsiderMemberAction, deleteMemberAction, updateMemberRoleAction } from '@/app/miembros/actions'
 import { SystemRole } from '@/types/database.types'
 
 export interface MemberItem {
@@ -12,6 +12,7 @@ export interface MemberItem {
   email: string
   avatar_url: string | null
   birth_date: string | null
+  gender?: string | null
   system_role: 'admin' | 'member'
   sports_role: 'jugador' | 'hincha' | 'ambos'
   approval_status: 'pendiente' | 'aprobado' | 'rechazado'
@@ -43,6 +44,8 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
   const pendingMembers = members.filter((m) => m.approval_status === 'pendiente')
   const approvedMembers = members.filter((m) => m.approval_status === 'aprobado')
+  const rejectedMembers = members.filter((m) => m.approval_status === 'rechazado')
+  const [showRejected, setShowRejected] = useState(false)
 
   const displayedList = isAdmin ? approvedMembers : approvedMembers
 
@@ -87,6 +90,19 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
       setErrorMsg(res.error)
     } else {
       setSuccessMsg('Solicitud rechazada.')
+      setTimeout(() => setSuccessMsg(null), 3000)
+    }
+  }
+
+  const handleReconsider = async (userId: string) => {
+    setErrorMsg(null)
+    setActionLoading(userId)
+    const res = await reconsiderMemberAction(userId)
+    setActionLoading(null)
+    if (res?.error) {
+      setErrorMsg(res.error)
+    } else {
+      setSuccessMsg('Solicitud restaurada a estado pendiente.')
       setTimeout(() => setSuccessMsg(null), 3000)
     }
   }
@@ -215,6 +231,72 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Admin Section: Solicitudes Rechazadas */}
+      {isAdmin && rejectedMembers.length > 0 && (
+        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <UserX className="w-4 h-4 text-rose-700" />
+              <h3 className="text-xs font-black uppercase tracking-wider text-rose-900">
+                Postulaciones Rechazadas ({rejectedMembers.length})
+              </h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowRejected(!showRejected)}
+              className="text-[11px] font-bold text-rose-800 hover:text-rose-950 underline cursor-pointer"
+            >
+              {showRejected ? 'Ocultar' : 'Ver lista'}
+            </button>
+          </div>
+
+          {showRejected && (
+            <div className="divide-y divide-rose-200/60 bg-white rounded-xl border border-rose-200/80 overflow-hidden">
+              {rejectedMembers.map((rm) => (
+                <div key={rm.id} className="p-3 flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-neutral-900 truncate">{rm.full_name}</p>
+                    <p className="text-[11px] text-neutral-500 truncate">{rm.email}</p>
+                    {rm.motivation && (
+                      <p className="text-[11px] text-neutral-600 italic mt-0.5">&ldquo;{rm.motivation}&rdquo;</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-shrink-0 mt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => handleReconsider(rm.id)}
+                      disabled={actionLoading === rm.id}
+                      className="px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] flex items-center gap-1 transition active:scale-95 disabled:opacity-50"
+                      title="Devolver a pendientes de revisión"
+                    >
+                      {actionLoading === rm.id ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                      <span>Reconsiderar</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleApprove(rm.id)}
+                      disabled={actionLoading === rm.id}
+                      className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center gap-1 transition active:scale-95 disabled:opacity-50"
+                    >
+                      <span>Aprobar</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(rm.id, rm.full_name)}
+                      disabled={actionLoading === rm.id}
+                      className="p-1.5 rounded-lg bg-neutral-100 hover:bg-red-50 text-neutral-500 hover:text-red-600 transition"
+                      title="Eliminar registro"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -482,6 +564,16 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                   <span className="text-neutral-500 font-medium">Edad / Nacimiento:</span>
                   <span className="font-bold text-neutral-900">
                     {getAgeString(activeMember.birth_date)}
+                  </span>
+                </div>
+              )}
+
+              {/* Género */}
+              {activeMember.gender && (
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/80">
+                  <span className="text-neutral-500 font-medium">Género:</span>
+                  <span className="font-bold text-neutral-900 capitalize">
+                    {activeMember.gender}
                   </span>
                 </div>
               )}

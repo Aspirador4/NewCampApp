@@ -2,16 +2,17 @@
 
 import { useState } from 'react'
 import { updateEventStatus, approveEventAction, rejectEventAction } from '@/app/eventos/actions'
-import { EventStatus } from '@/types/database.types'
-import { Play, CheckCircle2, Ban, Loader2, Shield, Check, X } from 'lucide-react'
+import { EventStatus, EventType } from '@/types/database.types'
+import { CheckCircle2, Ban, Loader2, Shield, Check, X } from 'lucide-react'
 
 interface EventAdminControlsProps {
   eventId: string
   currentStatus: EventStatus
   isAdmin?: boolean
+  eventType?: EventType
 }
 
-export function EventAdminControls({ eventId, currentStatus, isAdmin }: EventAdminControlsProps) {
+export function EventAdminControls({ eventId, currentStatus, isAdmin, eventType = 'partido' }: EventAdminControlsProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -97,18 +98,6 @@ export function EventAdminControls({ eventId, currentStatus, isAdmin }: EventAdm
         </div>
       ) : (
         <div className="flex flex-wrap gap-2 text-xs">
-          {currentStatus === 'convocado' && (
-            <button
-              type="button"
-              onClick={() => handleStatusChange('en_curso')}
-              disabled={loading}
-              className="flex-1 min-w-[120px] py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 font-bold transition flex items-center justify-center gap-1.5 disabled:opacity-50"
-            >
-              {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
-              <span>Iniciar Partido</span>
-            </button>
-          )}
-
           {currentStatus !== 'finalizado' && currentStatus !== 'cancelado' && (
             <button
               type="button"
@@ -117,7 +106,7 @@ export function EventAdminControls({ eventId, currentStatus, isAdmin }: EventAdm
               className="flex-1 min-w-[120px] py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold transition flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
               {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-              <span>Finalizar y Abrir MVP</span>
+              <span>{eventType === 'partido' ? 'Finalizar y Abrir MVP' : 'Finalizar Evento'}</span>
             </button>
           )}
 

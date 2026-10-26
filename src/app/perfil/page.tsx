@@ -34,6 +34,7 @@ export default async function PerfilPage() {
       phone: null,
       avatar_url: (user.user_metadata?.avatar_url as string) || (user.user_metadata?.picture as string) || null,
       birth_date: null,
+      gender: null,
       system_role: 'member',
       sports_role: 'jugador',
       approval_status: 'pendiente',

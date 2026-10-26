@@ -14,15 +14,16 @@ El directorio reúne la plantilla activa del club deportivo, optimizado para con
 - **Ficha Modal de Socio**: Al pulsar sobre cualquier miembro, se despliega una ficha con sus datos:
   - Avatar optimizado.
   - Rol en el club (`jugador`, `hincha`, `ambos`).
+  - Género configurado (`masculino`, `femenino`, `otro`).
   - Posición habitual y dorsal preferido (extraído de `custom_attributes` JSONB).
-  - Edad calculada a partir de su fecha de nacimiento (`birth_date`).
+  - Edad calculada a partir de su fecha de nacimiento (`birth_date`, mayor a 18 años).
   - **Métricas Deportivas Acumuladas** (desde `user_stats`): Partidos jugados, MVPs ganados, votos recibidos y eventos sociales asistidos.
 
 ---
 
-## 2. Cola de Admisión y Moderación con Carta de Motivación
+## 2. Cola de Admisión, Moderación y Reconsideración (Sin Blacklist)
 
-Cuando un nuevo usuario inicia sesión por primera vez con su correo o cuenta de Google:
+Cuando un nuevo usuario inicia sesión por primera vez con su cuenta de Google:
 1. Su registro se crea en estado `approval_status = 'pendiente'`.
 2. En la pantalla de espera, el postulante redacta una **carta de motivación breve** (máximo 50 caracteres) explicando su interés en unirse.
 3. En el panel superior de `/miembros`, los administradores del club ven un contenedor destacado:
@@ -31,6 +32,14 @@ Cuando un nuevo usuario inicia sesión por primera vez con su correo o cuenta de
    - Botón **"Aprobar"** (`approveMemberAction`): Actualiza su estado a `aprobado`, habilitando instantáneamente su acceso a la app, barra de navegación y convocatorias.
    - Botón **"Rechazar"** (`rejectMemberAction`): Cambia su estado a `rechazado`.
 
+### Prevención de Bloqueo Permanente (Re-postulación y Reconsideración)
+Anteriormente, al ser rechazado, el socio quedaba invisible en el panel de administración sin posibilidad de volver a solicitar acceso. Para evitar este problema de "blacklist":
+- **Re-postulación del Socio**: En [`PendingApprovalScreen.tsx`](../../src/components/PendingApprovalScreen.tsx), si el estado es `rechazado`, se despliega un mensaje explicativo (*"Tu solicitud anterior fue rechazada"*) y un formulario para enviar una nueva carta de motivación mediante el botón **"Reenviar Postulación al Club"**. La acción [`submitMotivationAction`](../../src/app/miembros/actions.ts) actualiza la motivación y **restaura automáticamente su estado a `pendiente`**.
+- **Panel Administrativo de Postulaciones Rechazadas**: En `/miembros`, los administradores disponen de una sección desplegable dedicada para revisar a todos los miembros rechazados, con tres acciones directas:
+  1. **"Reconsiderar"** (`reconsiderMemberAction`): Regresa al socio a la lista de pendientes para una nueva evaluación.
+  2. **"Aprobar"** (`approveMemberAction`): Habilita su ingreso inmediato al club.
+  3. **"Eliminar"** (`deleteMemberAction`): Elimina de manera definitiva su registro si es un caso no deseado.
+
 ```mermaid
 sequenceDiagram
     actor Postulante
@@ -38,16 +47,19 @@ sequenceDiagram
     participant App as CampApp (PWA)
     participant DB as Supabase Profiles
 
-    Postulante->>App: Registro con Google / Magic Link
+    Postulante->>App: Registro inicial con Google
     App->>DB: approval_status = 'pendiente'
     App-->>Postulante: Pantalla 'Tu aprobación aún está pendiente'
     Postulante->>App: Escribe carta de motivación (máx 50 car.)
-    App->>DB: UPDATE profiles SET motivation = '...'
-    Admin->>App: Ingresa a /miembros
-    App-->>Admin: Muestra solicitud con carta de motivación
+    Admin->>App: Clic en "Rechazar"
+    App->>DB: UPDATE profiles SET approval_status = 'rechazado'
+    App-->>Postulante: Pantalla 'Tu solicitud anterior fue rechazada'
+    Postulante->>App: Escribe nueva carta y pulsa "Reenviar Postulación"
+    App->>DB: UPDATE profiles SET motivation = '...', approval_status = 'pendiente'
+    App-->>Admin: Solicitud vuelve a aparecer en pendientes
     Admin->>App: Clic en "Aprobar"
     App->>DB: UPDATE profiles SET approval_status = 'aprobado'
-    App-->>Postulante: Próximo ingreso: Acceso total al Club
+    App-->>Postulante: Acceso total habilitado al Club
 ```
 
 ---

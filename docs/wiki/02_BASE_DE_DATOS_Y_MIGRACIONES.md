@@ -28,7 +28,8 @@ erDiagram
         string full_name
         string email
         string avatar_url
-        date birth_date
+        date birth_date "Mayor a 18 años"
+        string gender "masculino | femenino | otro"
         string system_role "admin | member"
         string sports_role "jugador | hincha | ambos"
         string approval_status "pendiente | aprobado | rechazado"
@@ -43,6 +44,7 @@ erDiagram
         string title
         string description
         string event_type "partido | entrenamiento | otro"
+        string gender_category "masculino | femenino | mixto"
         timestamp start_time
         timestamp end_time
         string location
@@ -92,9 +94,11 @@ erDiagram
 
 ### `profiles`
 Extensión de `auth.users`. Almacena la identidad deportiva y de membresía del usuario.
+- **`birth_date`**: Fecha de nacimiento. Restringida por validación a mayores de 18 años.
+- **`gender`**: Identidad de género del socio (`masculino`, `femenino`, `otro`). Relevante para validar la inscripción a convocatorias por categoría.
 - **`system_role`**: Controla privilegios de administración (`admin` o `member`).
 - **`sports_role`**: Tipo de afiliación (`jugador`, `hincha`, `ambos`).
-- **`approval_status`**: Estado de admisión en el club (`pendiente`, `aprobado`, `rechazado`). Controla el acceso global (gatekeeper).
+- **`approval_status`**: Estado de admisión en el club (`pendiente`, `aprobado`, `rechazado`). Controla el acceso global (gatekeeper). Un usuario rechazado puede reenviar su postulación, regresando a `pendiente`.
 - **`motivation`**: Carta de motivación breve enviada por el postulante (máximo 50 caracteres).
 - **`custom_attributes`**: Contenedor `JSONB` indexable que almacena los valores correspondientes a `profile_field_definitions` (ej: posición, dorsal, pie hábil).
 
@@ -104,6 +108,7 @@ Configuración administrable de campos de perfil adicionales. Permite agregar nu
 ### `events`
 Partidos, entrenamientos o eventos sociales.
 - **`event_type`**: `partido`, `entrenamiento`, `otro`.
+- **`gender_category`**: Categoría de género de la convocatoria (`masculino`, `femenino`, `mixto`).
 - **`max_capacity`**: Cupo máximo permitido. Si es `NULL`, no tiene límite.
 - **`status`**: `pendiente_aprobacion`, `convocado`, `en_curso`, `finalizado`, `cancelado`.
 - **`cost_per_player`**: Monto base o ejecutado por jugador.
@@ -112,7 +117,7 @@ Partidos, entrenamientos o eventos sociales.
 - **`financial_closed_at`**: Timestamp de la emisión del cierre financiero.
 - **`created_by`**: ID del usuario que convocó el evento (requiere aprobación si no es admin).
 - **`custom_fields`**: Contenedor `JSONB` mutable para campos dinámicos en eventos de tipo "otro" (ej: cuota asado, lugar quincho, encargado de compras).
-- **`mvp_voting_open`**: Bandera booleana para abrir o cerrar la ventana de votación de jugador del partido.
+- **`mvp_voting_open`**: Bandera booleana para abrir o cerrar la ventana de votación de jugador del partido (exclusivo para `event_type = 'partido'`).
 
 ### `member_debts`
 Control de deudas individuales por eventos deportivos o sociales.
@@ -172,12 +177,11 @@ Para evitar condiciones de carrera (*race conditions*) con múltiples usuarios c
 
 ---
 
-## 4. Instrucción de Ejecución en Supabase
+## 4. Registro de Migraciones en Supabase
 
-El script consolidado se encuentra en:
-[`supabase/migrations/001_initial_schema.sql`](../../supabase/migrations/001_initial_schema.sql)
+Las migraciones se ejecutan ordenadamente en el SQL Editor de Supabase:
 
-Para aplicarlo:
-1. Abrir el panel de Supabase: **SQL Editor**.
-2. Copiar y pegar el contenido completo del archivo.
-3. Ejecutar (**Run**).
+1. **[`001_initial_schema.sql`](../../supabase/migrations/001_initial_schema.sql)**: Tablas base, triggers de auditoría, RPCs `join_event`, `leave_event`, `finalize_event_mvp` y RLS inicial.
+2. **[`002_finances_and_realtime.sql`](../../supabase/migrations/002_finances_and_realtime.sql)**: Modelo de deudas en `member_debts`, soporte de invitados a cargo y publicaciones Realtime.
+3. **[`003_event_approval_and_member_admission.sql`](../../supabase/migrations/003_event_approval_and_member_admission.sql)**: Admisión con `approval_status`, carta de motivación, RPC `close_event_finances` y políticas de eliminación.
+4. **[`004_event_gender_category_and_profile_gender.sql`](../../supabase/migrations/004_event_gender_category_and_profile_gender.sql)**: Incorporación de `gender` en `profiles` y `gender_category` en `events`.

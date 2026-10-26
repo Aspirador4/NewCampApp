@@ -47,8 +47,22 @@ export async function updateProfile(formData: FormData) {
 
   const fullName = formData.get('full_name') as string
   const birthDate = (formData.get('birth_date') as string) || null
+  const gender = (formData.get('gender') as string) || null
   const sportsRole = (formData.get('sports_role') as SportsRole) || 'jugador'
   const customAttributesRaw = formData.get('custom_attributes') as string
+
+  if (birthDate) {
+    const birth = new Date(birthDate)
+    const now = new Date()
+    let age = now.getFullYear() - birth.getFullYear()
+    const m = now.getMonth() - birth.getMonth()
+    if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) {
+      age--
+    }
+    if (age < 18) {
+      return { error: 'Debes tener al menos 18 años para participar en el club' }
+    }
+  }
 
   let customAttributes = {}
   if (customAttributesRaw) {
@@ -68,6 +82,7 @@ export async function updateProfile(formData: FormData) {
     .update({
       full_name: fullName.trim(),
       birth_date: birthDate || null,
+      gender: (gender as 'masculino' | 'femenino' | 'otro') || null,
       sports_role: sportsRole,
       custom_attributes: customAttributes,
     })

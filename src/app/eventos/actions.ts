@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { SupabaseClient } from '@supabase/supabase-js'
-import { Database, EventStatus, EventType, Json } from '@/types/database.types'
+import { Database, EventStatus, EventType, GenderCategory, Json } from '@/types/database.types'
 import { sendPushToUser } from '@/app/api/push/actions'
 
 export async function createEvent(formData: FormData) {
@@ -32,6 +32,7 @@ export async function createEvent(formData: FormData) {
   const title = (formData.get('title') as string)?.trim()
   const description = (formData.get('description') as string)?.trim() || null
   const eventType = (formData.get('event_type') as EventType) || 'partido'
+  const genderCategory = (formData.get('gender_category') as GenderCategory) || 'mixto'
   const startDate = formData.get('start_date') as string
   const startTime = formData.get('start_time') as string
   const location = (formData.get('location') as string)?.trim()
@@ -68,6 +69,7 @@ export async function createEvent(formData: FormData) {
       title,
       description,
       event_type: eventType,
+      gender_category: genderCategory,
       start_time: startTimestamp,
       location,
       max_capacity: maxCapacity && maxCapacity > 0 ? maxCapacity : null,
@@ -97,10 +99,10 @@ export async function joinEvent(eventId: string) {
     return { error: 'Debes iniciar sesión para inscribirte' }
   }
 
-  // Check approval status
+  // Check approval status & gender
   const { data: profile } = await supabase
     .from('profiles')
-    .select('approval_status')
+    .select('approval_status, gender')
     .eq('id', user.id)
     .single()
 
@@ -109,6 +111,23 @@ export async function joinEvent(eventId: string) {
   }
   if (profile?.approval_status === 'rechazado') {
     return { error: 'Tu cuenta no ha sido admitida en el club.' }
+  }
+
+  // Check event gender category compatibility
+  const { data: targetEvent } = await supabase
+    .from('events')
+    .select('gender_category')
+    .eq('id', eventId)
+    .single()
+
+  if (targetEvent?.gender_category && targetEvent.gender_category !== 'mixto') {
+    if (!profile?.gender) {
+      return { error: 'Para inscribirte a este evento debes indicar tu género en tu perfil.' }
+    }
+    if (profile.gender !== targetEvent.gender_category) {
+      const catLabel = targetEvent.gender_category === 'femenino' ? 'Femenina' : 'Masculina'
+      return { error: `Este evento está reservado para la categoría ${catLabel}.` }
+    }
   }
 
   // Use atomic RPC function
@@ -300,7 +319,7 @@ export async function updateEventStatus(eventId: string, newStatus: EventStatus)
   // Check if user is admin OR creator of the event
   const { data: event } = await supabase
     .from('events')
-    .select('created_by')
+    .select('created_by, event_type')
     .eq('id', eventId)
     .single()
 
@@ -321,13 +340,16 @@ export async function updateEventStatus(eventId: string, newStatus: EventStatus)
     status: newStatus,
   }
 
-  // If finalized, automatically open MVP voting for matches and generate debts
-  if (newStatus === 'finalizado') {
+  // If finalized, automatically open MVP voting ONLY for matches
+  if (newStatus === 'finalizado' && event?.event_type === 'partido') {
     updatePayload.mvp_voting_open = true
     // Set 24 hour deadline for voting
     const deadline = new Date()
     deadline.setHours(deadline.getHours() + 24)
     updatePayload.mvp_voting_deadline = deadline.toISOString()
+  } else if (newStatus === 'finalizado') {
+    updatePayload.mvp_voting_open = false
+    updatePayload.mvp_voting_deadline = null
   }
 
   const { error } = await supabase
@@ -342,8 +364,8 @@ export async function updateEventStatus(eventId: string, newStatus: EventStatus)
   // Note: Debt generation is now handled via manual Financial Closure (closeEventFinancesAction)
   // allowing custom per-player pricing before issuing debts.
 
-  // If finalized, dispatch push notification to all confirmed attendees to vote for MVP
-  if (newStatus === 'finalizado') {
+  // If finalized match, dispatch push notification to all confirmed attendees to vote for MVP
+  if (newStatus === 'finalizado' && event?.event_type === 'partido') {
     const { data: attendees } = await supabase
       .from('event_attendees')
       .select('user_id')
