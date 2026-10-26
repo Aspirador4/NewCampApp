@@ -324,14 +324,16 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
               <CircleDollarSign className="w-4 h-4 text-emerald-600 flex-shrink-0" />
               <div className="text-xs">
                 {event.total_cost && event.total_cost > 0 ? (
-                  <span className="font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60 inline-flex flex-wrap items-center gap-1">
-                    <span>Cancha: ${event.total_cost.toLocaleString('es-CL')}</span>
-                    <span className="text-emerald-700 font-medium">
-                      • Prorrateo: ${Math.round(event.total_cost / (totalConfirmedCount > 0 ? totalConfirmedCount : (maxCap || 14))).toLocaleString('es-CL')} c/u
+                  <span className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/80 inline-flex flex-wrap items-center gap-1.5">
+                    <span className="font-bold">
+                      ${Math.round(event.total_cost / (maxCap || 14)).toLocaleString('es-CL')} por jugador
+                    </span>
+                    <span className="text-emerald-700 text-[11px]">
+                      (Total Cancha: ${event.total_cost.toLocaleString('es-CL')} ÷ {maxCap || 14} cupos)
                     </span>
                   </span>
                 ) : (
-                  <span className="font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                  <span className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/80">
                     ${event.cost_per_player.toLocaleString('es-CL')} por jugador
                   </span>
                 )}
@@ -340,12 +342,53 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           )}
         </div>
 
+        {/* Custom dynamic fields for 'otro' or special events */}
+        {event.custom_fields && Object.keys(event.custom_fields).length > 0 && (
+          <div className="p-3.5 rounded-xl bg-neutral-50 border border-neutral-200 space-y-2">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">
+              Detalles adicionales del evento
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              {Object.entries(event.custom_fields as Record<string, unknown>).map(([k, v]) => (
+                <div key={k} className="bg-white p-2.5 rounded-lg border border-neutral-200/70 shadow-xs">
+                  <span className="font-bold text-neutral-500 text-[10px] uppercase block mb-0.5">{k}</span>
+                  <span className="text-neutral-900 font-medium">{String(v)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {event.description && (
           <div className="p-3 rounded-xl bg-neutral-100 border border-neutral-200 text-xs text-neutral-700 whitespace-pre-wrap">
             {event.description}
           </div>
         )}
       </div>
+
+      {/* Pre-RSVP Cost Callout */}
+      {(Boolean(event.total_cost && event.total_cost > 0) || Boolean(event.cost_per_player && event.cost_per_player > 0)) && !userStatus && !eventClosed && (
+        <div className="my-2 p-3 rounded-xl bg-emerald-50 border border-emerald-200/90 flex items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2">
+            <CircleDollarSign className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+            <span className="text-emerald-950 font-medium">
+              Costo estimado:{' '}
+              <strong className="text-emerald-950 font-bold">
+                ${(event.total_cost && event.total_cost > 0
+                  ? Math.round(event.total_cost / (maxCap || 14))
+                  : event.cost_per_player
+                ).toLocaleString('es-CL')}
+              </strong>{' '}
+              por jugador
+            </span>
+          </div>
+          {event.total_cost && event.total_cost > 0 && (
+            <span className="text-[10px] text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded font-semibold whitespace-nowrap">
+              Cancha: ${event.total_cost.toLocaleString('es-CL')} ÷ {maxCap || 14}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* 1-Click Attendance CTA */}
       <div className="my-2">

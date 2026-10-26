@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 import { FinanzasMemberView, MemberDebtItem } from '@/components/FinanzasMemberView'
 import { FinanzasAdminPanel, AdminDebtItem } from '@/components/FinanzasAdminPanel'
+import { BankDetails } from '@/app/finanzas/actions'
 import { Wallet, ShieldCheck, ArrowLeft } from 'lucide-react'
 
 interface FinanzasPageProps {
@@ -89,6 +90,22 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
     allDebts = (allDebtsRaw || []) as unknown as AdminDebtItem[]
   }
 
+  // Fetch bank details from club_settings
+  const { data: bankSettingsRaw } = await supabase
+    .from('club_settings')
+    .select('value')
+    .eq('key', 'bank_details')
+    .maybeSingle()
+
+  const bankDetails = (bankSettingsRaw?.value as unknown as BankDetails) || {
+    banco: 'Banco Santander',
+    tipo_cuenta: 'Cuenta Corriente',
+    numero_cuenta: '78-90123-4',
+    titular: 'Club Deportivo',
+    rut: '76.543.210-K',
+    email: 'admin@clubdeportivo.com',
+  }
+
   const activeView = isAdmin && tab === 'admin' ? 'admin' : 'socio'
 
   return (
@@ -154,11 +171,12 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
       {/* Main View */}
       <div className="mt-2 flex-1">
         {activeView === 'admin' ? (
-          <FinanzasAdminPanel debts={allDebts} />
+          <FinanzasAdminPanel debts={allDebts} initialBankDetails={bankDetails} />
         ) : (
           <FinanzasMemberView
             debts={myDebts}
             userName={profile?.full_name || user.email || 'Socio'}
+            bankDetails={bankDetails}
           />
         )}
       </div>

@@ -88,3 +88,47 @@ export async function generateEventDebtsAction(eventId: string, costPerPlayer?: 
   revalidatePath(`/eventos/${eventId}`)
   return { success: true, data }
 }
+
+export interface BankDetails {
+  banco: string
+  tipo_cuenta: string
+  numero_cuenta: string
+  titular: string
+  rut: string
+  email: string
+}
+
+export async function updateBankDetailsAction(details: BankDetails) {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: 'No autorizado' }
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('system_role')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.system_role !== 'admin') {
+    return { error: 'Solo los administradores pueden modificar los datos bancarios' }
+  }
+
+  const { error } = await supabase
+    .from('club_settings')
+    .upsert({
+      key: 'bank_details',
+      value: details as unknown as Record<string, string>,
+      updated_at: new Date().toISOString(),
+      updated_by: user.id,
+    })
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  revalidatePath('/finanzas')
+  return { success: true }
+}

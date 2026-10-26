@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { settleMemberDebtsAction, revertDebtAction } from '@/app/finanzas/actions'
-import { CheckCircle2, ChevronDown, ChevronUp, Loader2, AlertCircle, RefreshCw, UserCheck, Shield } from 'lucide-react'
+import { settleMemberDebtsAction, revertDebtAction, updateBankDetailsAction, BankDetails } from '@/app/finanzas/actions'
+import { CheckCircle2, ChevronDown, ChevronUp, Loader2, AlertCircle, RefreshCw, UserCheck, Shield, Settings2, X, Save } from 'lucide-react'
 
 export interface AdminDebtItem {
   id: string
@@ -38,14 +38,20 @@ export interface PlayerDebtSummary {
 
 interface FinanzasAdminPanelProps {
   debts: AdminDebtItem[]
+  initialBankDetails: BankDetails
 }
 
-export function FinanzasAdminPanel({ debts }: FinanzasAdminPanelProps) {
+export function FinanzasAdminPanel({ debts, initialBankDetails }: FinanzasAdminPanelProps) {
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null)
   const [loadingDebtId, setLoadingDebtId] = useState<string | null>(null)
   const [expandedUser, setExpandedUser] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
+
+  // Bank details settings modal state
+  const [isEditingBank, setIsEditingBank] = useState(false)
+  const [bankForm, setBankForm] = useState<BankDetails>(initialBankDetails)
+  const [savingBank, setSavingBank] = useState(false)
 
   // Filter pending debts
   const pendingDebts = debts.filter((d) => d.status === 'pendiente')
@@ -121,6 +127,21 @@ export function FinanzasAdminPanel({ debts }: FinanzasAdminPanelProps) {
     }
   }
 
+  const handleSaveBank = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSavingBank(true)
+    setError(null)
+    const res = await updateBankDetailsAction(bankForm)
+    setSavingBank(false)
+    if (res?.error) {
+      setError(res.error)
+    } else {
+      setIsEditingBank(false)
+      setSuccessMsg('Datos bancarios del club actualizados correctamente.')
+      setTimeout(() => setSuccessMsg(null), 4000)
+    }
+  }
+
   return (
     <div className="space-y-4">
       {/* Messages */}
@@ -166,7 +187,127 @@ export function FinanzasAdminPanel({ debts }: FinanzasAdminPanelProps) {
             </p>
           </div>
         </div>
+
+        {/* Bank Config Button */}
+        <div className="pt-2 border-t border-neutral-800 flex justify-end">
+          <button
+            type="button"
+            onClick={() => setIsEditingBank(true)}
+            className="text-[11px] font-bold text-neutral-300 hover:text-white bg-neutral-800 hover:bg-neutral-700 py-1.5 px-3 rounded-xl border border-neutral-700 flex items-center gap-1.5 transition active:scale-95"
+          >
+            <Settings2 className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Configurar Cuenta de Transferencia</span>
+          </button>
+        </div>
       </div>
+
+      {/* Bank Details Modal */}
+      {isEditingBank && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4">
+          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 space-y-4 max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
+            <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
+              <h3 className="font-extrabold text-base text-neutral-900">
+                Datos Bancarios del Club
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsEditingBank(false)}
+                className="p-1 rounded-full text-neutral-400 hover:text-neutral-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveBank} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-semibold text-neutral-700 mb-1">Banco</label>
+                <input
+                  type="text"
+                  required
+                  value={bankForm.banco}
+                  onChange={(e) => setBankForm({ ...bankForm, banco: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-neutral-700 mb-1">Tipo de Cuenta</label>
+                <input
+                  type="text"
+                  required
+                  value={bankForm.tipo_cuenta}
+                  onChange={(e) => setBankForm({ ...bankForm, tipo_cuenta: e.target.value })}
+                  placeholder="Ej: Cuenta Corriente / Cuenta Vista"
+                  className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-neutral-700 mb-1">Número de Cuenta</label>
+                <input
+                  type="text"
+                  required
+                  value={bankForm.numero_cuenta}
+                  onChange={(e) => setBankForm({ ...bankForm, numero_cuenta: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-neutral-700 mb-1">Titular</label>
+                <input
+                  type="text"
+                  required
+                  value={bankForm.titular}
+                  onChange={(e) => setBankForm({ ...bankForm, titular: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-semibold text-neutral-700 mb-1">RUT</label>
+                  <input
+                    type="text"
+                    required
+                    value={bankForm.rut}
+                    onChange={(e) => setBankForm({ ...bankForm, rut: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-neutral-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    required
+                    value={bankForm.email}
+                    onChange={(e) => setBankForm({ ...bankForm, email: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-neutral-100 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsEditingBank(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-neutral-100 font-bold text-neutral-700"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingBank}
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center justify-center gap-1.5 disabled:opacity-50"
+                >
+                  {savingBank ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  <span>Guardar Datos</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Debtors List */}
       <div className="space-y-3">

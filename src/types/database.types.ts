@@ -117,6 +117,7 @@ export interface Database {
           mvp_voting_deadline: string | null
           cost_per_player: number
           total_cost: number | null
+          custom_fields: Record<string, Json>
           created_by: string | null
           created_at: string
           updated_at: string
@@ -135,6 +136,7 @@ export interface Database {
           mvp_voting_deadline?: string | null
           cost_per_player?: number
           total_cost?: number | null
+          custom_fields?: Record<string, Json>
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -153,6 +155,7 @@ export interface Database {
           mvp_voting_deadline?: string | null
           cost_per_player?: number
           total_cost?: number | null
+          custom_fields?: Record<string, Json>
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -501,6 +504,35 @@ export interface Database {
             columns: ["guest_id"]
             isOneToOne: false
             referencedRelation: "event_guests"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      club_settings: {
+        Row: {
+          key: string
+          value: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          key: string
+          value: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          key?: string
+          value?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           }
         ]

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
-import { Plus, Calendar, MapPin, Users, ChevronRight, CheckCircle2, Clock } from 'lucide-react'
+import { Plus, Calendar, MapPin, Users, ChevronRight, CheckCircle2, Clock, CircleDollarSign } from 'lucide-react'
 import { EventType } from '@/types/database.types'
 
 interface AttendeeSummary {
@@ -23,6 +23,8 @@ interface EventWithAttendees {
   start_time: string
   location: string
   max_capacity: number | null
+  cost_per_player: number
+  total_cost: number | null
   status: string
   event_attendees: AttendeeSummary[] | null
   event_guests: GuestSummary[] | null
@@ -134,8 +136,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
           { key: 'todos', label: 'Todos' },
           { key: 'partido', label: '⚽ Partidos' },
           { key: 'entrenamiento', label: '🏃 Entrenamientos' },
-          { key: 'asado', label: '🥩 Asados' },
-          { key: 'torneo', label: '🏆 Torneos' },
+          { key: 'otro', label: '✨ Otros' },
         ].map((item) => {
           const isActive = (!tipo && item.key === 'todos') || tipo === item.key
           return (
@@ -165,7 +166,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
               No hay eventos convocados
             </h3>
             <p className="text-xs text-neutral-500 mt-1 max-w-xs mx-auto">
-              Presiona &quot;+ Crear&quot; arriba para convocar el próximo partido o asado.
+              Presiona &quot;+ Crear&quot; arriba para convocar el próximo partido o evento.
             </p>
           </div>
         ) : (
@@ -195,9 +196,28 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
               >
                 {/* Card Top: Type & Status */}
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-700 tracking-wider">
-                    {event.event_type}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-700 tracking-wider">
+                      {event.event_type === 'partido'
+                        ? '⚽ Partido'
+                        : event.event_type === 'entrenamiento'
+                        ? '🏃 Entrenamiento'
+                        : '✨ ' + event.event_type}
+                    </span>
+
+                    {(Boolean(event.total_cost && event.total_cost > 0) || Boolean(event.cost_per_player && event.cost_per_player > 0)) && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/60 inline-flex items-center gap-1">
+                        <CircleDollarSign className="w-3 h-3 text-emerald-600" />
+                        {event.total_cost && event.total_cost > 0 ? (
+                          <span>
+                            ~${Math.round(event.total_cost / (event.max_capacity || 14)).toLocaleString('es-CL')} p/p
+                          </span>
+                        ) : (
+                          <span>${event.cost_per_player.toLocaleString('es-CL')} p/p</span>
+                        )}
+                      </span>
+                    )}
+                  </div>
 
                   <div className="flex items-center gap-1.5">
                     {event.status === 'finalizado' && (

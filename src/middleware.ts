@@ -19,7 +19,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/eventos') ||
     pathname.startsWith('/ranking') ||
     pathname.startsWith('/admin') ||
-    pathname.startsWith('/finanzas')
+    pathname.startsWith('/finanzas') ||
+    pathname.startsWith('/miembros')
 
   if (isProtected && !user) {
     const loginUrl = new URL('/login', request.url)

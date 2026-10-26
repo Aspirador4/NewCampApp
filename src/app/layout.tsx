@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { BottomNav } from "@/components/BottomNav";
+import { NavigationProgressBar } from "@/components/NavigationProgressBar";
 import { createClient } from "@/utils/supabase/server";
 
 const geistSans = Geist({
@@ -58,6 +59,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-neutral-900 text-neutral-900 flex justify-center`}
       >
         <div className="w-full max-w-md min-h-screen bg-neutral-50 flex flex-col shadow-2xl relative">
+          <NavigationProgressBar />
           {children}
           <BottomNav isAuthenticated={Boolean(user)} />
         </div>

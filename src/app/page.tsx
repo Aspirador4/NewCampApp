@@ -1,5 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
-import { Flame, ArrowRight, UserCircle2, Calendar, MapPin, Users, Wallet, Trophy } from "lucide-react";
+import { Flame, ArrowRight, UserCircle2, Calendar, MapPin, Users, Wallet, CircleDollarSign } from "lucide-react";
 import Link from "next/link";
 
 export default async function Home() {
@@ -167,6 +167,16 @@ export default async function Home() {
                       : `${confirmedCount} confirmados`}
                   </span>
                 </div>
+                {(Boolean(nextEvent.total_cost && nextEvent.total_cost > 0) || Boolean(nextEvent.cost_per_player && nextEvent.cost_per_player > 0)) && (
+                  <div className="flex items-center gap-2">
+                    <CircleDollarSign className="w-3.5 h-3.5 text-emerald-600" />
+                    <span className="font-semibold text-emerald-800">
+                      {nextEvent.total_cost && nextEvent.total_cost > 0
+                        ? `~$${Math.round(nextEvent.total_cost / (nextEvent.max_capacity || 14)).toLocaleString('es-CL')} p/jugador`
+                        : `$${nextEvent.cost_per_player.toLocaleString('es-CL')} p/jugador`}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -236,18 +246,18 @@ export default async function Home() {
             </Link>
 
             <Link
-              href="/ranking"
+              href="/miembros"
               className="bg-white p-3.5 rounded-2xl border border-neutral-200/80 shadow-xs hover:border-emerald-300 transition flex flex-col justify-between gap-2"
             >
               <div className="p-2 rounded-xl bg-blue-50 text-blue-600 w-fit">
-                <Trophy className="w-4 h-4" />
+                <Users className="w-4 h-4" />
               </div>
               <div>
                 <p className="text-xs font-bold text-neutral-900 leading-tight">
-                  Ranking & MVPs
+                  Miembros del Club
                 </p>
                 <p className="text-[10px] text-neutral-500 mt-0.5">
-                  Tabla de líderes del club
+                  Directorio y fichas
                 </p>
               </div>
             </Link>

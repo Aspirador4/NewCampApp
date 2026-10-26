@@ -25,6 +25,8 @@ export async function createEvent(formData: FormData) {
   const location = (formData.get('location') as string)?.trim()
   const maxCapacityRaw = formData.get('max_capacity') as string
   const totalCostRaw = formData.get('total_cost') as string
+  const costPerPlayerRaw = formData.get('cost_per_player') as string
+  const customFieldsRaw = formData.get('custom_fields') as string
 
   if (!title || !startDate || !startTime || !location) {
     return { error: 'Por favor completa todos los campos obligatorios' }
@@ -33,12 +35,20 @@ export async function createEvent(formData: FormData) {
   const startTimestamp = new Date(`${startDate}T${startTime}:00`).toISOString()
   const maxCapacity = maxCapacityRaw ? parseInt(maxCapacityRaw, 10) : null
   const totalCost = totalCostRaw !== null && totalCostRaw !== '' ? parseInt(totalCostRaw, 10) : null
-  const costPerPlayer =
-    totalCost && totalCost > 0
-      ? maxCapacity && maxCapacity > 0
-        ? Math.round(totalCost / maxCapacity)
-        : Math.round(totalCost / 14)
-      : 0
+
+  let customFields = {}
+  if (customFieldsRaw) {
+    try {
+      customFields = JSON.parse(customFieldsRaw)
+    } catch {}
+  }
+
+  let costPerPlayer = 0
+  if (costPerPlayerRaw !== null && costPerPlayerRaw !== '') {
+    costPerPlayer = parseInt(costPerPlayerRaw, 10) || 0
+  } else if (totalCost && totalCost > 0) {
+    costPerPlayer = maxCapacity && maxCapacity > 0 ? Math.round(totalCost / maxCapacity) : Math.round(totalCost / 14)
+  }
 
   const { data: newEvent, error: insertError } = await supabase
     .from('events')
@@ -51,6 +61,7 @@ export async function createEvent(formData: FormData) {
       max_capacity: maxCapacity && maxCapacity > 0 ? maxCapacity : null,
       total_cost: totalCost && totalCost > 0 ? totalCost : null,
       cost_per_player: costPerPlayer,
+      custom_fields: customFields,
       status: 'convocado',
       created_by: user.id,
     })

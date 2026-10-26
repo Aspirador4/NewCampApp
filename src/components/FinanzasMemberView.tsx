@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { CheckCircle2, AlertCircle, Copy, Check, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
+import { BankDetails } from '@/app/finanzas/actions'
+
 export interface MemberDebtItem {
   id: string
   event_id: string
@@ -25,9 +27,10 @@ export interface MemberDebtItem {
 interface FinanzasMemberViewProps {
   debts: MemberDebtItem[]
   userName: string
+  bankDetails: BankDetails
 }
 
-export function FinanzasMemberView({ debts, userName }: FinanzasMemberViewProps) {
+export function FinanzasMemberView({ debts, userName, bankDetails }: FinanzasMemberViewProps) {
   const [activeTab, setActiveTab] = useState<'pendientes' | 'pagados'>('pendientes')
   const [copied, setCopied] = useState(false)
 
@@ -39,7 +42,15 @@ export function FinanzasMemberView({ debts, userName }: FinanzasMemberViewProps)
   const guestMatchesOwed = pending.filter((d) => d.debt_type === 'invitado').length
 
   const handleCopyTransfer = () => {
-    navigator.clipboard.writeText('admin@clubdeportivo.com')
+    const textToCopy = `DATOS DE TRANSFERENCIA CLUB:
+Banco: ${bankDetails.banco}
+Tipo de Cuenta: ${bankDetails.tipo_cuenta}
+Nº Cuenta: ${bankDetails.numero_cuenta}
+Titular: ${bankDetails.titular}
+RUT: ${bankDetails.rut}
+Email: ${bankDetails.email}`
+
+    navigator.clipboard.writeText(textToCopy)
     setCopied(true)
     setTimeout(() => setCopied(false), 3000)
   }
@@ -93,31 +104,25 @@ export function FinanzasMemberView({ debts, userName }: FinanzasMemberViewProps)
         </div>
       )}
 
-      {/* Bank Account Transfer Info Card */}
-      <div className="bg-white border border-neutral-200 rounded-2xl p-4 shadow-xs space-y-2.5">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xs font-bold text-neutral-800 uppercase tracking-wider">
-            Datos de Transferencia
+      {/* Bank Account Transfer Action Box (Data hidden from display, 1-click copy) */}
+      <div className="bg-white border border-neutral-200 rounded-2xl p-4 shadow-xs flex items-center justify-between gap-3">
+        <div>
+          <h3 className="text-xs font-bold text-neutral-900 uppercase tracking-wider">
+            Transferencia Bancaria
           </h3>
-          <button
-            type="button"
-            onClick={handleCopyTransfer}
-            className="text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 py-1 px-2.5 rounded-lg border border-emerald-200 flex items-center gap-1 transition"
-          >
-            {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-            <span>{copied ? '¡Copiado!' : 'Copiar email'}</span>
-          </button>
+          <p className="text-[11px] text-neutral-500 mt-0.5">
+            Copia los datos de la cuenta oficial para transferir desde tu app bancaria.
+          </p>
         </div>
 
-        <div className="text-xs text-neutral-600 space-y-1 bg-neutral-50 p-3 rounded-xl border border-neutral-200/70 font-mono">
-          <p><span className="text-neutral-400 font-sans">Banco:</span> Banco Santander</p>
-          <p><span className="text-neutral-400 font-sans">Cuenta Corriente:</span> 78-90123-4</p>
-          <p><span className="text-neutral-400 font-sans">RUT:</span> 76.543.210-K</p>
-          <p><span className="text-neutral-400 font-sans">Email:</span> admin@clubdeportivo.com</p>
-        </div>
-        <p className="text-[11px] text-neutral-500">
-          Una vez transferido, el administrador verificará el pago y marcará tu cuenta como saneada.
-        </p>
+        <button
+          type="button"
+          onClick={handleCopyTransfer}
+          className="py-2 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition active:scale-95 flex-shrink-0"
+        >
+          {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+          <span>{copied ? '¡Datos Copiados!' : 'Copiar Datos'}</span>
+        </button>
       </div>
 
       {/* Tabs */}
