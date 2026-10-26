@@ -100,7 +100,7 @@ export function ClubSwitcher({
 
         <div className="flex flex-col min-w-0 pr-1">
           <div className="flex items-center gap-1.5">
-            <span className="font-bold text-neutral-900 text-sm truncate max-w-[170px] sm:max-w-[210px] leading-tight">
+            <span className="font-display font-black text-neutral-950 text-base uppercase tracking-tight truncate max-w-[170px] sm:max-w-[210px] leading-tight">
               {currentClub.name}
             </span>
             <ChevronDown className="w-4 h-4 text-neutral-400 group-hover:text-neutral-700 transition flex-shrink-0" />
@@ -109,7 +109,7 @@ export function ClubSwitcher({
           <div className="flex items-center gap-1.5 mt-0.5">
             {isAuthenticated ? (
               <span
-                className={`text-[10px] font-semibold px-2 py-0.2 rounded-full border inline-flex items-center gap-0.5 ${roleBadgeStyle}`}
+                className={`font-mono text-[9px] font-bold uppercase px-1.5 py-0.2 rounded border inline-flex items-center gap-0.5 ${roleBadgeStyle}`}
               >
                 {currentRole === 'admin' ? (
                   <Shield className="w-2.5 h-2.5" />
