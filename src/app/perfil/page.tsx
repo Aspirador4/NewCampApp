@@ -36,6 +36,7 @@ export default async function PerfilPage() {
       birth_date: null,
       system_role: 'member',
       sports_role: 'jugador',
+      approval_status: 'pendiente',
       custom_attributes: {},
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

@@ -8,8 +8,9 @@ export type Json =
 
 export type SystemRole = 'admin' | 'member'
 export type SportsRole = 'jugador' | 'hincha' | 'ambos'
+export type ApprovalStatus = 'pendiente' | 'aprobado' | 'rechazado'
 export type EventType = 'partido' | 'entrenamiento' | 'torneo' | 'asado' | 'otro'
-export type EventStatus = 'convocado' | 'en_curso' | 'finalizado' | 'cancelado'
+export type EventStatus = 'pendiente_aprobacion' | 'convocado' | 'en_curso' | 'finalizado' | 'cancelado'
 export type AttendeeStatus = 'confirmado' | 'lista_espera' | 'cancelado'
 export type GuestStatus = 'pendiente_aprobacion' | 'aprobado' | 'rechazado'
 export type DebtType = 'partido_propio' | 'invitado'
@@ -37,6 +38,7 @@ export interface Database {
           birth_date: string | null
           system_role: SystemRole
           sports_role: SportsRole
+          approval_status: ApprovalStatus
           custom_attributes: Record<string, Json>
           created_at: string
           updated_at: string
@@ -50,6 +52,7 @@ export interface Database {
           birth_date?: string | null
           system_role?: SystemRole
           sports_role?: SportsRole
+          approval_status?: ApprovalStatus
           custom_attributes?: Record<string, Json>
           created_at?: string
           updated_at?: string
@@ -63,6 +66,7 @@ export interface Database {
           birth_date?: string | null
           system_role?: SystemRole
           sports_role?: SportsRole
+          approval_status?: ApprovalStatus
           custom_attributes?: Record<string, Json>
           created_at?: string
           updated_at?: string
@@ -118,6 +122,8 @@ export interface Database {
           cost_per_player: number
           total_cost: number | null
           custom_fields: Record<string, Json>
+          financial_closed: boolean
+          financial_closed_at: string | null
           created_by: string | null
           created_at: string
           updated_at: string
@@ -137,6 +143,8 @@ export interface Database {
           cost_per_player?: number
           total_cost?: number | null
           custom_fields?: Record<string, Json>
+          financial_closed?: boolean
+          financial_closed_at?: string | null
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -156,6 +164,8 @@ export interface Database {
           cost_per_player?: number
           total_cost?: number | null
           custom_fields?: Record<string, Json>
+          financial_closed?: boolean
+          financial_closed_at?: string | null
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -604,6 +614,13 @@ export interface Database {
       revert_debt_to_pending: {
         Args: {
           p_debt_id: string
+        }
+        Returns: Json
+      }
+      close_event_finances: {
+        Args: {
+          p_event_id: string
+          p_custom_debts?: Json
         }
         Returns: Json
       }

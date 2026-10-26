@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { SupabaseClient } from '@supabase/supabase-js'
-import { Database, EventStatus, EventType } from '@/types/database.types'
+import { Database, EventStatus, EventType, Json } from '@/types/database.types'
 import { sendPushToUser } from '@/app/api/push/actions'
 
 export async function createEvent(formData: FormData) {
@@ -15,7 +15,19 @@ export async function createEvent(formData: FormData) {
     return { error: 'Debes iniciar sesión para crear un evento' }
   }
 
-  // Any authenticated member can create events
+  // Check creator profile and approval status
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('system_role, approval_status')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.approval_status === 'pendiente') {
+    return { error: 'Tu cuenta está pendiente de admisión por los administradores del club.' }
+  }
+
+  const isAdmin = profile?.system_role === 'admin'
+  const initialStatus: EventStatus = isAdmin ? 'convocado' : 'pendiente_aprobacion'
 
   const title = (formData.get('title') as string)?.trim()
   const description = (formData.get('description') as string)?.trim() || null
@@ -62,7 +74,7 @@ export async function createEvent(formData: FormData) {
       total_cost: totalCost && totalCost > 0 ? totalCost : null,
       cost_per_player: costPerPlayer,
       custom_fields: customFields,
-      status: 'convocado',
+      status: initialStatus,
       created_by: user.id,
     })
     .select('id')
@@ -83,6 +95,20 @@ export async function joinEvent(eventId: string) {
 
   if (authError || !user) {
     return { error: 'Debes iniciar sesión para inscribirte' }
+  }
+
+  // Check approval status
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('approval_status')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.approval_status === 'pendiente') {
+    return { error: 'Tu cuenta está pendiente de admisión por los administradores del club.' }
+  }
+  if (profile?.approval_status === 'rechazado') {
+    return { error: 'Tu cuenta no ha sido admitida en el club.' }
   }
 
   // Use atomic RPC function
@@ -313,14 +339,8 @@ export async function updateEventStatus(eventId: string, newStatus: EventStatus)
     return { error: error.message }
   }
 
-  // If finalized, automatically generate debts for attendees and guests
-  if (newStatus === 'finalizado') {
-    try {
-      await supabase.rpc('generate_event_debts', { p_event_id: eventId })
-    } catch (debtsErr) {
-      console.error('Error generating event debts:', debtsErr)
-    }
-  }
+  // Note: Debt generation is now handled via manual Financial Closure (closeEventFinancesAction)
+  // allowing custom per-player pricing before issuing debts.
 
   // If finalized, dispatch push notification to all confirmed attendees to vote for MVP
   if (newStatus === 'finalizado') {
@@ -346,4 +366,150 @@ export async function updateEventStatus(eventId: string, newStatus: EventStatus)
   revalidatePath(`/eventos/${eventId}`)
   revalidatePath('/eventos')
   return { success: true }
+}
+
+export async function approveEventAction(eventId: string) {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: 'No autorizado' }
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('system_role')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.system_role !== 'admin') {
+    return { error: 'Solo los administradores pueden aprobar eventos' }
+  }
+
+  const { data: event, error: eventErr } = await supabase
+    .from('events')
+    .select('title, created_by')
+    .eq('id', eventId)
+    .single()
+
+  if (eventErr || !event) {
+    return { error: 'Evento no encontrado' }
+  }
+
+  const { error } = await supabase
+    .from('events')
+    .update({ status: 'convocado' })
+    .eq('id', eventId)
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  if (event.created_by) {
+    try {
+      await sendPushToUser(event.created_by, {
+        title: '¡Tu Convocatoria fue Aprobada! ⚽',
+        body: `"${event.title}" ya está visible y abierta para inscripciones de los socios.`,
+        url: `/eventos/${eventId}`,
+      })
+    } catch (e) {
+      console.error('Push error:', e)
+    }
+  }
+
+  revalidatePath('/eventos')
+  revalidatePath(`/eventos/${eventId}`)
+  revalidatePath('/')
+  return { success: true }
+}
+
+export async function rejectEventAction(eventId: string) {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: 'No autorizado' }
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('system_role')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.system_role !== 'admin') {
+    return { error: 'Solo los administradores pueden rechazar eventos' }
+  }
+
+  const { error } = await supabase
+    .from('events')
+    .delete()
+    .eq('id', eventId)
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  revalidatePath('/eventos')
+  revalidatePath('/')
+  return { success: true }
+}
+
+export interface CustomDebtInput {
+  userId: string
+  guestId?: string | null
+  amount: number
+  description?: string
+}
+
+export async function closeEventFinancesAction(
+  eventId: string,
+  customDebts?: CustomDebtInput[]
+) {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: 'No autorizado' }
+  }
+
+  // Check admin or creator
+  const { data: event } = await supabase
+    .from('events')
+    .select('created_by')
+    .eq('id', eventId)
+    .single()
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('system_role')
+    .eq('id', user.id)
+    .single()
+
+  const isAdmin = profile?.system_role === 'admin'
+  const isCreator = event?.created_by === user.id
+
+  if (!isAdmin && !isCreator) {
+    return { error: 'Solo el creador del evento o un administrador pueden emitir el cierre financiero' }
+  }
+
+  const formattedDebts = customDebts?.map((d) => ({
+    user_id: d.userId,
+    guest_id: d.guestId || null,
+    amount: d.amount,
+    description: d.description,
+  }))
+
+  const { data, error } = await supabase.rpc('close_event_finances', {
+    p_event_id: eventId,
+    p_custom_debts: formattedDebts && formattedDebts.length > 0 ? (formattedDebts as unknown as Json) : undefined,
+  })
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  revalidatePath(`/eventos/${eventId}`)
+  revalidatePath('/finanzas')
+  return { success: true, data }
 }

@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
-import { Flame, ArrowRight, UserCircle2, Calendar, MapPin, Users, Wallet, CircleDollarSign } from "lucide-react";
+import { Flame, ArrowRight, UserCircle2, Calendar, MapPin, Users, Wallet, CircleDollarSign, Clock, User } from "lucide-react";
 import Link from "next/link";
+import { AppOnboardingModal } from "@/components/AppOnboardingModal";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -21,6 +22,9 @@ export default async function Home() {
     .from('events')
     .select(`
       *,
+      creator:created_by (
+        full_name
+      ),
       event_attendees (
         id,
         status
@@ -122,6 +126,21 @@ export default async function Home() {
           </div>
         )}
 
+        {/* Pending Admission Notice */}
+        {profile?.approval_status === 'pendiente' && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 shadow-xs space-y-1.5">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-amber-600 flex-shrink-0" />
+              <p className="text-xs font-bold text-amber-900">Solicitud de Admisión en Revisión</p>
+            </div>
+            <p className="text-[11px] text-amber-800 leading-normal">
+              Tu cuenta está pendiente de ser admitida por los administradores del club. Te notificaremos en cuanto puedas confirmar asistencias a partidos y entrenamientos.
+            </p>
+          </div>
+        )}
+
+        <AppOnboardingModal isLoggedIn={Boolean(user)} />
+
         {/* Next Event Highlight Card */}
         {nextEvent ? (
           <div className="bg-white rounded-2xl p-4 border border-emerald-200 shadow-sm space-y-3">
@@ -174,6 +193,14 @@ export default async function Home() {
                       {nextEvent.total_cost && nextEvent.total_cost > 0
                         ? `~$${Math.round(nextEvent.total_cost / (nextEvent.max_capacity || 14)).toLocaleString('es-CL')} p/jugador`
                         : `$${nextEvent.cost_per_player.toLocaleString('es-CL')} p/jugador`}
+                    </span>
+                  </div>
+                )}
+                {nextEvent.creator && (
+                  <div className="flex items-center gap-2 pt-0.5 text-neutral-500">
+                    <User className="w-3.5 h-3.5 text-neutral-400" />
+                    <span>
+                      Convocado por <strong className="text-neutral-700 font-semibold">{nextEvent.creator.full_name}</strong>
                     </span>
                   </div>
                 )}

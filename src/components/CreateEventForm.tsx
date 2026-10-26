@@ -388,6 +388,11 @@ export function CreateEventForm() {
         />
       </div>
 
+      {/* Notice for non-admin creators */}
+      <p className="text-[11px] text-neutral-500 bg-neutral-50 p-2.5 rounded-xl border border-neutral-200">
+        ℹ️ Si eres socio, la convocatoria quedará en revisión para aprobación de los administradores antes de publicarse a los miembros.
+      </p>
+
       {/* Submit Button */}
       <button
         type="submit"

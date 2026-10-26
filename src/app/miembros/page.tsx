@@ -12,6 +12,15 @@ export default async function MiembrosPage() {
     redirect('/login?next=/miembros')
   }
 
+  // Check current user profile
+  const { data: currentProfile } = await supabase
+    .from('profiles')
+    .select('system_role')
+    .eq('id', user.id)
+    .single()
+
+  const isAdmin = currentProfile?.system_role === 'admin'
+
   // Fetch all profiles and their stats
   const { data: profilesRaw } = await supabase
     .from('profiles')
@@ -24,6 +33,7 @@ export default async function MiembrosPage() {
       birth_date,
       system_role,
       sports_role,
+      approval_status,
       custom_attributes,
       user_stats (
         matches_played,
@@ -43,6 +53,7 @@ export default async function MiembrosPage() {
     birth_date: string | null
     system_role: 'admin' | 'member'
     sports_role: 'jugador' | 'hincha' | 'ambos'
+    approval_status: 'pendiente' | 'aprobado' | 'rechazado'
     custom_attributes: Record<string, unknown>
     user_stats: {
       matches_played: number
@@ -68,6 +79,7 @@ export default async function MiembrosPage() {
       birth_date: p.birth_date,
       system_role: p.system_role,
       sports_role: p.sports_role,
+      approval_status: p.approval_status || 'aprobado',
       custom_attributes: p.custom_attributes || {},
       stats: rawStats || null,
     }
@@ -110,7 +122,7 @@ export default async function MiembrosPage() {
 
       {/* Directory Component */}
       <div className="mt-4 flex-1">
-        <MembersDirectory members={members} />
+        <MembersDirectory members={members} isAdmin={isAdmin} currentUserId={user.id} />
       </div>
     </div>
   )

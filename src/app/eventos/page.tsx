@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
-import { Plus, Calendar, MapPin, Users, ChevronRight, CheckCircle2, Clock, CircleDollarSign } from 'lucide-react'
+import { Plus, Calendar, MapPin, Users, ChevronRight, CheckCircle2, Clock, CircleDollarSign, User } from 'lucide-react'
 import { EventType } from '@/types/database.types'
 
 interface AttendeeSummary {
@@ -28,6 +28,12 @@ interface EventWithAttendees {
   status: string
   event_attendees: AttendeeSummary[] | null
   event_guests: GuestSummary[] | null
+  creator?: {
+    id: string
+    full_name: string
+    avatar_url: string | null
+    system_role: string
+  } | null
 }
 
 interface EventosPageProps {
@@ -42,11 +48,27 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
+  let isAdmin = false
+  if (user) {
+    const { data: prof } = await supabase
+      .from('profiles')
+      .select('system_role')
+      .eq('id', user.id)
+      .single()
+    isAdmin = prof?.system_role === 'admin'
+  }
+
   // Fetch events
   let query = supabase
     .from('events')
     .select(`
       *,
+      creator:created_by (
+        id,
+        full_name,
+        avatar_url,
+        system_role
+      ),
       event_attendees (
         id,
         user_id,
@@ -62,6 +84,8 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
 
   if (filtro === 'finalizados') {
     query = query.eq('status', 'finalizado')
+  } else if (filtro === 'pendientes') {
+    query = query.eq('status', 'pendiente_aprobacion')
   } else {
     query = query.in('status', ['convocado', 'en_curso'])
   }
@@ -128,6 +152,18 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         >
           Finalizados
         </Link>
+        {isAdmin && (
+          <Link
+            href={`/eventos?filtro=pendientes${tipo ? `&tipo=${tipo}` : ''}`}
+            className={`px-3 py-1.5 rounded-full whitespace-nowrap transition flex items-center gap-1.5 ${
+              filtro === 'pendientes'
+                ? 'bg-amber-500 text-white font-bold'
+                : 'bg-white text-amber-700 border border-amber-300'
+            }`}
+          >
+            <span>Por Aprobar</span>
+          </Link>
+        )}
       </div>
 
       {/* Type Filter Chips */}
@@ -220,6 +256,11 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                   </div>
 
                   <div className="flex items-center gap-1.5">
+                    {event.status === 'pendiente_aprobacion' && (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900">
+                        Por Aprobar
+                      </span>
+                    )}
                     {event.status === 'finalizado' && (
                       <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-neutral-200 text-neutral-700">
                         Finalizado
@@ -249,6 +290,15 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                     <MapPin className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
                     <span className="truncate">{event.location}</span>
                   </div>
+
+                  {event.creator && (
+                    <div className="flex items-center gap-1.5 text-[11px] text-neutral-500 pt-0.5">
+                      <User className="w-3 h-3 text-neutral-400 flex-shrink-0" />
+                      <span>
+                        Convocado por <strong className="text-neutral-700 font-semibold">{event.creator.full_name}</strong>
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Capacity Bar */}

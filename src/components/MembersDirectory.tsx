@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Search, Trophy, Calendar, User, X, Sparkles } from 'lucide-react'
+import { Search, Trophy, Calendar, User, X, Sparkles, Shield, UserCheck, UserX, Trash2, Check, AlertCircle, Loader2 } from 'lucide-react'
+import { approveMemberAction, rejectMemberAction, deleteMemberAction, updateMemberRoleAction } from '@/app/miembros/actions'
+import { SystemRole } from '@/types/database.types'
 
 export interface MemberItem {
   id: string
@@ -13,6 +15,7 @@ export interface MemberItem {
   birth_date: string | null
   system_role: 'admin' | 'member'
   sports_role: 'jugador' | 'hincha' | 'ambos'
+  approval_status: 'pendiente' | 'aprobado' | 'rechazado'
   custom_attributes: Record<string, unknown>
   stats: {
     matches_played: number
@@ -24,16 +27,26 @@ export interface MemberItem {
 
 interface MembersDirectoryProps {
   members: MemberItem[]
+  isAdmin: boolean
+  currentUserId: string
 }
 
-export function MembersDirectory({ members }: MembersDirectoryProps) {
+export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDirectoryProps) {
   const [search, setSearch] = useState('')
   const [selectedPosition, setSelectedPosition] = useState<string>('todos')
   const [activeMember, setActiveMember] = useState<MemberItem | null>(null)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
   const positions = ['todos', 'Arquero', 'Defensor', 'Mediocampista', 'Delantero']
 
-  const filteredMembers = members.filter((m) => {
+  const pendingMembers = members.filter((m) => m.approval_status === 'pendiente')
+  const approvedMembers = members.filter((m) => m.approval_status === 'aprobado')
+
+  const displayedList = isAdmin ? approvedMembers : approvedMembers
+
+  const filteredMembers = displayedList.filter((m) => {
     // Search filter
     const matchesSearch =
       m.full_name.toLowerCase().includes(search.toLowerCase()) ||
@@ -50,6 +63,66 @@ export function MembersDirectory({ members }: MembersDirectoryProps) {
     }
     return customPos === selectedPosition
   })
+
+  const handleApprove = async (userId: string) => {
+    setErrorMsg(null)
+    setActionLoading(userId)
+    const res = await approveMemberAction(userId)
+    setActionLoading(null)
+    if (res?.error) {
+      setErrorMsg(res.error)
+    } else {
+      setSuccessMsg('Miembro admitido correctamente.')
+      setTimeout(() => setSuccessMsg(null), 3000)
+    }
+  }
+
+  const handleReject = async (userId: string) => {
+    if (!confirm('¿Rechazar esta solicitud de admisión?')) return
+    setErrorMsg(null)
+    setActionLoading(userId)
+    const res = await rejectMemberAction(userId)
+    setActionLoading(null)
+    if (res?.error) {
+      setErrorMsg(res.error)
+    } else {
+      setSuccessMsg('Solicitud rechazada.')
+      setTimeout(() => setSuccessMsg(null), 3000)
+    }
+  }
+
+  const handleDelete = async (userId: string, name: string) => {
+    if (!confirm(`¿Eliminar definitivamente a ${name} del club? Esta acción no se puede deshacer.`)) return
+    setErrorMsg(null)
+    setActionLoading(userId)
+    const res = await deleteMemberAction(userId)
+    setActionLoading(null)
+    if (res?.error) {
+      setErrorMsg(res.error)
+    } else {
+      setActiveMember(null)
+      setSuccessMsg(`Miembro ${name} eliminado del club.`)
+      setTimeout(() => setSuccessMsg(null), 3000)
+    }
+  }
+
+  const handleRoleChange = async (userId: string, newRole: SystemRole) => {
+    const roleLabel = newRole === 'admin' ? 'Administrador' : 'Miembro regular'
+    if (!confirm(`¿Confirmas asignar el rol de ${roleLabel}?`)) return
+    setErrorMsg(null)
+    setActionLoading(userId)
+    const res = await updateMemberRoleAction(userId, newRole)
+    setActionLoading(null)
+    if (res?.error) {
+      setErrorMsg(res.error)
+    } else {
+      if (activeMember) {
+        setActiveMember({ ...activeMember, system_role: newRole })
+      }
+      setSuccessMsg(`Rol actualizado a ${roleLabel}.`)
+      setTimeout(() => setSuccessMsg(null), 3000)
+    }
+  }
 
   // Format age from birth_date
   const getAgeString = (birthDate: string | null) => {
@@ -71,6 +144,69 @@ export function MembersDirectory({ members }: MembersDirectoryProps) {
 
   return (
     <div className="space-y-4">
+      {/* Messages */}
+      {errorMsg && (
+        <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 text-red-700 text-xs border border-red-200">
+          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <span>{errorMsg}</span>
+        </div>
+      )}
+
+      {successMsg && (
+        <div className="flex items-start gap-2 p-3 rounded-xl bg-emerald-50 text-emerald-800 text-xs border border-emerald-200">
+          <Check className="w-4 h-4 mt-0.5 text-emerald-600 flex-shrink-0" />
+          <span>{successMsg}</span>
+        </div>
+      )}
+
+      {/* Admin Section: Solicitudes de Admisión Pendientes */}
+      {isAdmin && pendingMembers.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <UserCheck className="w-4 h-4 text-amber-700" />
+              <h3 className="text-xs font-black uppercase tracking-wider text-amber-900">
+                Solicitudes de Admisión ({pendingMembers.length})
+              </h3>
+            </div>
+            <span className="text-[10px] font-bold bg-amber-200/80 text-amber-900 px-2 py-0.5 rounded-full">
+              Por Aprobar
+            </span>
+          </div>
+
+          <div className="divide-y divide-amber-200/60 bg-white rounded-xl border border-amber-200/80 overflow-hidden">
+            {pendingMembers.map((pm) => (
+              <div key={pm.id} className="p-3 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-neutral-900 truncate">{pm.full_name}</p>
+                  <p className="text-[11px] text-neutral-500 truncate">{pm.email}</p>
+                </div>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => handleApprove(pm.id)}
+                    disabled={actionLoading === pm.id}
+                    className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 transition active:scale-95 disabled:opacity-50 shadow-xs"
+                  >
+                    {actionLoading === pm.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                    <span>Aprobar</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleReject(pm.id)}
+                    disabled={actionLoading === pm.id}
+                    className="p-1.5 rounded-lg bg-neutral-100 hover:bg-red-50 text-neutral-600 hover:text-red-600 font-semibold text-xs transition active:scale-95 disabled:opacity-50"
+                    title="Rechazar admisión"
+                  >
+                    <UserX className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Search Input */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
@@ -347,6 +483,66 @@ export function MembersDirectory({ members }: MembersDirectoryProps) {
                 </div>
               )}
             </div>
+
+            {/* Admin Management Section */}
+            {isAdmin && (
+              <div className="pt-3 border-t border-neutral-100 space-y-2">
+                <h4 className="font-bold uppercase tracking-wider text-[11px] text-neutral-400 flex items-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5 text-neutral-500" />
+                  <span>Gestión de Miembro (Admin)</span>
+                </h4>
+
+                <div className="flex flex-col gap-2">
+                  {/* Assign / Remove Admin Role */}
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 border border-neutral-200">
+                    <div>
+                      <p className="text-xs font-bold text-neutral-800">
+                        Rol: <span className="uppercase text-emerald-700">{activeMember.system_role === 'admin' ? 'Administrador' : 'Socio'}</span>
+                      </p>
+                      <p className="text-[10px] text-neutral-500">
+                        {activeMember.system_role === 'admin'
+                          ? 'Acceso total de administración'
+                          : 'Acceso estándar de socio'}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRoleChange(activeMember.id, activeMember.system_role === 'admin' ? 'member' : 'admin')}
+                      disabled={actionLoading === activeMember.id}
+                      className={`py-1.5 px-3 rounded-xl font-bold text-xs transition active:scale-95 flex items-center gap-1.5 shadow-xs ${
+                        activeMember.system_role === 'admin'
+                          ? 'bg-neutral-200 hover:bg-neutral-300 text-neutral-800'
+                          : 'bg-neutral-900 hover:bg-neutral-800 text-emerald-400'
+                      }`}
+                    >
+                      {actionLoading === activeMember.id ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Shield className="w-3.5 h-3.5" />
+                      )}
+                      <span>{activeMember.system_role === 'admin' ? 'Quitar Admin' : 'Hacer Admin'}</span>
+                    </button>
+                  </div>
+
+                  {/* Delete Member */}
+                  {activeMember.id !== currentUserId && (
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(activeMember.id, activeMember.full_name)}
+                      disabled={actionLoading === activeMember.id}
+                      className="w-full py-2 px-3 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-98 disabled:opacity-50"
+                    >
+                      {actionLoading === activeMember.id ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-3.5 h-3.5" />
+                      )}
+                      <span>Eliminar Miembro del Club</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
 
             <button
               type="button"

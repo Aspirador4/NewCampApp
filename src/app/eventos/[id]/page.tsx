@@ -7,6 +7,8 @@ import { EventAdminControls } from '@/components/EventAdminControls'
 import { EventGuestsSection, EventGuestItem } from '@/components/EventGuestsSection'
 import { MvpVotingSection, MvpCandidate, MvpWinner } from '@/components/MvpVotingSection'
 import { EventRealtimeListener } from '@/components/EventRealtimeListener'
+import { ShareEventButton } from '@/components/ShareEventButton'
+import { EventFinancialClosure } from '@/components/EventFinancialClosure'
 import { ArrowLeft, Calendar, MapPin, Users, History, Clock, User, UserCheck, CircleDollarSign } from 'lucide-react'
 
 interface AttendeeProfile {
@@ -54,13 +56,30 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
   // Fetch event details
   const { data: event, error: eventErr } = await supabase
     .from('events')
-    .select('*')
+    .select(`
+      *,
+      creator:created_by (
+        id,
+        full_name,
+        avatar_url,
+        system_role,
+        sports_role
+      )
+    `)
     .eq('id', id)
     .single()
 
   if (eventErr || !event) {
     notFound()
   }
+
+  const creator = event.creator as unknown as {
+    id: string
+    full_name: string
+    avatar_url: string | null
+    system_role: string
+    sports_role: string
+  } | null
 
   // Check admin
   const { data: userProfile } = await supabase
@@ -129,7 +148,8 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
   const maxCap = event.max_capacity
   const isFull = maxCap ? totalConfirmedCount >= maxCap : false
-  const eventClosed = event.status === 'finalizado' || event.status === 'cancelado'
+  const isPendingApproval = event.status === 'pendiente_aprobacion'
+  const eventClosed = event.status === 'finalizado' || event.status === 'cancelado' || isPendingApproval
 
   // Fetch attendance audit logs
   const { data: logsRaw } = await supabase
@@ -272,13 +292,69 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <span className="text-[11px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-800 tracking-wider">
-          {event.event_type}
-        </span>
+        <div className="flex items-center gap-2">
+          {event.status !== 'pendiente_aprobacion' && event.status !== 'cancelado' && (
+            <ShareEventButton
+              eventId={event.id}
+              title={event.title}
+              eventType={event.event_type}
+              startFormatted={formatEventDate(event.start_time)}
+              location={event.location}
+              costFormatted={
+                event.total_cost && event.total_cost > 0
+                  ? `~$${Math.round(event.total_cost / (maxCap || 14)).toLocaleString('es-CL')} p/jugador`
+                  : event.cost_per_player > 0
+                  ? `$${event.cost_per_player.toLocaleString('es-CL')} p/jugador`
+                  : 'Gratis'
+              }
+              confirmedCount={totalConfirmedCount}
+              maxCapacity={maxCap}
+            />
+          )}
+          <span className="text-[11px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-800 tracking-wider">
+            {event.event_type}
+          </span>
+        </div>
       </div>
 
       {/* Main Info Card */}
       <div className="py-4 space-y-3">
+        {/* Creator Attribution */}
+        {creator && (
+          <div className="flex items-center gap-2 text-xs text-neutral-600 bg-neutral-50 px-3 py-2 rounded-xl border border-neutral-200/70">
+            <div className="w-5 h-5 rounded-full overflow-hidden bg-neutral-200 relative flex items-center justify-center flex-shrink-0">
+              {creator.avatar_url ? (
+                <Image src={creator.avatar_url} alt={creator.full_name} fill className="object-cover" sizes="20px" />
+              ) : (
+                <User className="w-3 h-3 text-neutral-400" />
+              )}
+            </div>
+            <span>
+              Convocado por <strong className="text-neutral-900 font-bold">{creator.full_name}</strong>
+              {creator.system_role === 'admin' && (
+                <span className="ml-1 text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-neutral-900 text-emerald-400">
+                  Admin
+                </span>
+              )}
+            </span>
+          </div>
+        )}
+
+        {/* Pending Approval Notice */}
+        {event.status === 'pendiente_aprobacion' && (
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 space-y-1">
+            <p className="font-bold flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-amber-600" />
+              <span>Convocatoria Pendiente de Aprobación</span>
+            </p>
+            <p className="text-[11px] text-amber-800 leading-normal">
+              {isAdmin
+                ? 'Como administrador del club, puedes aprobar o rechazar esta convocatoria en los controles de gestión abajo.'
+                : 'Esta convocatoria está siendo revisada por los administradores del club antes de admitir inscripciones.'}
+            </p>
+          </div>
+        )}
+
         <div className="flex items-start justify-between gap-3">
           <h1 className="text-xl font-extrabold text-neutral-900 leading-tight">
             {event.title}
@@ -289,10 +365,12 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                 ? 'bg-emerald-100 text-emerald-800'
                 : event.status === 'en_curso'
                 ? 'bg-blue-100 text-blue-800 animate-pulse'
+                : event.status === 'pendiente_aprobacion'
+                ? 'bg-amber-100 text-amber-900'
                 : 'bg-neutral-200 text-neutral-700'
             }`}
           >
-            {event.status === 'convocado' ? 'Abierto' : event.status}
+            {event.status === 'convocado' ? 'Abierto' : event.status === 'pendiente_aprobacion' ? 'Por Aprobar' : event.status}
           </span>
         </div>
 
@@ -404,8 +482,37 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       {/* Event Management Controls (Admin or Organizer) */}
       {canManageEvent && (
         <div className="my-3">
-          <EventAdminControls eventId={event.id} currentStatus={event.status} />
+          <EventAdminControls eventId={event.id} currentStatus={event.status} isAdmin={isAdmin} />
         </div>
+      )}
+
+      {/* Financial Closure Section (Manual per-player rates upon match completion) */}
+      {event.status === 'finalizado' && (
+        <EventFinancialClosure
+          eventId={event.id}
+          eventTitle={event.title}
+          totalCost={event.total_cost}
+          baseCostPerPlayer={
+            event.total_cost && event.total_cost > 0
+              ? Math.round(event.total_cost / (totalConfirmedCount > 0 ? totalConfirmedCount : (maxCap || 14)))
+              : event.cost_per_player
+          }
+          isFinancialClosed={Boolean(event.financial_closed)}
+          financialClosedAt={event.financial_closed_at}
+          confirmedAttendees={confirmedAttendees.map((a) => ({
+            userId: a.user_id,
+            fullName: a.profiles?.full_name || 'Socio',
+            avatarUrl: a.profiles?.avatar_url || null,
+          }))}
+          approvedGuests={approvedGuests.map((g) => ({
+            guestId: g.id,
+            guestName: g.guest_name,
+            invitedByUserId: g.invited_by_user_id,
+            inviterName: g.inviter?.full_name || 'Socio',
+          }))}
+          canManage={canManageEvent}
+          isAdmin={isAdmin}
+        />
       )}
 
       {/* MVP Voting & Results Section */}
