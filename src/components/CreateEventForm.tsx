@@ -426,7 +426,10 @@ export function CreateEventForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+        className="w-full min-h-[48px] py-3.5 px-4 rounded-xl text-white font-bold text-sm shadow-md transition active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+        style={{
+          backgroundColor: 'var(--club-primary, #059669)',
+        }}
       >
         {loading ? (
           <>

@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
-import { Plus, Calendar, MapPin, Users, ChevronRight, CheckCircle2, Clock, CircleDollarSign, User } from 'lucide-react'
+import { Plus, Calendar, MapPin, Users, ChevronRight, CheckCircle2, Clock, User } from 'lucide-react'
 import { EventType, GenderCategory } from '@/types/database.types'
 import { getActiveClub } from '@/utils/club'
+import { EmptyState } from '@/components/EmptyState'
 
 interface AttendeeSummary {
   id: string
@@ -121,21 +122,24 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
   }
 
   return (
-    <div className="flex-1 flex flex-col p-5 pb-24">
+    <div className="flex-1 flex flex-col p-5 pb-nav">
       {/* Top Header */}
       <div className="flex items-center justify-between pt-2 pb-4 border-b border-neutral-200">
         <div>
           <h1 className="font-extrabold text-xl text-neutral-900 leading-tight">
-            Eventos: {club.name}
+            Eventos
           </h1>
-          <p className="text-xs text-neutral-500 font-medium">
-            Convocatorias oficiales del club activo
+          <p className="text-xs text-neutral-500 font-medium truncate max-w-[210px]">
+            {club.name} • Convocatorias oficiales
           </p>
         </div>
 
         <Link
           href="/eventos/nuevo"
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition active:scale-95"
+          className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-white font-bold text-xs shadow-xs transition active:scale-95"
+          style={{
+            backgroundColor: 'var(--club-primary, #059669)',
+          }}
         >
           <Plus className="w-4 h-4" />
           <span>Crear</span>
@@ -146,20 +150,20 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
       <div className="flex gap-2 my-3.5 overflow-x-auto pb-1 text-xs font-semibold no-scrollbar">
         <Link
           href={`/eventos?filtro=proximos${tipo ? `&tipo=${tipo}` : ''}`}
-          className={`px-3 py-1.5 rounded-full whitespace-nowrap transition ${
+          className={`min-h-[38px] px-3.5 py-2 rounded-full whitespace-nowrap transition flex items-center justify-center active:scale-95 ${
             filtro === 'proximos'
               ? 'bg-neutral-900 text-white'
-              : 'bg-white text-neutral-600 border border-neutral-200'
+              : 'bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-50'
           }`}
         >
           Próximos
         </Link>
         <Link
           href={`/eventos?filtro=finalizados${tipo ? `&tipo=${tipo}` : ''}`}
-          className={`px-3 py-1.5 rounded-full whitespace-nowrap transition ${
+          className={`min-h-[38px] px-3.5 py-2 rounded-full whitespace-nowrap transition flex items-center justify-center active:scale-95 ${
             filtro === 'finalizados'
               ? 'bg-neutral-900 text-white'
-              : 'bg-white text-neutral-600 border border-neutral-200'
+              : 'bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-50'
           }`}
         >
           Finalizados
@@ -167,7 +171,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         {isAdmin && pendingClosureCount && pendingClosureCount > 0 && (
           <Link
             href={`/eventos?filtro=pendientes_cierre${tipo ? `&tipo=${tipo}` : ''}`}
-            className={`px-3 py-1.5 rounded-full whitespace-nowrap transition flex items-center gap-1.5 ${
+            className={`min-h-[38px] px-3.5 py-2 rounded-full whitespace-nowrap transition flex items-center gap-1.5 active:scale-95 ${
               filtro === 'pendientes_cierre'
                 ? 'bg-amber-600 text-white font-bold'
                 : 'bg-amber-50 text-amber-900 border border-amber-300 font-semibold'
@@ -182,10 +186,10 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         {isAdmin && (
           <Link
             href={`/eventos?filtro=pendientes${tipo ? `&tipo=${tipo}` : ''}`}
-            className={`px-3 py-1.5 rounded-full whitespace-nowrap transition flex items-center gap-1.5 ${
+            className={`min-h-[38px] px-3.5 py-2 rounded-full whitespace-nowrap transition flex items-center gap-1.5 active:scale-95 ${
               filtro === 'pendientes'
                 ? 'bg-amber-500 text-white font-bold'
-                : 'bg-white text-amber-700 border border-amber-300'
+                : 'bg-white text-amber-700 border border-amber-300 hover:bg-amber-50'
             }`}
           >
             <span>Por Aprobar</span>
@@ -194,7 +198,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
       </div>
 
       {/* Type Filter Chips */}
-      <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 text-[11px] font-medium no-scrollbar">
+      <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 text-xs font-medium no-scrollbar">
         {[
           { key: 'todos', label: 'Todos' },
           { key: 'partido', label: '⚽ Partidos' },
@@ -206,11 +210,20 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
             <Link
               key={item.key}
               href={`/eventos?filtro=${filtro}&tipo=${item.key}`}
-              className={`px-2.5 py-1 rounded-lg whitespace-nowrap transition ${
+              className={`min-h-[34px] px-3 py-1.5 rounded-lg whitespace-nowrap transition flex items-center justify-center active:scale-95 ${
                 isActive
-                  ? 'bg-emerald-100 text-emerald-800 font-bold border border-emerald-300'
+                  ? 'font-bold border'
                   : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
               }`}
+              style={
+                isActive
+                  ? {
+                      backgroundColor: 'var(--club-primary-light, #ecfdf5)',
+                      color: 'var(--club-primary, #059669)',
+                      borderColor: 'var(--club-primary-border, #a7f3d0)',
+                    }
+                  : undefined
+              }
             >
               {item.label}
             </Link>
@@ -221,17 +234,20 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
       {/* Events List */}
       <div className="space-y-3.5">
         {events.length === 0 ? (
-          <div className="bg-white rounded-2xl p-8 border border-neutral-200/80 shadow-sm text-center">
-            <div className="w-12 h-12 rounded-2xl bg-neutral-100 flex items-center justify-center text-neutral-400 mx-auto mb-3">
-              <Calendar className="w-6 h-6" />
-            </div>
-            <h3 className="text-sm font-bold text-neutral-800">
-              No hay eventos convocados
-            </h3>
-            <p className="text-xs text-neutral-500 mt-1 max-w-xs mx-auto">
-              Presiona &quot;+ Crear&quot; arriba para convocar el próximo partido o evento.
-            </p>
-          </div>
+          <EmptyState
+            icon={Calendar}
+            title="No hay eventos en esta sección"
+            description={
+              filtro === 'pendientes_cierre'
+                ? 'No hay eventos pendientes de liquidación y cierre financiero.'
+                : 'Aún no se han convocado eventos con estos filtros.'
+            }
+            action={
+              isAdmin && filtro === 'proximos'
+                ? { label: '+ Convocar Partido', href: '/eventos/nuevo' }
+                : undefined
+            }
+          />
         ) : (
           events.map((event) => {
             const attendees = event.event_attendees || []
@@ -255,7 +271,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
               <Link
                 key={event.id}
                 href={`/eventos/${event.id}`}
-                className="block bg-white rounded-2xl p-4 border border-neutral-200/90 shadow-sm hover:border-emerald-500 transition active:scale-[0.99]"
+                className="block bg-white rounded-2xl p-4 border border-neutral-200/90 shadow-xs hover:border-neutral-300 transition active:scale-[0.99]"
               >
                 {/* Card Top: Type & Status */}
                 <div className="flex items-center justify-between mb-2">
@@ -279,24 +295,11 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                         {event.gender_category === 'femenino' ? '👩 Femenino' : event.gender_category === 'masculino' ? '👨 Masculino' : '👫 Mixto'}
                       </span>
                     )}
-
-                    {(Boolean(event.total_cost && event.total_cost > 0) || Boolean(event.cost_per_player && event.cost_per_player > 0)) && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/60 inline-flex items-center gap-1">
-                        <CircleDollarSign className="w-3 h-3 text-emerald-600" />
-                        {event.total_cost && event.total_cost > 0 ? (
-                          <span>
-                            ~${Math.round(event.total_cost / (event.max_capacity || 14)).toLocaleString('es-CL')} p/p
-                          </span>
-                        ) : (
-                          <span>${event.cost_per_player.toLocaleString('es-CL')} p/p</span>
-                        )}
-                      </span>
-                    )}
                   </div>
 
-                  <div className="flex items-center gap-1.5">
+                  <div>
                     {event.status === 'pendiente_aprobacion' && (
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
                         Por Aprobar
                       </span>
                     )}
@@ -311,7 +314,13 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                       </span>
                     )}
                     {event.status === 'convocado' && (
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                      <span
+                        className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                        style={{
+                          backgroundColor: 'var(--club-primary-light, #ecfdf5)',
+                          color: 'var(--club-primary, #059669)',
+                        }}
+                      >
                         Convocatoria Abierta
                       </span>
                     )}
@@ -356,7 +365,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                     </div>
 
                     {waitlistCount > 0 && (
-                      <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
                         +{waitlistCount} en espera
                       </span>
                     )}
@@ -365,10 +374,11 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                   {maxCap && (
                     <div className="w-full h-1.5 bg-neutral-100 rounded-full overflow-hidden">
                       <div
-                        className={`h-full rounded-full transition-all duration-300 ${
-                          isFull ? 'bg-amber-500' : 'bg-emerald-500'
-                        }`}
-                        style={{ width: `${percentFilled}%` }}
+                        className="h-full rounded-full transition-all duration-300"
+                        style={{
+                          width: `${percentFilled}%`,
+                          backgroundColor: isFull ? '#d97706' : 'var(--club-primary, #059669)',
+                        }}
                       />
                     </div>
                   )}
@@ -377,8 +387,14 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                 {/* Bottom User Status / CTA */}
                 <div className="mt-3 flex items-center justify-between pt-2">
                   {userStatus === 'confirmado' ? (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-lg">
-                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    <span
+                      className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg"
+                      style={{
+                        backgroundColor: 'var(--club-primary-light, #ecfdf5)',
+                        color: 'var(--club-primary, #059669)',
+                      }}
+                    >
+                      <CheckCircle2 className="w-3 h-3" />
                       Estás confirmado
                     </span>
                   ) : userStatus === 'lista_espera' ? (

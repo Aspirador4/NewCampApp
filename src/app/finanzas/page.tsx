@@ -103,6 +103,7 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
         `)
         .eq('events.club_id', club.id)
         .order('created_at', { ascending: false }),
+
       supabase
         .from('events')
         .select(`
@@ -115,10 +116,6 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
           event_attendees (
             id,
             status
-          ),
-          event_guests (
-            id,
-            status
           )
         `)
         .eq('club_id', club.id)
@@ -127,23 +124,21 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
         .order('start_time', { ascending: false }),
     ])
 
-    if (allDebtsRes.error) {
-      console.error('Error fetching admin debts:', allDebtsRes.error)
-    }
     allDebts = (allDebtsRes.data || []) as unknown as AdminDebtItem[]
 
     if (pEventsRes.data) {
-      pendingClosureEvents = pEventsRes.data.map((pe) => {
-        const confAttendees = pe.event_attendees?.filter((a: { status: string }) => a.status === 'confirmado').length || 0
-        const appGuests = pe.event_guests?.filter((g: { status: string }) => g.status === 'aprobado').length || 0
+      pendingClosureEvents = pEventsRes.data.map((ev) => {
+        const confirmed = (ev.event_attendees || []).filter(
+          (a: { status: string }) => a.status === 'confirmado'
+        ).length
         return {
-          id: pe.id,
-          title: pe.title,
-          start_time: pe.start_time,
-          event_type: pe.event_type,
-          total_cost: pe.total_cost,
-          cost_per_player: pe.cost_per_player,
-          confirmed_count: confAttendees + appGuests,
+          id: ev.id,
+          title: ev.title,
+          start_time: ev.start_time,
+          event_type: ev.event_type,
+          total_cost: ev.total_cost,
+          cost_per_player: ev.cost_per_player,
+          confirmed_count: confirmed,
         }
       })
     }
@@ -151,12 +146,12 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
 
   // Fetch bank details from active club settings, fallback to club_settings
   let bankDetails: BankDetails = {
-    banco: 'Banco Santander',
-    tipo_cuenta: 'Cuenta Corriente',
-    numero_cuenta: '78-90123-4',
-    titular: club.name || 'Club Deportivo',
-    rut: '76.543.210-K',
-    email: 'admin@clubdeportivo.com',
+    banco: '',
+    tipo_cuenta: '',
+    numero_cuenta: '',
+    titular: '',
+    rut: '',
+    email: '',
   }
 
   if (club.settings?.bank_details && typeof club.settings.bank_details === 'object') {
@@ -165,32 +160,40 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
       ...(club.settings.bank_details as Partial<BankDetails>),
     }
   } else {
-    const { data: bankSettingsRaw } = await supabase
+    const { data: legacySettings } = await supabase
       .from('club_settings')
       .select('value')
       .eq('key', 'bank_details')
+      .limit(1)
       .maybeSingle()
 
-    if (bankSettingsRaw?.value) {
-      bankDetails = bankSettingsRaw.value as unknown as BankDetails
+    if (legacySettings?.value && typeof legacySettings.value === 'object') {
+      bankDetails = {
+        ...bankDetails,
+        ...(legacySettings.value as Partial<BankDetails>),
+      }
     }
   }
 
   const activeView = isAdmin && tab === 'admin' ? 'admin' : 'socio'
 
   return (
-    <div className="flex-1 flex flex-col p-5 pb-28">
-      {/* Header */}
+    <div className="flex-1 flex flex-col p-5 pb-nav">
+      {/* Top Header */}
       <div className="flex items-center justify-between pt-2 pb-4 border-b border-neutral-200">
         <div className="flex items-center gap-2.5">
           <Link
             href="/"
-            className="p-2 -ml-2 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition"
+            className="p-2.5 -ml-2 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+            aria-label="Volver al inicio"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-emerald-600 text-white shadow-xs">
+            <div
+              className="p-2.5 rounded-xl text-white shadow-xs"
+              style={{ backgroundColor: 'var(--club-primary, #059669)' }}
+            >
               <Wallet className="w-5 h-5" />
             </div>
             <div>
@@ -214,10 +217,10 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
 
       {/* Admin / Socio Toggle Pills */}
       {isAdmin && (
-        <div className="my-3 flex rounded-xl bg-neutral-200/70 p-1 text-xs font-bold">
+        <div className="my-3 flex rounded-xl bg-neutral-200/70 p-1 text-xs font-bold min-h-[44px] items-center">
           <Link
             href="/finanzas?tab=socio"
-            className={`flex-1 py-1.5 rounded-lg text-center transition ${
+            className={`flex-1 py-2 rounded-lg text-center transition min-h-[38px] flex items-center justify-center active:scale-95 ${
               activeView === 'socio'
                 ? 'bg-white text-neutral-900 shadow-xs'
                 : 'text-neutral-600 hover:text-neutral-900'
@@ -227,7 +230,7 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
           </Link>
           <Link
             href="/finanzas?tab=admin"
-            className={`flex-1 py-1.5 rounded-lg text-center transition ${
+            className={`flex-1 py-2 rounded-lg text-center transition min-h-[38px] flex items-center justify-center active:scale-95 ${
               activeView === 'admin'
                 ? 'bg-neutral-900 text-white shadow-xs'
                 : 'text-neutral-600 hover:text-neutral-900'
@@ -245,6 +248,8 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
             debts={allDebts}
             initialBankDetails={bankDetails}
             pendingClosureEvents={pendingClosureEvents}
+            clubId={club.id}
+            currentPalette={(club.settings as { palette?: string })?.palette || 'emerald'}
           />
         ) : (
           <FinanzasMemberView

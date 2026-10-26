@@ -98,51 +98,52 @@ export default async function PerfilPage() {
     },
   ]
 
-  // Fetch user stats for active club
-  const { data: stats } = await supabase
+  // Fetch stats for active club
+  const { data: statsData } = await supabase
     .from('user_stats')
     .select('*')
     .eq('user_id', user.id)
     .eq('club_id', club.id)
     .maybeSingle()
 
-  const userStats: UserStats = stats || {
-    id: '0',
-    club_id: club.id,
+  const userStats: UserStats = statsData || {
+    id: 'temp',
     user_id: user.id,
+    club_id: club.id,
     matches_played: 0,
     mvp_count: 0,
     mvp_votes_received: 0,
     social_events_attended: 0,
-    mutable_stats: { matches_won: 0, matches_lost: 0, matches_tied: 0, goals: 0 },
+    mutable_stats: {},
     updated_at: new Date().toISOString(),
   }
 
-  // Fetch pending debts count for active club
+  // Fetch count of pending debts for financial badge
   const { count: pendingDebtsCount } = await supabase
     .from('member_debts')
     .select('id, events!inner(club_id)', { count: 'exact', head: true })
     .eq('user_id', user.id)
-    .eq('events.club_id', club.id)
     .eq('status', 'pendiente')
+    .eq('events.club_id', club.id)
 
   return (
-    <div className="flex-1 flex flex-col p-5 pb-24">
+    <div className="flex-1 flex flex-col p-5 pb-nav">
       {/* Top Header */}
       <div className="flex items-center justify-between pt-2 pb-4 border-b border-neutral-200">
         <div className="flex items-center gap-2.5">
           <Link
             href="/"
-            className="p-2 -ml-2 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition"
+            className="p-2.5 -ml-2 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+            aria-label="Volver al inicio"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="font-extrabold text-xl text-neutral-900 leading-tight">
+            <h1 className="font-extrabold text-lg text-neutral-900 leading-tight">
               Mi Perfil
             </h1>
             <p className="text-xs text-neutral-500 font-medium">
-              Socio en {club.name}
+              {club.name} • Socio Activo
             </p>
           </div>
         </div>
@@ -150,14 +151,14 @@ export default async function PerfilPage() {
         {/* Financial shortcut badge */}
         <Link
           href="/finanzas"
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition active:scale-95 ${
+          className={`min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-bold transition active:scale-95 ${
             (pendingDebtsCount || 0) > 0
               ? 'bg-amber-50 text-amber-800 border-amber-300 shadow-xs animate-pulse'
               : 'bg-emerald-50 text-emerald-800 border-emerald-200'
           }`}
           title="Ver estado de cuenta"
         >
-          <Wallet className="w-3.5 h-3.5" />
+          <Wallet className="w-4 h-4" />
           <span>
             {(pendingDebtsCount || 0) > 0
               ? `${pendingDebtsCount} ${(pendingDebtsCount || 0) === 1 ? 'deuda' : 'deudas'}`
@@ -181,7 +182,13 @@ export default async function PerfilPage() {
         </div>
 
         <div className="bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-xs flex flex-col items-center text-center">
-          <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 mb-1">
+          <div
+            className="p-2 rounded-xl mb-1"
+            style={{
+              backgroundColor: 'var(--club-primary-light, #ecfdf5)',
+              color: 'var(--club-primary, #059669)',
+            }}
+          >
             <CalendarCheck className="w-4 h-4" />
           </div>
           <span className="text-base font-extrabold text-neutral-900 leading-none">

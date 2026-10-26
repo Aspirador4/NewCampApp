@@ -62,6 +62,7 @@ try {
     { src: '08_PWA_Y_WEB_PUSH.md', dest: '08-PWA-y-Web-Push.md' },
     { src: '09_ADMISION_DIRECTORIO_Y_ROLES.md', dest: '09-Admision-Directorio-y-Roles.md' },
     { src: '10_ARQUITECTURA_MULTICLUB.md', dest: '10-Arquitectura-MultiClub.md' },
+    { src: '11_DISENO_Y_UX_MOBILE_FIRST.md', dest: '11-Diseno-y-UX-Mobile-First.md' },
   ]
 
   // Copiar y adaptar enlaces para formato de GitHub Wiki

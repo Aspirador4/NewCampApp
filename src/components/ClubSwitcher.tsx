@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import type { Club, UserClubItem } from '@/types/club.types'
 import { switchClubAction } from '@/app/club/actions'
+import { getClubTheme } from '@/utils/theme'
 
 interface ClubSwitcherProps {
   currentClub: Club
@@ -36,6 +37,8 @@ export function ClubSwitcher({
   const [isOpen, setIsOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+
+  const currentTheme = getClubTheme(currentClub)
 
   const handleSelectClub = (clubId: string) => {
     if (clubId === currentClub.id) {
@@ -65,7 +68,7 @@ export function ClubSwitcher({
       : currentApproval === 'rechazado'
       ? 'bg-rose-100 text-rose-800 border-rose-200'
       : currentRole === 'admin'
-      ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+      ? 'bg-neutral-900 text-white border-neutral-900'
       : 'bg-neutral-100 text-neutral-700 border-neutral-200'
 
   return (
@@ -73,10 +76,16 @@ export function ClubSwitcher({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2.5 p-1.5 -ml-1 rounded-2xl hover:bg-neutral-100 transition active:scale-98 text-left group"
+        className="flex items-center gap-2.5 p-1.5 -ml-1 rounded-2xl hover:bg-neutral-100 transition active:scale-98 text-left group min-h-[44px]"
         title="Cambiar de Club"
+        aria-label="Abrir selector de club"
       >
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center text-white shadow-md flex-shrink-0 group-hover:shadow-lg transition">
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-sm flex-shrink-0 group-hover:shadow-md transition"
+          style={{
+            background: `linear-gradient(135deg, ${currentTheme.gradientFrom}, ${currentTheme.gradientTo})`,
+          }}
+        >
           {currentClub.logo_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -117,7 +126,7 @@ export function ClubSwitcher({
               </span>
             )}
             <span className="text-[10px] text-neutral-400 font-normal">
-              • {currentClub.slug}
+              • /{currentClub.slug}
             </span>
           </div>
         </div>
@@ -125,13 +134,13 @@ export function ClubSwitcher({
 
       {/* Modal / Sheet Dropdown */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-150">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-150">
           <div
             className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl border border-neutral-200 overflow-hidden max-h-[85vh] flex flex-col animate-in slide-in-from-bottom duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="p-4 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/70">
+            <div className="p-4 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/80">
               <div>
                 <h3 className="font-bold text-neutral-900 text-base">Mis Clubes</h3>
                 <p className="text-xs text-neutral-500">
@@ -141,7 +150,8 @@ export function ClubSwitcher({
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-full hover:bg-neutral-200 text-neutral-500 transition"
+                className="w-10 h-10 rounded-full hover:bg-neutral-200 text-neutral-500 transition flex items-center justify-center min-h-[44px] min-w-[44px]"
+                aria-label="Cerrar modal de clubes"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -154,6 +164,7 @@ export function ClubSwitcher({
                   const isCurrent = item.club.id === currentClub.id
                   const isItemAdmin = item.membership.system_role === 'admin'
                   const isItemApproved = item.membership.approval_status === 'aprobado'
+                  const itemTheme = getClubTheme(item.club)
 
                   return (
                     <button
@@ -161,14 +172,19 @@ export function ClubSwitcher({
                       type="button"
                       disabled={isPending}
                       onClick={() => handleSelectClub(item.club.id)}
-                      className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition duration-150 pt-3 ${
+                      className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition duration-150 pt-3 min-h-[56px] active:scale-98 ${
                         isCurrent
-                          ? 'bg-emerald-50/80 border border-emerald-200'
+                          ? 'bg-neutral-50 border border-neutral-300 shadow-xs ring-1 ring-neutral-300'
                           : 'hover:bg-neutral-50 border border-transparent'
                       }`}
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                        <div
+                          className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-xs flex-shrink-0"
+                          style={{
+                            background: `linear-gradient(135deg, ${itemTheme.gradientFrom}, ${itemTheme.gradientTo})`,
+                          }}
+                        >
                           {item.club.logo_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -191,7 +207,7 @@ export function ClubSwitcher({
                                 !isItemApproved
                                   ? 'bg-amber-100 text-amber-800 border-amber-200'
                                   : isItemAdmin
-                                  ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                                  ? 'bg-neutral-900 text-white border-neutral-900'
                                   : 'bg-neutral-100 text-neutral-600 border-neutral-200'
                               }`}
                             >
@@ -209,7 +225,10 @@ export function ClubSwitcher({
                       </div>
 
                       {isCurrent && (
-                        <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center flex-shrink-0">
+                        <div
+                          className="w-6 h-6 rounded-full text-white flex items-center justify-center flex-shrink-0"
+                          style={{ backgroundColor: itemTheme.primary }}
+                        >
                           <Check className="w-3.5 h-3.5 stroke-[3]" />
                         </div>
                       )}
@@ -224,11 +243,14 @@ export function ClubSwitcher({
             </div>
 
             {/* Actions */}
-            <div className="p-3 border-t border-neutral-100 bg-neutral-50/60 flex flex-col gap-2">
+            <div className="p-3 border-t border-neutral-100 bg-neutral-50/80 flex flex-col gap-2">
               <Link
                 href="/club/nuevo"
                 onClick={() => setIsOpen(false)}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition active:scale-98"
+                className="w-full min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-white text-xs font-semibold shadow-xs transition active:scale-98"
+                style={{
+                  backgroundColor: currentTheme.primary,
+                }}
               >
                 <PlusCircle className="w-4 h-4" />
                 Crear Nuevo Club
@@ -237,7 +259,7 @@ export function ClubSwitcher({
               <Link
                 href="/club/unirse"
                 onClick={() => setIsOpen(false)}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-semibold border border-neutral-200 transition active:scale-98"
+                className="w-full min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-semibold border border-neutral-200 transition active:scale-98"
               >
                 <Compass className="w-4 h-4 text-neutral-500" />
                 Explorar o Unirme a otro Club

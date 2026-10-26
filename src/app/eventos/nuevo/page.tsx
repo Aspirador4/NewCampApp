@@ -20,12 +20,13 @@ export default async function NuevoEventoPage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col p-5 pb-24">
+    <div className="flex-1 flex flex-col p-5 pb-nav">
       {/* Header */}
       <div className="flex items-center gap-3 pt-2 pb-4 border-b border-neutral-200">
         <Link
           href="/eventos"
-          className="p-2 -ml-2 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition"
+          className="p-2.5 -ml-2 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+          aria-label="Volver al listado de eventos"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>

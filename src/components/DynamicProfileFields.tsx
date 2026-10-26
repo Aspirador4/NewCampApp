@@ -59,7 +59,11 @@ export function DynamicProfileFields({
                         selectedList.map((item) => (
                           <span
                             key={item}
-                            className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold"
+                            style={{
+                              backgroundColor: 'var(--club-primary-light, #ecfdf5)',
+                              color: 'var(--club-primary, #059669)',
+                            }}
                           >
                             ⚽ {item}
                           </span>
@@ -110,32 +114,37 @@ export function DynamicProfileFields({
                                 : [...selectedList, opt]
                               onChange(def.field_key, updated as unknown as Json)
                             }}
-                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95 ${
+                            className={`min-h-[38px] px-3 py-1.5 rounded-xl text-xs font-semibold border transition flex items-center gap-1.5 active:scale-95 ${
                               isSelected
-                                ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                                ? 'text-white border-transparent shadow-xs'
                                 : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50'
                             }`}
+                            style={
+                              isSelected
+                                ? { backgroundColor: 'var(--club-primary, #059669)' }
+                                : undefined
+                            }
                           >
-                            {isSelected ? (
-                              <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                            ) : (
-                              <Plus className="w-3.5 h-3.5 text-neutral-400" />
-                            )}
+                            {isSelected ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Plus className="w-3.5 h-3.5 text-neutral-400" />}
                             <span>{opt}</span>
                           </button>
                         )
                       })}
                     </div>
 
-                    {/* Active Selected Badges Summary (with clear option) */}
+                    {/* Summary tags of selected items */}
                     {selectedList.length > 0 && (
-                      <div className="flex items-center gap-1.5 text-[11px] text-neutral-500 pt-1">
-                        <span>Seleccionadas ({selectedList.length}):</span>
+                      <div className="pt-1 flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[10px] text-neutral-400 font-semibold uppercase">Seleccionadas:</span>
                         <div className="flex flex-wrap gap-1">
                           {selectedList.map((item) => (
                             <span
                               key={item}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-100/70 text-emerald-800 text-[11px] font-medium"
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold"
+                              style={{
+                                backgroundColor: 'var(--club-primary-light, #ecfdf5)',
+                                color: 'var(--club-primary, #059669)',
+                              }}
                             >
                               {item}
                               <button
@@ -147,7 +156,8 @@ export function DynamicProfileFields({
                                     selectedList.filter((x) => x !== item) as unknown as Json
                                   )
                                 }}
-                                className="hover:text-red-600"
+                                className="hover:text-red-600 p-0.5"
+                                aria-label={`Remover ${item}`}
                               >
                                 <X className="w-3 h-3" />
                               </button>
@@ -166,7 +176,7 @@ export function DynamicProfileFields({
                     value={stringValue}
                     required={def.is_required}
                     onChange={(e) => onChange && onChange(def.field_key, e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900"
+                    className="w-full px-3.5 py-3 rounded-xl border border-neutral-300 text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900 text-neutral-900"
                   >
                     <option value="">Selecciona una opción</option>
                     {optionsList.map((optVal, idx) => (
@@ -182,6 +192,8 @@ export function DynamicProfileFields({
                   <input
                     id={`dynamic-${def.field_key}`}
                     type="number"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     value={stringValue}
                     required={def.is_required}
                     onChange={(e) =>
@@ -189,21 +201,21 @@ export function DynamicProfileFields({
                       onChange(def.field_key, e.target.value === '' ? null : Number(e.target.value))
                     }
                     placeholder={`Ingresa ${def.label.toLowerCase()}`}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900"
+                    className="w-full px-3.5 py-3 rounded-xl border border-neutral-300 text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900 text-neutral-900"
                   />
                 )}
 
                 {/* BOOLEAN field */}
                 {def.field_type === 'boolean' && (
-                  <label className="flex items-center gap-3 cursor-pointer py-1">
+                  <label className="flex items-center gap-3 cursor-pointer py-2">
                     <input
                       type="checkbox"
                       id={`dynamic-${def.field_key}`}
                       checked={Boolean(rawValue)}
                       onChange={(e) => onChange && onChange(def.field_key, e.target.checked)}
-                      className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-neutral-300"
+                      className="w-5 h-5 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300"
                     />
-                    <span className="text-xs text-neutral-600">Habilitar / Sí</span>
+                    <span className="text-sm text-neutral-700">Habilitar / Sí</span>
                   </label>
                 )}
 
@@ -216,7 +228,7 @@ export function DynamicProfileFields({
                     required={def.is_required}
                     onChange={(e) => onChange && onChange(def.field_key, e.target.value)}
                     placeholder={`Ingresa ${def.label.toLowerCase()}`}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900"
+                    className="w-full px-3.5 py-3 rounded-xl border border-neutral-300 text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900 text-neutral-900"
                   />
                 )}
               </div>

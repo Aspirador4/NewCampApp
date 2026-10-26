@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { NavigationProgressBar } from "@/components/NavigationProgressBar";
 import { createClient } from "@/utils/supabase/server";
 import { getActiveClub } from "@/utils/club";
+import { getClubTheme, getClubThemeCssVariables } from "@/utils/theme";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "Club Deportivo",
   },
   icons: {
@@ -51,21 +52,27 @@ export default async function RootLayout({
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  let isApproved = false;
-  if (user) {
-    const activeContext = await getActiveClub(supabase);
-    isApproved = activeContext.isApproved;
-  }
+  // Retrieve active club and permissions
+  const activeContext = await getActiveClub(supabase);
+  const isApproved = user ? activeContext.isApproved : false;
+  const activeClub = activeContext.club;
+
+  // Resolve 10-palette theme for the active club
+  const palette = getClubTheme(activeClub);
+  const themeVars = getClubThemeCssVariables(palette);
 
   return (
-    <html lang="es">
+    <html lang="es" className="h-full">
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-neutral-900 text-neutral-900 flex justify-center`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-neutral-900 text-neutral-900 flex justify-center selection:bg-club-primary selection:text-white`}
       >
-        <div className="w-full max-w-md min-h-screen bg-neutral-50 flex flex-col shadow-2xl relative">
+        <div
+          className="w-full max-w-md min-h-screen bg-neutral-50 flex flex-col shadow-2xl relative"
+          style={themeVars as React.CSSProperties}
+        >
           <NavigationProgressBar />
           {children}
           {(!user || isApproved) && (

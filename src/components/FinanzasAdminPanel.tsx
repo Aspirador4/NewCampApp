@@ -3,7 +3,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { settleMemberDebtsAction, revertDebtAction, updateBankDetailsAction, BankDetails } from '@/app/finanzas/actions'
-import { CheckCircle2, ChevronDown, ChevronUp, ChevronRight, Loader2, AlertCircle, RefreshCw, UserCheck, Shield, Settings2, X, Save } from 'lucide-react'
+import { updateClubThemeAction } from '@/app/club/actions'
+import { PalettePicker } from '@/components/PalettePicker'
+import { EmptyState } from '@/components/EmptyState'
+import { CheckCircle2, ChevronDown, ChevronUp, ChevronRight, Loader2, AlertCircle, RefreshCw, UserCheck, Settings2, X, Save, Palette } from 'lucide-react'
 
 export interface PendingClosureEventItem {
   id: string
@@ -51,19 +54,28 @@ interface FinanzasAdminPanelProps {
   debts: AdminDebtItem[]
   initialBankDetails: BankDetails
   pendingClosureEvents?: PendingClosureEventItem[]
+  clubId?: string
+  currentPalette?: string
 }
 
-export function FinanzasAdminPanel({ debts, initialBankDetails, pendingClosureEvents = [] }: FinanzasAdminPanelProps) {
+export function FinanzasAdminPanel({
+  debts,
+  initialBankDetails,
+  pendingClosureEvents = [],
+  clubId,
+  currentPalette = 'emerald',
+}: FinanzasAdminPanelProps) {
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null)
   const [loadingDebtId, setLoadingDebtId] = useState<string | null>(null)
   const [expandedUser, setExpandedUser] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
-  // Bank details settings modal state
-  const [isEditingBank, setIsEditingBank] = useState(false)
+  // Bank & Theme settings modal state
+  const [isEditingSettings, setIsEditingSettings] = useState(false)
   const [bankForm, setBankForm] = useState<BankDetails>(initialBankDetails)
-  const [savingBank, setSavingBank] = useState(false)
+  const [selectedPalette, setSelectedPalette] = useState<string>(currentPalette)
+  const [savingSettings, setSavingSettings] = useState(false)
 
   // Filter pending debts
   const pendingDebts = debts.filter((d) => d.status === 'pendiente')
@@ -98,37 +110,38 @@ export function FinanzasAdminPanel({ debts, initialBankDetails, pendingClosureEv
   const totalClubDebt = pendingDebts.reduce((acc, curr) => acc + curr.amount, 0)
 
   const handleSettleAll = async (player: PlayerDebtSummary) => {
-    if (!confirm(`¿Confirmas que ${player.full_name} pagó $${player.total_amount.toLocaleString('es-CL')} y queda al día?`)) {
-      return
-    }
-
+    if (!confirm(`¿Confirmas marcar como PAGADOS todos los partidos de ${player.full_name}?`)) return
     setError(null)
-    setSuccessMsg(null)
     setLoadingUserId(player.user_id)
-    const res = await settleMemberDebtsAction(player.user_id)
+
+    const debtIds = player.pending_debts.map((d) => d.id)
+    const res = await settleMemberDebtsAction(player.user_id, debtIds, clubId)
     setLoadingUserId(null)
 
     if (res?.error) {
       setError(res.error)
     } else {
-      setSuccessMsg(`Deuda de ${player.full_name} saneada con éxito.`)
-      setTimeout(() => setSuccessMsg(null), 4000)
+      setSuccessMsg(`Deuda de ${player.full_name} liquidada exitosamente.`)
+      setTimeout(() => setSuccessMsg(null), 3500)
     }
   }
 
   const handleSettleSingle = async (userId: string, debtId: string) => {
     setError(null)
     setLoadingDebtId(debtId)
-    const res = await settleMemberDebtsAction(userId, [debtId])
+    const res = await settleMemberDebtsAction(userId, [debtId], clubId)
     setLoadingDebtId(null)
 
     if (res?.error) {
       setError(res.error)
+    } else {
+      setSuccessMsg('Partido marcado como pagado.')
+      setTimeout(() => setSuccessMsg(null), 3000)
     }
   }
 
   const handleRevert = async (debtId: string) => {
-    if (!confirm('¿Deseas revertir este pago a pendiente?')) return
+    if (!confirm('¿Revertir este pago a estado pendiente?')) return
     setError(null)
     setLoadingDebtId(debtId)
     const res = await revertDebtAction(debtId)
@@ -136,27 +149,44 @@ export function FinanzasAdminPanel({ debts, initialBankDetails, pendingClosureEv
 
     if (res?.error) {
       setError(res.error)
+    } else {
+      setSuccessMsg('Pago revertido a pendiente.')
+      setTimeout(() => setSuccessMsg(null), 3000)
     }
   }
 
-  const handleSaveBank = async (e: React.FormEvent) => {
+  const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSavingBank(true)
     setError(null)
-    const res = await updateBankDetailsAction(bankForm)
-    setSavingBank(false)
-    if (res?.error) {
-      setError(res.error)
-    } else {
-      setIsEditingBank(false)
-      setSuccessMsg('Datos bancarios del club actualizados correctamente.')
-      setTimeout(() => setSuccessMsg(null), 4000)
+    setSavingSettings(true)
+
+    // 1. Update bank details
+    const bankRes = await updateBankDetailsAction(bankForm)
+    if (bankRes?.error) {
+      setError(bankRes.error)
+      setSavingSettings(false)
+      return
     }
+
+    // 2. Update theme palette if clubId is provided
+    if (clubId && selectedPalette !== currentPalette) {
+      const themeRes = await updateClubThemeAction(clubId, selectedPalette)
+      if (themeRes?.error) {
+        setError(themeRes.error)
+        setSavingSettings(false)
+        return
+      }
+    }
+
+    setSavingSettings(false)
+    setIsEditingSettings(false)
+    setSuccessMsg('Configuración del club guardada exitosamente.')
+    setTimeout(() => setSuccessMsg(null), 3500)
   }
 
   return (
     <div className="space-y-4">
-      {/* Messages */}
+      {/* Alert Messages */}
       {error && (
         <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 text-red-700 text-xs border border-red-200">
           <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
@@ -171,44 +201,41 @@ export function FinanzasAdminPanel({ debts, initialBankDetails, pendingClosureEv
         </div>
       )}
 
-      {/* Admin KPI Header Card */}
-      <div className="bg-neutral-900 text-white rounded-2xl p-4 shadow-sm space-y-3">
+      {/* Global Club Financial Health Card */}
+      <div className="bg-neutral-900 text-white rounded-2xl p-4 shadow-md space-y-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-emerald-400" />
-            <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-300">
-              Panel Tesorería & Cobranzas
-            </h3>
-          </div>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700">
-            {playerSummaries.length} con saldo pendiente
+          <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300">
+            Resumen General de Tesorería
+          </span>
+          <span className="text-xs font-semibold text-neutral-400">
+            {pendingDebts.length} cobro(s) pendiente(s)
           </span>
         </div>
 
         <div className="grid grid-cols-2 gap-3 pt-1">
-          <div className="bg-neutral-800/80 p-3 rounded-xl border border-neutral-700">
-            <p className="text-[10px] uppercase font-semibold text-neutral-400">Total por Cobrar</p>
-            <p className="text-lg font-black text-amber-400">
+          <div>
+            <p className="text-[11px] text-neutral-400">Por Cobrar en el Club</p>
+            <p className="text-2xl font-black text-amber-400 tracking-tight">
               ${totalClubDebt.toLocaleString('es-CL')}
             </p>
           </div>
-          <div className="bg-neutral-800/80 p-3 rounded-xl border border-neutral-700">
-            <p className="text-[10px] uppercase font-semibold text-neutral-400">Partidos Pendientes</p>
-            <p className="text-lg font-black text-white">
-              {pendingDebts.length} cargos
+          <div className="text-right">
+            <p className="text-[11px] text-neutral-400">Jugadores Deudores</p>
+            <p className="text-2xl font-black text-white tracking-tight">
+              {playerSummaries.length}
             </p>
           </div>
         </div>
 
-        {/* Bank Config Button */}
+        {/* Club Settings & Bank Config Button */}
         <div className="pt-2 border-t border-neutral-800 flex justify-end">
           <button
             type="button"
-            onClick={() => setIsEditingBank(true)}
-            className="text-[11px] font-bold text-neutral-300 hover:text-white bg-neutral-800 hover:bg-neutral-700 py-1.5 px-3 rounded-xl border border-neutral-700 flex items-center gap-1.5 transition active:scale-95"
+            onClick={() => setIsEditingSettings(true)}
+            className="min-h-[44px] text-xs font-bold text-neutral-200 hover:text-white bg-neutral-800 hover:bg-neutral-700 py-2 px-3 rounded-xl border border-neutral-700 flex items-center gap-1.5 transition active:scale-95"
           >
-            <Settings2 className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Configurar Cuenta de Transferencia</span>
+            <Settings2 className="w-4 h-4 text-emerald-400" />
+            <span>Configuración & Colores del Club</span>
           </button>
         </div>
       </div>
@@ -244,7 +271,7 @@ export function FinanzasAdminPanel({ debts, initialBankDetails, pendingClosureEv
                 </div>
                 <Link
                   href={`/eventos/${ev.id}`}
-                  className="py-1.5 px-3 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center gap-1 transition active:scale-95 shadow-xs flex-shrink-0"
+                  className="min-h-[44px] py-2 px-3.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center gap-1 transition active:scale-95 shadow-xs flex-shrink-0"
                 >
                   <span>Cerrar Finanzas</span>
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -255,107 +282,134 @@ export function FinanzasAdminPanel({ debts, initialBankDetails, pendingClosureEv
         </div>
       )}
 
-      {/* Bank Details Modal */}
-      {isEditingBank && (
+      {/* Settings Modal (Bank details + Palette Picker) */}
+      {isEditingSettings && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4">
           <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 space-y-4 max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
             <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
               <h3 className="font-extrabold text-base text-neutral-900">
-                Datos Bancarios del Club
+                Ajustes & Finanzas del Club
               </h3>
               <button
                 type="button"
-                onClick={() => setIsEditingBank(false)}
-                className="p-1 rounded-full text-neutral-400 hover:text-neutral-700"
+                onClick={() => setIsEditingSettings(false)}
+                className="w-10 h-10 rounded-full text-neutral-400 hover:text-neutral-700 flex items-center justify-center"
+                aria-label="Cerrar modal"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveBank} className="space-y-3 text-xs">
-              <div>
-                <label className="block font-semibold text-neutral-700 mb-1">Banco</label>
-                <input
-                  type="text"
-                  required
-                  value={bankForm.banco}
-                  onChange={(e) => setBankForm({ ...bankForm, banco: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium"
-                />
-              </div>
+            <form onSubmit={handleSaveSettings} className="space-y-4 text-xs">
+              {/* 10-Color Palette Customizer */}
+              {clubId && (
+                <div className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-2">
+                  <label className="text-xs font-bold text-neutral-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <Palette className="w-3.5 h-3.5 text-neutral-600" />
+                    Color Institucional del Club (10 Paletas)
+                  </label>
+                  <p className="text-[11px] text-neutral-500">
+                    Cambia la personalidad de los botones, medallas y navegación de todos los miembros.
+                  </p>
+                  <PalettePicker
+                    selectedId={selectedPalette}
+                    onSelect={(id) => setSelectedPalette(id)}
+                    disabled={savingSettings}
+                  />
+                </div>
+              )}
 
-              <div>
-                <label className="block font-semibold text-neutral-700 mb-1">Tipo de Cuenta</label>
-                <input
-                  type="text"
-                  required
-                  value={bankForm.tipo_cuenta}
-                  onChange={(e) => setBankForm({ ...bankForm, tipo_cuenta: e.target.value })}
-                  placeholder="Ej: Cuenta Corriente / Cuenta Vista"
-                  className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium"
-                />
-              </div>
+              {/* Bank Details */}
+              <div className="space-y-2.5">
+                <h4 className="text-xs font-bold text-neutral-800 uppercase tracking-wider">
+                  Cuenta de Transferencia para Socios
+                </h4>
 
-              <div>
-                <label className="block font-semibold text-neutral-700 mb-1">Número de Cuenta</label>
-                <input
-                  type="text"
-                  required
-                  value={bankForm.numero_cuenta}
-                  onChange={(e) => setBankForm({ ...bankForm, numero_cuenta: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-neutral-700 mb-1">Titular</label>
-                <input
-                  type="text"
-                  required
-                  value={bankForm.titular}
-                  onChange={(e) => setBankForm({ ...bankForm, titular: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-semibold text-neutral-700 mb-1">RUT</label>
+                  <label className="block font-semibold text-neutral-700 mb-1">Banco</label>
                   <input
                     type="text"
                     required
-                    value={bankForm.rut}
-                    onChange={(e) => setBankForm({ ...bankForm, rut: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium"
+                    value={bankForm.banco}
+                    onChange={(e) => setBankForm({ ...bankForm, banco: e.target.value })}
+                    className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium text-base sm:text-xs"
                   />
                 </div>
+
                 <div>
-                  <label className="block font-semibold text-neutral-700 mb-1">Email</label>
+                  <label className="block font-semibold text-neutral-700 mb-1">Tipo de Cuenta</label>
                   <input
-                    type="email"
+                    type="text"
                     required
-                    value={bankForm.email}
-                    onChange={(e) => setBankForm({ ...bankForm, email: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium"
+                    value={bankForm.tipo_cuenta}
+                    onChange={(e) => setBankForm({ ...bankForm, tipo_cuenta: e.target.value })}
+                    placeholder="Ej: Cuenta Corriente / Cuenta Vista"
+                    className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium text-base sm:text-xs"
                   />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-neutral-700 mb-1">Número de Cuenta</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    required
+                    value={bankForm.numero_cuenta}
+                    onChange={(e) => setBankForm({ ...bankForm, numero_cuenta: e.target.value })}
+                    className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium text-base sm:text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-neutral-700 mb-1">Titular</label>
+                  <input
+                    type="text"
+                    required
+                    value={bankForm.titular}
+                    onChange={(e) => setBankForm({ ...bankForm, titular: e.target.value })}
+                    className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium text-base sm:text-xs"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block font-semibold text-neutral-700 mb-1">RUT</label>
+                    <input
+                      type="text"
+                      required
+                      value={bankForm.rut}
+                      onChange={(e) => setBankForm({ ...bankForm, rut: e.target.value })}
+                      className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium text-base sm:text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-neutral-700 mb-1">Email</label>
+                    <input
+                      type="email"
+                      required
+                      value={bankForm.email}
+                      onChange={(e) => setBankForm({ ...bankForm, email: e.target.value })}
+                      className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium text-base sm:text-xs"
+                    />
+                  </div>
                 </div>
               </div>
 
               <div className="pt-3 border-t border-neutral-100 flex gap-2">
                 <button
                   type="button"
-                  onClick={() => setIsEditingBank(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-neutral-100 font-bold text-neutral-700"
+                  onClick={() => setIsEditingSettings(false)}
+                  className="flex-1 min-h-[44px] py-2.5 rounded-xl bg-neutral-100 font-bold text-neutral-700 active:scale-95 transition"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  disabled={savingBank}
-                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  disabled={savingSettings}
+                  className="flex-1 min-h-[44px] py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-bold flex items-center justify-center gap-1.5 disabled:opacity-50 active:scale-95 transition"
                 >
-                  {savingBank ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  <span>Guardar Datos</span>
+                  {savingSettings ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  <span>Guardar Ajustes</span>
                 </button>
               </div>
             </form>
@@ -370,11 +424,11 @@ export function FinanzasAdminPanel({ debts, initialBankDetails, pendingClosureEv
         </h4>
 
         {playerSummaries.length === 0 ? (
-          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center">
-            <UserCheck className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-            <p className="text-sm font-bold text-emerald-900">¡Todo el club está al día!</p>
-            <p className="text-xs text-emerald-700 mt-1">No hay deudas pendientes por cobrar.</p>
-          </div>
+          <EmptyState
+            icon={UserCheck}
+            title="¡Todo el club está al día!"
+            description="No hay deudas pendientes por cobrar en este momento."
+          />
         ) : (
           playerSummaries.map((player) => {
             const isExpanded = expandedUser === player.user_id
@@ -412,7 +466,7 @@ export function FinanzasAdminPanel({ debts, initialBankDetails, pendingClosureEv
                     <button
                       type="button"
                       onClick={() => setExpandedUser(isExpanded ? null : player.user_id)}
-                      className="text-[11px] font-semibold text-neutral-400 hover:text-neutral-700 flex items-center gap-0.5 ml-auto mt-0.5"
+                      className="text-[11px] font-semibold text-neutral-400 hover:text-neutral-700 flex items-center gap-0.5 ml-auto mt-0.5 min-h-[32px]"
                     >
                       <span>{isExpanded ? 'Ocultar' : 'Detalle'}</span>
                       {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -426,7 +480,10 @@ export function FinanzasAdminPanel({ debts, initialBankDetails, pendingClosureEv
                     type="button"
                     onClick={() => handleSettleAll(player)}
                     disabled={isUserLoading}
-                    className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-xs disabled:opacity-50"
+                    className="flex-1 min-h-[44px] py-2 px-3 rounded-xl text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-xs disabled:opacity-50 active:scale-95"
+                    style={{
+                      backgroundColor: 'var(--club-primary, #059669)',
+                    }}
                   >
                     {isUserLoading ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -466,7 +523,7 @@ export function FinanzasAdminPanel({ debts, initialBankDetails, pendingClosureEv
                             type="button"
                             onClick={() => handleSettleSingle(player.user_id, item.id)}
                             disabled={loadingDebtId === item.id}
-                            className="p-1 rounded-lg bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition"
+                            className="min-h-[36px] min-w-[36px] p-1.5 rounded-lg bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition flex items-center justify-center active:scale-95"
                             title="Marcar este partido como pagado"
                           >
                             {loadingDebtId === item.id ? (
@@ -499,18 +556,16 @@ export function FinanzasAdminPanel({ debts, initialBankDetails, pendingClosureEv
                 className="p-2 rounded-xl bg-neutral-100 border border-neutral-200 flex items-center justify-between text-xs text-neutral-600"
               >
                 <div>
-                  <p className="font-medium text-neutral-800">{paid.profiles?.full_name}: {paid.description}</p>
-                  <p className="text-[10px] text-neutral-400">
-                    Saneado: {paid.paid_at ? new Date(paid.paid_at).toLocaleDateString('es-CL') : ''}
-                  </p>
+                  <span className="font-semibold text-neutral-900">{paid.profiles?.full_name}</span>
+                  <span className="text-[10px] text-neutral-400 block">{paid.description}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-emerald-700">${paid.amount.toLocaleString('es-CL')}</span>
+                  <span className="font-bold">${paid.amount.toLocaleString('es-CL')}</span>
                   <button
                     type="button"
                     onClick={() => handleRevert(paid.id)}
                     disabled={loadingDebtId === paid.id}
-                    className="p-1 rounded-lg text-neutral-400 hover:text-amber-700 transition"
+                    className="p-1 text-neutral-400 hover:text-amber-600 transition"
                     title="Revertir a pendiente"
                   >
                     <RefreshCw className="w-3 h-3" />

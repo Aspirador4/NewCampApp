@@ -98,18 +98,22 @@ export default async function MiembrosPage() {
   members.sort((a, b) => a.full_name.localeCompare(b.full_name))
 
   return (
-    <div className="flex-1 flex flex-col p-5 pb-28">
+    <div className="flex-1 flex flex-col p-5 pb-nav">
       {/* Top Header */}
       <div className="flex items-center justify-between pt-2 pb-4 border-b border-neutral-200">
         <div className="flex items-center gap-2.5">
           <Link
             href="/"
-            className="p-2 -ml-2 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition"
+            className="p-2.5 -ml-2 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+            aria-label="Volver al inicio"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-blue-600 text-white shadow-xs">
+            <div
+              className="p-2.5 rounded-xl text-white shadow-xs"
+              style={{ backgroundColor: 'var(--club-primary, #059669)' }}
+            >
               <Users className="w-5 h-5" />
             </div>
             <div>

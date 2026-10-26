@@ -18,6 +18,7 @@ export async function createClubAction(formData: FormData) {
   const slugRaw = (formData.get('slug') as string)?.trim()
   const description = (formData.get('description') as string)?.trim() || null
   const logoUrl = (formData.get('logo_url') as string)?.trim() || null
+  const paletteId = (formData.get('palette_id') as string)?.trim() || 'emerald'
 
   if (!name || !slugRaw) {
     return { error: 'El nombre y el identificador (slug) son obligatorios' }
@@ -43,6 +44,8 @@ export async function createClubAction(formData: FormData) {
     p_logo_url: logoUrl || undefined,
   })
 
+  let finalClubId: string | null = null
+
   if (error) {
     // If RPC is missing or fails, fallback to manual insert
     const { data: existingClub } = await supabase
@@ -64,6 +67,7 @@ export async function createClubAction(formData: FormData) {
         logo_url: logoUrl,
         created_by: user.id,
         settings: {
+          palette: paletteId,
           bank_details: {
             banco: '',
             tipo_cuenta: '',
@@ -80,6 +84,8 @@ export async function createClubAction(formData: FormData) {
     if (insertErr || !newClub) {
       return { error: `Error al crear club: ${insertErr?.message || 'Error desconocido'}` }
     }
+
+    finalClubId = newClub.id
 
     // Insert creator as admin
     await supabase.from('club_members').insert({
@@ -126,24 +132,33 @@ export async function createClubAction(formData: FormData) {
         display_order: 3,
       },
     ])
+  } else {
+    finalClubId = (data as { club_id?: string })?.club_id || null
 
-    // Set cookie to active club
-    const cookieStore = await cookies()
-    cookieStore.set(ACTIVE_CLUB_COOKIE, newClub.id, {
-      path: '/',
-      maxAge: 60 * 60 * 24 * 365,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-    })
+    // If RPC succeeded, update the settings with the selected palette
+    if (finalClubId && paletteId) {
+      const { data: currentClub } = await supabase
+        .from('clubs')
+        .select('settings')
+        .eq('id', finalClubId)
+        .single()
 
-    revalidatePath('/', 'layout')
-    redirect('/')
+      const currentSettings = (currentClub?.settings as Record<string, unknown>) || {}
+      await supabase
+        .from('clubs')
+        .update({
+          settings: {
+            ...currentSettings,
+            palette: paletteId,
+          },
+        })
+        .eq('id', finalClubId)
+    }
   }
 
-  const resultClubId = (data as { club_id?: string })?.club_id
-  if (resultClubId) {
+  if (finalClubId) {
     const cookieStore = await cookies()
-    cookieStore.set(ACTIVE_CLUB_COOKIE, resultClubId, {
+    cookieStore.set(ACTIVE_CLUB_COOKIE, finalClubId, {
       path: '/',
       maxAge: 60 * 60 * 24 * 365,
       sameSite: 'lax',
@@ -153,6 +168,51 @@ export async function createClubAction(formData: FormData) {
 
   revalidatePath('/', 'layout')
   redirect('/')
+}
+
+export async function updateClubThemeAction(clubId: string, paletteId: string) {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: 'No autorizado' }
+  }
+
+  // Verify admin permissions in club
+  const { data: membership } = await supabase
+    .from('club_members')
+    .select('system_role, approval_status')
+    .eq('club_id', clubId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (membership?.system_role !== 'admin' || membership?.approval_status !== 'aprobado') {
+    return { error: 'Solo los administradores pueden cambiar los colores del club.' }
+  }
+
+  const { data: currentClub } = await supabase
+    .from('clubs')
+    .select('settings')
+    .eq('id', clubId)
+    .single()
+
+  const currentSettings = (currentClub?.settings as Record<string, unknown>) || {}
+  const { error } = await supabase
+    .from('clubs')
+    .update({
+      settings: {
+        ...currentSettings,
+        palette: paletteId,
+      },
+    })
+    .eq('id', clubId)
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  revalidatePath('/', 'layout')
+  return { success: true }
 }
 
 export async function joinClubAction(clubId: string, motivationText?: string) {

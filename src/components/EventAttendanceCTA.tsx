@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { joinEvent, leaveEvent } from '@/app/eventos/actions'
-import { Check, X, Loader2, AlertCircle, Clock, CheckCircle2 } from 'lucide-react'
+import { Check, Loader2, AlertCircle, Clock, CheckCircle2 } from 'lucide-react'
 
 interface EventAttendanceCTAProps {
   eventId: string
@@ -68,17 +68,29 @@ export function EventAttendanceCTA({
 
       {/* State 1: User is confirmed */}
       {userStatus === 'confirmado' && (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex flex-col gap-3">
+        <div
+          className="border rounded-2xl p-4 flex flex-col gap-3"
+          style={{
+            backgroundColor: 'var(--club-primary-light, #ecfdf5)',
+            borderColor: 'var(--club-primary-border, #a7f3d0)',
+          }}
+        >
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-emerald-600 text-white shadow-xs">
+            <div
+              className="p-2 rounded-xl text-white shadow-xs"
+              style={{ backgroundColor: 'var(--club-primary, #059669)' }}
+            >
               <CheckCircle2 className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-xs font-bold text-emerald-900">
+              <p
+                className="text-xs font-bold"
+                style={{ color: 'var(--club-primary, #059669)' }}
+              >
                 ¡Tu cupo está confirmado!
               </p>
-              <p className="text-[11px] text-emerald-700">
-                Estás en la lista oficial de jugadores del partido.
+              <p className="text-[11px] text-neutral-600">
+                Estás en la lista oficial de jugadores convocados.
               </p>
             </div>
           </div>
@@ -87,10 +99,9 @@ export function EventAttendanceCTA({
             type="button"
             onClick={() => setShowCancelModal(true)}
             disabled={loading}
-            className="w-full py-2.5 px-4 rounded-xl border border-red-200 bg-white hover:bg-red-50 text-red-600 font-semibold text-xs transition active:scale-[0.98] flex items-center justify-center gap-1.5"
+            className="w-full min-h-[44px] py-2 px-3 rounded-xl border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition active:scale-98"
           >
-            <X className="w-4 h-4" />
-            <span>Bajarme del partido</span>
+            Darse de baja
           </button>
         </div>
       )}
@@ -104,10 +115,11 @@ export function EventAttendanceCTA({
             </div>
             <div>
               <p className="text-xs font-bold text-amber-900">
-                Estás en Lista de Espera {waitlistPosition ? `(Posición #${waitlistPosition})` : ''}
+                Estás en lista de espera
+                {waitlistPosition ? ` (Puesto #${waitlistPosition})` : ''}
               </p>
               <p className="text-[11px] text-amber-700">
-                Si un jugador confirmado se baja, subirás automáticamente.
+                Si un jugador confirmado se da de baja, ascenderás automáticamente.
               </p>
             </div>
           </div>
@@ -116,10 +128,9 @@ export function EventAttendanceCTA({
             type="button"
             onClick={() => setShowCancelModal(true)}
             disabled={loading}
-            className="w-full py-2.5 px-4 rounded-xl border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-700 font-semibold text-xs transition active:scale-[0.98] flex items-center justify-center gap-1.5"
+            className="w-full min-h-[44px] py-2 px-3 rounded-xl border border-amber-300 bg-white hover:bg-amber-50 text-amber-800 text-xs font-semibold transition active:scale-98"
           >
-            <X className="w-4 h-4" />
-            <span>Salir de la lista de espera</span>
+            Salir de la lista de espera
           </button>
         </div>
       )}
@@ -131,18 +142,20 @@ export function EventAttendanceCTA({
             type="button"
             onClick={handleJoin}
             disabled={loading}
-            className={`w-full py-3.5 px-4 rounded-2xl font-bold text-sm shadow-md transition active:scale-[0.98] flex items-center justify-center gap-2 text-white ${
-              isFull
-                ? 'bg-amber-600 hover:bg-amber-700'
-                : 'bg-emerald-600 hover:bg-emerald-700'
-            }`}
+            className={`w-full min-h-[48px] py-3.5 px-4 rounded-xl text-white font-bold text-sm shadow-md transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50`}
+            style={{
+              backgroundColor: isFull ? '#d97706' : 'var(--club-primary, #059669)',
+            }}
           >
             {loading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Procesando...</span>
+              </>
             ) : isFull ? (
               <>
                 <Clock className="w-4 h-4" />
-                <span>Cupo lleno • Entrar a Lista de Espera</span>
+                <span>Entrar a Lista de Espera</span>
               </>
             ) : (
               <>
@@ -179,7 +192,7 @@ export function EventAttendanceCTA({
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
                 placeholder="Ej: Lesión, viaje, trabajo..."
-                className="w-full px-3 py-2 rounded-xl border border-neutral-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 text-base sm:text-xs bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900"
               />
             </div>
 
@@ -188,7 +201,7 @@ export function EventAttendanceCTA({
                 type="button"
                 onClick={() => setShowCancelModal(false)}
                 disabled={loading}
-                className="flex-1 py-2.5 px-3 rounded-xl border border-neutral-300 font-semibold text-xs text-neutral-700 hover:bg-neutral-50"
+                className="flex-1 min-h-[44px] py-2.5 px-3 rounded-xl border border-neutral-300 font-semibold text-xs text-neutral-700 hover:bg-neutral-50 active:scale-95 transition"
               >
                 Volver
               </button>
@@ -197,7 +210,7 @@ export function EventAttendanceCTA({
                 type="button"
                 onClick={handleLeave}
                 disabled={loading}
-                className="flex-1 py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-700 font-bold text-xs text-white shadow-sm flex items-center justify-center gap-1.5"
+                className="flex-1 min-h-[44px] py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-700 font-bold text-xs text-white shadow-xs flex items-center justify-center gap-1.5 active:scale-95 transition"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirmar baja'}
               </button>

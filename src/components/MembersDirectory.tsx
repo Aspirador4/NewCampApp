@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { Search, Trophy, Calendar, User, X, Sparkles, Shield, UserCheck, UserX, Trash2, Check, AlertCircle, Loader2 } from 'lucide-react'
 import { approveMemberAction, rejectMemberAction, reconsiderMemberAction, deleteMemberAction, updateMemberRoleAction } from '@/app/miembros/actions'
 import { SystemRole } from '@/types/database.types'
+import { EmptyState } from '@/components/EmptyState'
 
 export interface MemberItem {
   id: string
@@ -47,7 +48,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
   const rejectedMembers = members.filter((m) => m.approval_status === 'rechazado')
   const [showRejected, setShowRejected] = useState(false)
 
-  const displayedList = isAdmin ? approvedMembers : approvedMembers
+  const displayedList = approvedMembers
 
   const filteredMembers = displayedList.filter((m) => {
     // Search filter
@@ -102,7 +103,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
     if (res?.error) {
       setErrorMsg(res.error)
     } else {
-      setSuccessMsg('Solicitud restaurada a estado pendiente.')
+      setSuccessMsg('Solicitud devuelta a pendientes de revisión.')
       setTimeout(() => setSuccessMsg(null), 3000)
     }
   }
@@ -116,7 +117,9 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
     if (res?.error) {
       setErrorMsg(res.error)
     } else {
-      setActiveMember(null)
+      if (activeMember?.id === userId) {
+        setActiveMember(null)
+      }
       setSuccessMsg(`Miembro ${name} eliminado del club.`)
       setTimeout(() => setSuccessMsg(null), 3000)
     }
@@ -213,7 +216,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                     type="button"
                     onClick={() => handleApprove(pm.id)}
                     disabled={actionLoading === pm.id}
-                    className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 transition active:scale-95 disabled:opacity-50 shadow-xs"
+                    className="min-h-[38px] px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 transition active:scale-95 disabled:opacity-50 shadow-xs"
                   >
                     {actionLoading === pm.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                     <span>Aprobar</span>
@@ -222,10 +225,9 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                     type="button"
                     onClick={() => handleReject(pm.id)}
                     disabled={actionLoading === pm.id}
-                    className="p-1.5 rounded-lg bg-neutral-100 hover:bg-red-50 text-neutral-600 hover:text-red-600 font-semibold text-xs transition active:scale-95 disabled:opacity-50"
-                    title="Rechazar admisión"
+                    className="min-h-[38px] px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs transition active:scale-95 disabled:opacity-50"
                   >
-                    <UserX className="w-4 h-4" />
+                    Rechazar
                   </button>
                 </div>
               </div>
@@ -234,9 +236,9 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
         </div>
       )}
 
-      {/* Admin Section: Solicitudes Rechazadas */}
+      {/* Admin Section: Postulaciones Rechazadas */}
       {isAdmin && rejectedMembers.length > 0 && (
-        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 space-y-3">
+        <div className="bg-rose-50/60 border border-rose-200/80 rounded-2xl p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <UserX className="w-4 h-4 text-rose-700" />
@@ -247,7 +249,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
             <button
               type="button"
               onClick={() => setShowRejected(!showRejected)}
-              className="text-[11px] font-bold text-rose-800 hover:text-rose-950 underline cursor-pointer"
+              className="text-[11px] font-bold text-rose-800 hover:text-rose-950 underline cursor-pointer p-1"
             >
               {showRejected ? 'Ocultar' : 'Ver lista'}
             </button>
@@ -269,7 +271,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                       type="button"
                       onClick={() => handleReconsider(rm.id)}
                       disabled={actionLoading === rm.id}
-                      className="px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] flex items-center gap-1 transition active:scale-95 disabled:opacity-50"
+                      className="min-h-[36px] px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] flex items-center gap-1 transition active:scale-95 disabled:opacity-50"
                       title="Devolver a pendientes de revisión"
                     >
                       {actionLoading === rm.id ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
@@ -279,7 +281,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                       type="button"
                       onClick={() => handleApprove(rm.id)}
                       disabled={actionLoading === rm.id}
-                      className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center gap-1 transition active:scale-95 disabled:opacity-50"
+                      className="min-h-[36px] px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center gap-1 transition active:scale-95 disabled:opacity-50"
                     >
                       <span>Aprobar</span>
                     </button>
@@ -287,8 +289,9 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                       type="button"
                       onClick={() => handleDelete(rm.id, rm.full_name)}
                       disabled={actionLoading === rm.id}
-                      className="p-1.5 rounded-lg bg-neutral-100 hover:bg-red-50 text-neutral-500 hover:text-red-600 transition"
+                      className="min-h-[36px] min-w-[36px] p-2 rounded-xl bg-neutral-100 hover:bg-red-50 text-neutral-500 hover:text-red-600 transition flex items-center justify-center active:scale-95"
                       title="Eliminar registro"
+                      aria-label="Eliminar registro"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -309,8 +312,8 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar por nombre o apodo..."
-          className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-neutral-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900 shadow-xs"
+          placeholder="Buscar por nombre o correo..."
+          className="w-full pl-10 pr-3.5 py-3 rounded-xl border border-neutral-300 text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900 text-neutral-900 shadow-xs"
         />
       </div>
 
@@ -323,11 +326,16 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
               key={pos}
               type="button"
               onClick={() => setSelectedPosition(pos)}
-              className={`px-3 py-1.5 rounded-xl whitespace-nowrap transition active:scale-95 ${
+              className={`min-h-[38px] px-3.5 py-2 rounded-xl whitespace-nowrap transition active:scale-95 ${
                 isActive
-                  ? 'bg-emerald-600 text-white shadow-xs'
+                  ? 'text-white shadow-xs'
                   : 'bg-white text-neutral-600 border border-neutral-200/80 hover:bg-neutral-50'
               }`}
+              style={
+                isActive
+                  ? { backgroundColor: 'var(--club-primary, #059669)' }
+                  : undefined
+              }
             >
               {pos === 'todos' ? 'Todos los roles' : pos}
             </button>
@@ -342,99 +350,111 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
       {/* Members Grid / List */}
       <div className="grid grid-cols-1 gap-2.5">
-        {filteredMembers.map((member) => {
-          const stats = member.stats || {
-            matches_played: 0,
-            mvp_count: 0,
-            mvp_votes_received: 0,
-            social_events_attended: 0,
-          }
-          const positionsArr = Array.isArray(member.custom_attributes?.posicion)
-            ? (member.custom_attributes.posicion as string[])
-            : member.custom_attributes?.posicion
-            ? [String(member.custom_attributes.posicion)]
-            : []
+        {filteredMembers.length === 0 ? (
+          <EmptyState
+            icon={User}
+            title="No se encontraron socios"
+            description="Intenta ajustar el término de búsqueda o el filtro de posición."
+          />
+        ) : (
+          filteredMembers.map((member) => {
+            const stats = member.stats || {
+              matches_played: 0,
+              mvp_count: 0,
+              mvp_votes_received: 0,
+              social_events_attended: 0,
+            }
+            const positionsArr = Array.isArray(member.custom_attributes?.posicion)
+              ? (member.custom_attributes.posicion as string[])
+              : member.custom_attributes?.posicion
+              ? [String(member.custom_attributes.posicion)]
+              : []
 
-          return (
-            <div
-              key={member.id}
-              onClick={() => setActiveMember(member)}
-              className="bg-white border border-neutral-200/90 rounded-2xl p-3.5 shadow-xs hover:border-emerald-500 transition cursor-pointer active:scale-[0.99] flex items-center justify-between gap-3"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-12 h-12 rounded-full overflow-hidden bg-neutral-100 border border-neutral-200 flex items-center justify-center relative flex-shrink-0">
-                  {member.avatar_url ? (
-                    <Image
-                      src={member.avatar_url}
-                      alt={member.full_name}
-                      fill
-                      className="object-cover"
-                      sizes="48px"
-                    />
-                  ) : (
-                    <span className="font-bold text-sm text-neutral-600">
-                      {member.full_name.charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                </div>
-
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <h3 className="font-bold text-sm text-neutral-900 truncate leading-tight">
-                      {member.full_name}
-                    </h3>
-                    {member.system_role === 'admin' && (
-                      <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-neutral-900 text-emerald-400">
-                        Admin
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                    {positionsArr.length > 0 ? (
-                      positionsArr.map((p) => (
-                        <span
-                          key={p}
-                          className="text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/60 px-1.5 py-0.5 rounded-md"
-                        >
-                          {p}
-                        </span>
-                      ))
+            return (
+              <div
+                key={member.id}
+                onClick={() => setActiveMember(member)}
+                className="bg-white border border-neutral-200/90 rounded-2xl p-3.5 shadow-xs hover:border-neutral-300 transition cursor-pointer active:scale-[0.99] flex items-center justify-between gap-3 min-h-[64px]"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-12 h-12 rounded-full overflow-hidden bg-neutral-100 border border-neutral-200 flex items-center justify-center relative flex-shrink-0">
+                    {member.avatar_url ? (
+                      <Image
+                        src={member.avatar_url}
+                        alt={member.full_name}
+                        fill
+                        className="object-cover"
+                        sizes="48px"
+                      />
                     ) : (
-                      <span className="text-[10px] text-neutral-500 capitalize">
-                        {member.sports_role}
-                      </span>
-                    )}
-
-                    {Boolean(member.custom_attributes?.numero_camiseta) && (
-                      <span className="text-[10px] font-extrabold text-neutral-700 bg-neutral-100 px-1.5 py-0.5 rounded-md">
-                        #{String(member.custom_attributes.numero_camiseta)}
+                      <span className="font-bold text-sm text-neutral-600">
+                        {member.full_name.charAt(0).toUpperCase()}
                       </span>
                     )}
                   </div>
-                </div>
-              </div>
 
-              {/* Stats badges */}
-              <div className="flex items-center gap-2 text-right flex-shrink-0">
-                <div className="bg-amber-50 border border-amber-200 px-2 py-1 rounded-xl text-center min-w-[42px]">
-                  <div className="flex items-center justify-center gap-0.5 text-amber-700 font-black text-xs">
-                    <Trophy className="w-3 h-3" />
-                    <span>{stats.mvp_count}</span>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <h3 className="font-bold text-sm text-neutral-900 truncate leading-tight">
+                        {member.full_name}
+                      </h3>
+                      {member.system_role === 'admin' && (
+                        <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-neutral-900 text-white">
+                          Admin
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                      {positionsArr.length > 0 ? (
+                        positionsArr.map((p) => (
+                          <span
+                            key={p}
+                            className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md"
+                            style={{
+                              backgroundColor: 'var(--club-primary-light, #ecfdf5)',
+                              color: 'var(--club-primary, #059669)',
+                            }}
+                          >
+                            {p}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-[10px] text-neutral-500 capitalize">
+                          {member.sports_role}
+                        </span>
+                      )}
+
+                      {Boolean(member.custom_attributes?.numero_camiseta) && (
+                        <span className="text-[10px] font-extrabold text-neutral-700 bg-neutral-100 px-1.5 py-0.5 rounded-md">
+                          #{String(member.custom_attributes.numero_camiseta)}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <span className="text-[8px] font-bold text-amber-600 uppercase block">MVP</span>
                 </div>
 
-                <div className="bg-neutral-100 border border-neutral-200 px-2 py-1 rounded-xl text-center min-w-[42px]">
-                  <span className="font-black text-xs text-neutral-800 block">
-                    {stats.matches_played}
-                  </span>
-                  <span className="text-[8px] font-bold text-neutral-500 uppercase block">PJ</span>
+                {/* Stats badges */}
+                <div className="flex items-center gap-2 text-right flex-shrink-0">
+                  <div className="bg-amber-50 border border-amber-200 px-2 py-1 rounded-xl text-center min-w-[42px]">
+                    <div className="flex items-center justify-center gap-0.5 text-amber-700 font-black text-xs">
+                      <Trophy className="w-3 h-3" />
+                      <span>{stats.mvp_count}</span>
+                    </div>
+                    <span className="text-[8px] font-bold text-amber-600 uppercase block">MVP</span>
+                  </div>
+
+                  <div className="bg-neutral-100 border border-neutral-200 px-2 py-1 rounded-xl text-center min-w-[42px]">
+                    <span className="font-black text-xs text-neutral-800 block">
+                      {stats.matches_played}
+                    </span>
+                    <span className="text-[8px] font-bold text-neutral-500 uppercase block">PJ</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })
+        )}
       </div>
 
       {/* Member Profile Drawer / Modal */}
@@ -445,14 +465,18 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
             <button
               type="button"
               onClick={() => setActiveMember(null)}
-              className="absolute top-4 right-4 p-2 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 transition"
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 transition flex items-center justify-center"
+              aria-label="Cerrar ficha de socio"
             >
               <X className="w-5 h-5" />
             </button>
 
             {/* Profile Header */}
             <div className="flex items-center gap-4 pt-1">
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-neutral-100 border-2 border-emerald-500 shadow-md flex items-center justify-center relative flex-shrink-0">
+              <div
+                className="w-20 h-20 rounded-full overflow-hidden bg-neutral-100 border-2 shadow-md flex items-center justify-center relative flex-shrink-0"
+                style={{ borderColor: 'var(--club-primary, #059669)' }}
+              >
                 {activeMember.avatar_url ? (
                   <Image
                     src={activeMember.avatar_url}
@@ -473,11 +497,17 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                   {activeMember.full_name}
                 </h2>
                 <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                  <span
+                    className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full"
+                    style={{
+                      backgroundColor: 'var(--club-primary-light, #ecfdf5)',
+                      color: 'var(--club-primary, #059669)',
+                    }}
+                  >
                     {activeMember.sports_role}
                   </span>
                   {activeMember.system_role === 'admin' && (
-                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-neutral-900 text-emerald-400">
+                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-neutral-900 text-white">
                       Administrador
                     </span>
                   )}
@@ -532,7 +562,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                 <span className="font-bold text-neutral-900 text-right">
                   {activeMember.custom_attributes?.posicion
                     ? Array.isArray(activeMember.custom_attributes.posicion)
-                      ? (activeMember.custom_attributes.posicion as string[]).join(', ')
+                      ? (activeMember.custom_attributes.posicion as string[])?.join(', ')
                       : String(activeMember.custom_attributes.posicion)
                     : 'No especificada'}
                 </span>
@@ -592,7 +622,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                   <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 border border-neutral-200">
                     <div>
                       <p className="text-xs font-bold text-neutral-800">
-                        Rol: <span className="uppercase text-emerald-700">{activeMember.system_role === 'admin' ? 'Administrador' : 'Socio'}</span>
+                        Rol: <span className="uppercase text-neutral-900 font-extrabold">{activeMember.system_role === 'admin' ? 'Administrador' : 'Socio'}</span>
                       </p>
                       <p className="text-[10px] text-neutral-500">
                         {activeMember.system_role === 'admin'
@@ -604,10 +634,10 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                       type="button"
                       onClick={() => handleRoleChange(activeMember.id, activeMember.system_role === 'admin' ? 'member' : 'admin')}
                       disabled={actionLoading === activeMember.id}
-                      className={`py-1.5 px-3 rounded-xl font-bold text-xs transition active:scale-95 flex items-center gap-1.5 shadow-xs ${
+                      className={`min-h-[40px] py-1.5 px-3 rounded-xl font-bold text-xs transition active:scale-95 flex items-center gap-1.5 shadow-xs ${
                         activeMember.system_role === 'admin'
                           ? 'bg-neutral-200 hover:bg-neutral-300 text-neutral-800'
-                          : 'bg-neutral-900 hover:bg-neutral-800 text-emerald-400'
+                          : 'bg-neutral-900 hover:bg-neutral-800 text-white'
                       }`}
                     >
                       {actionLoading === activeMember.id ? (
@@ -625,7 +655,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                       type="button"
                       onClick={() => handleDelete(activeMember.id, activeMember.full_name)}
                       disabled={actionLoading === activeMember.id}
-                      className="w-full py-2 px-3 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-98 disabled:opacity-50"
+                      className="w-full min-h-[44px] py-2 px-3 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-98 disabled:opacity-50"
                     >
                       {actionLoading === activeMember.id ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -642,7 +672,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
             <button
               type="button"
               onClick={() => setActiveMember(null)}
-              className="w-full py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-xs transition"
+              className="w-full min-h-[44px] py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-xs transition active:scale-98"
             >
               Cerrar Ficha
             </button>
