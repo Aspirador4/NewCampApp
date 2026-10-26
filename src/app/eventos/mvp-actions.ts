@@ -87,15 +87,31 @@ export async function closeMvpVoting(eventId: string) {
     return { error: 'No autorizado' }
   }
 
-  // Verify admin
+  // Verify admin OR event creator
+  const { data: event } = await supabase
+    .from('events')
+    .select('created_by')
+    .eq('id', eventId)
+    .single()
+
   const { data: profile } = await supabase
     .from('profiles')
     .select('system_role')
     .eq('id', user.id)
     .single()
 
-  if (profile?.system_role !== 'admin') {
-    return { success: false, error: 'Solo los administradores pueden cerrar la votación' }
+  const isAdmin = profile?.system_role === 'admin'
+  const isCreator = event?.created_by === user.id
+
+  if (!isAdmin && !isCreator) {
+    return { success: false, error: 'Solo el creador del evento o un administrador pueden cerrar la votación' }
+  }
+
+  // Ensure debts are generated if they weren't generated before
+  try {
+    await supabase.rpc('generate_event_debts', { p_event_id: eventId })
+  } catch (debtsErr) {
+    console.error('Error in generate_event_debts on close:', debtsErr)
   }
 
   // Call atomic finalize_event_mvp RPC

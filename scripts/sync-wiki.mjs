@@ -23,7 +23,7 @@ console.log('🚀 Iniciando sincronización de Wiki hacia GitHub...')
 let token = ''
 try {
   token = execSync('gh auth token', { encoding: 'utf8' }).trim()
-} catch (e) {
+} catch {
   console.error('❌ Error: GitHub CLI no está autenticado. Ejecuta "gh auth login".')
   process.exit(1)
 }
@@ -34,7 +34,7 @@ const authenticatedRemote = `https://${REPO_OWNER}:${token}@${WIKI_REMOTE_BASE}`
 try {
   execSync(`git ls-remote ${authenticatedRemote}`, { stdio: 'pipe' })
   console.log('✅ Repositorio Wiki de GitHub detectado.')
-} catch (e) {
+} catch {
   console.error('\n⚠️ El repositorio GitHub Wiki aún no ha sido inicializado.')
   console.error('👉 Por favor ingresa a: https://github.com/' + REPO_OWNER + '/' + REPO_NAME + '/wiki')
   console.error('👉 Haz clic en "Create the first page", escribe un título y pulsa "Save page".')

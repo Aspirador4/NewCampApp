@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Calendar, Trophy, User } from 'lucide-react'
+import { Home, Calendar, Trophy, User, Wallet } from 'lucide-react'
 
 interface BottomNavProps {
   isAuthenticated: boolean
@@ -19,6 +19,7 @@ export function BottomNav({ isAuthenticated }: BottomNavProps) {
   const navItems = [
     { href: '/', label: 'Inicio', icon: Home },
     { href: '/eventos', label: 'Eventos', icon: Calendar },
+    { href: '/finanzas', label: 'Finanzas', icon: Wallet },
     { href: '/ranking', label: 'Ranking', icon: Trophy },
     { href: isAuthenticated ? '/perfil' : '/login', label: 'Perfil', icon: User },
   ]

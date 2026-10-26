@@ -34,7 +34,7 @@ export function EventAdminControls({ eventId, currentStatus }: EventAdminControl
       <div className="flex items-center gap-2">
         <Shield className="w-4 h-4 text-emerald-400" />
         <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-200">
-          Panel de Control Administrador
+          Gestión del Evento (Admin / Organizador)
         </h3>
       </div>
 

@@ -6,7 +6,8 @@ import { EventAttendanceCTA } from '@/components/EventAttendanceCTA'
 import { EventAdminControls } from '@/components/EventAdminControls'
 import { EventGuestsSection, EventGuestItem } from '@/components/EventGuestsSection'
 import { MvpVotingSection, MvpCandidate, MvpWinner } from '@/components/MvpVotingSection'
-import { ArrowLeft, Calendar, MapPin, Users, History, Clock, User, UserCheck } from 'lucide-react'
+import { EventRealtimeListener } from '@/components/EventRealtimeListener'
+import { ArrowLeft, Calendar, MapPin, Users, History, Clock, User, UserCheck, CircleDollarSign } from 'lucide-react'
 
 interface AttendeeProfile {
   id: string
@@ -68,6 +69,8 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
     .eq('id', user.id)
     .single()
   const isAdmin = userProfile?.system_role === 'admin'
+  const isCreator = event.created_by === user.id
+  const canManageEvent = isAdmin || isCreator
 
   // Fetch attendees with profile details
   const { data: attendeesRaw } = await supabase
@@ -259,6 +262,8 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
   return (
     <div className="flex-1 flex flex-col p-5 pb-28">
+      <EventRealtimeListener eventId={event.id} />
+
       {/* Top Header */}
       <div className="flex items-center justify-between pt-2 pb-4 border-b border-neutral-200">
         <Link
@@ -313,6 +318,15 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
               </span>
             </div>
           )}
+
+          {Boolean(event.cost_per_player && event.cost_per_player > 0) && (
+            <div className="flex items-center gap-2">
+              <CircleDollarSign className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <span className="font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                ${event.cost_per_player.toLocaleString('es-CL')} por jugador
+              </span>
+            </div>
+          )}
         </div>
 
         {event.description && (
@@ -333,8 +347,8 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         />
       </div>
 
-      {/* Admin Controls */}
-      {isAdmin && (
+      {/* Event Management Controls (Admin or Organizer) */}
+      {canManageEvent && (
         <div className="my-3">
           <EventAdminControls eventId={event.id} currentStatus={event.status} />
         </div>
@@ -349,7 +363,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         hasVoted={hasVoted}
         candidates={candidates}
         currentUserId={user.id}
-        isAdmin={isAdmin}
+        isAdmin={canManageEvent}
         winners={winners}
         allVoteResults={allVoteResults}
       />

@@ -24,6 +24,7 @@ export async function createEvent(formData: FormData) {
   const startTime = formData.get('start_time') as string
   const location = (formData.get('location') as string)?.trim()
   const maxCapacityRaw = formData.get('max_capacity') as string
+  const costPerPlayerRaw = formData.get('cost_per_player') as string
 
   if (!title || !startDate || !startTime || !location) {
     return { error: 'Por favor completa todos los campos obligatorios' }
@@ -31,6 +32,7 @@ export async function createEvent(formData: FormData) {
 
   const startTimestamp = new Date(`${startDate}T${startTime}:00`).toISOString()
   const maxCapacity = maxCapacityRaw ? parseInt(maxCapacityRaw, 10) : null
+  const costPerPlayer = costPerPlayerRaw !== null && costPerPlayerRaw !== '' ? parseInt(costPerPlayerRaw, 10) : 3500
 
   const { data: newEvent, error: insertError } = await supabase
     .from('events')
@@ -41,6 +43,7 @@ export async function createEvent(formData: FormData) {
       start_time: startTimestamp,
       location,
       max_capacity: maxCapacity && maxCapacity > 0 ? maxCapacity : null,
+      cost_per_player: isNaN(costPerPlayer) ? 3500 : costPerPlayer,
       status: 'convocado',
       created_by: user.id,
     })
@@ -242,22 +245,31 @@ export async function updateEventStatus(eventId: string, newStatus: EventStatus)
     return { error: 'No autorizado' }
   }
 
-  // Check admin
+  // Check if user is admin OR creator of the event
+  const { data: event } = await supabase
+    .from('events')
+    .select('created_by')
+    .eq('id', eventId)
+    .single()
+
   const { data: profile } = await supabase
     .from('profiles')
     .select('system_role')
     .eq('id', user.id)
     .single()
 
-  if (profile?.system_role !== 'admin') {
-    return { error: 'Solo administradores pueden cambiar el estado del evento' }
+  const isAdmin = profile?.system_role === 'admin'
+  const isCreator = event?.created_by === user.id
+
+  if (!isAdmin && !isCreator) {
+    return { error: 'Solo el creador del evento o un administrador pueden cambiar el estado' }
   }
 
   const updatePayload: Database['public']['Tables']['events']['Update'] = {
     status: newStatus,
   }
 
-  // If finalized, automatically open MVP voting for matches
+  // If finalized, automatically open MVP voting for matches and generate debts
   if (newStatus === 'finalizado') {
     updatePayload.mvp_voting_open = true
     // Set 24 hour deadline for voting
@@ -273,6 +285,15 @@ export async function updateEventStatus(eventId: string, newStatus: EventStatus)
 
   if (error) {
     return { error: error.message }
+  }
+
+  // If finalized, automatically generate debts for attendees and guests
+  if (newStatus === 'finalizado') {
+    try {
+      await supabase.rpc('generate_event_debts', { p_event_id: eventId })
+    } catch (debtsErr) {
+      console.error('Error generating event debts:', debtsErr)
+    }
   }
 
   // If finalized, dispatch push notification to all confirmed attendees to vote for MVP

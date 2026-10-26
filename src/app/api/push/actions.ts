@@ -82,12 +82,13 @@ export async function removePushSubscription(endpoint: string) {
 export async function sendPushToUser(userId: string, payload: PushPayload) {
   const supabase = await createClient()
 
-  const { data: subs, error } = await supabase
-    .from('push_subscriptions')
-    .select('id, endpoint, keys_p256dh, keys_auth')
-    .eq('user_id', userId)
+  // Use SECURITY DEFINER RPC to safely fetch push tokens even when called by another user (e.g. waitlist promotion)
+  const { data: subsRpc, error } = await supabase.rpc('get_user_push_subscriptions', {
+    p_user_id: userId,
+  })
 
-  if (error || !subs || subs.length === 0) {
+  const subs = subsRpc || []
+  if (error || subs.length === 0) {
     return { sent: 0 }
   }
 
@@ -122,9 +123,9 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
     }
   }
 
-  // Clean stale subscriptions
+  // Clean stale subscriptions safely
   if (staleSubIds.length > 0) {
-    await supabase.from('push_subscriptions').delete().in('id', staleSubIds)
+    await supabase.rpc('delete_stale_push_subscriptions', { p_sub_ids: staleSubIds })
   }
 
   return { sent: sentCount }

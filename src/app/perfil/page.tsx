@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { ProfileForm } from '@/components/ProfileForm'
 import { PwaPrompt } from '@/components/PwaPrompt'
-import { Trophy, CalendarCheck, Award, ArrowLeft } from 'lucide-react'
+import { Trophy, CalendarCheck, Award, ArrowLeft, Wallet } from 'lucide-react'
 import Link from 'next/link'
 import { Database } from '@/types/database.types'
 
@@ -102,6 +102,13 @@ export default async function PerfilPage() {
     updated_at: new Date().toISOString(),
   }
 
+  // Fetch pending debts count
+  const { count: pendingDebtsCount } = await supabase
+    .from('member_debts')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('status', 'pendiente')
+
   return (
     <div className="flex-1 flex flex-col p-5 pb-24">
       {/* Top Header */}
@@ -150,6 +157,39 @@ export default async function PerfilPage() {
           <span className="text-[10px] text-neutral-500 font-medium">Votos MVP</span>
         </div>
       </div>
+
+      {/* Financial Status Quick Banner */}
+      <Link
+        href="/finanzas"
+        className={`mb-4 p-3 rounded-2xl border flex items-center justify-between transition shadow-xs ${
+          (pendingDebtsCount || 0) > 0
+            ? 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100/80'
+            : 'bg-emerald-50 border-emerald-200 text-emerald-900 hover:bg-emerald-100/80'
+        }`}
+      >
+        <div className="flex items-center gap-2.5">
+          <div
+            className={`p-2 rounded-xl text-white ${
+              (pendingDebtsCount || 0) > 0 ? 'bg-amber-500' : 'bg-emerald-600'
+            }`}
+          >
+            <Wallet className="w-4 h-4" />
+          </div>
+          <div>
+            <p className="text-xs font-bold leading-tight">
+              {(pendingDebtsCount || 0) > 0
+                ? `${pendingDebtsCount} partido(s) pendiente(s) de pago`
+                : 'Cuenta al día'}
+            </p>
+            <p className="text-[10px] text-neutral-500 mt-0.5">
+              {(pendingDebtsCount || 0) > 0
+                ? 'Revisa el detalle y datos de transferencia'
+                : 'No registras deudas pendientes'}
+            </p>
+          </div>
+        </div>
+        <span className="text-xs font-bold text-emerald-700">Ver &rarr;</span>
+      </Link>
 
       {/* Profile Form Card */}
       <div className="bg-white rounded-2xl p-5 border border-neutral-200/80 shadow-sm">

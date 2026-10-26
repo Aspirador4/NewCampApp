@@ -12,6 +12,8 @@ export type EventType = 'partido' | 'entrenamiento' | 'torneo' | 'asado' | 'otro
 export type EventStatus = 'convocado' | 'en_curso' | 'finalizado' | 'cancelado'
 export type AttendeeStatus = 'confirmado' | 'lista_espera' | 'cancelado'
 export type GuestStatus = 'pendiente_aprobacion' | 'aprobado' | 'rechazado'
+export type DebtType = 'partido_propio' | 'invitado'
+export type DebtStatus = 'pendiente' | 'pagado'
 export type AttendanceAction =
   | 'confirmo'
   | 'bajo'
@@ -113,6 +115,8 @@ export interface Database {
           status: EventStatus
           mvp_voting_open: boolean
           mvp_voting_deadline: string | null
+          cost_per_player: number
+          total_cost: number | null
           created_by: string | null
           created_at: string
           updated_at: string
@@ -129,6 +133,8 @@ export interface Database {
           status?: EventStatus
           mvp_voting_open?: boolean
           mvp_voting_deadline?: string | null
+          cost_per_player?: number
+          total_cost?: number | null
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -145,6 +151,8 @@ export interface Database {
           status?: EventStatus
           mvp_voting_open?: boolean
           mvp_voting_deadline?: string | null
+          cost_per_player?: number
+          total_cost?: number | null
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -430,6 +438,73 @@ export interface Database {
           }
         ]
       }
+      member_debts: {
+        Row: {
+          id: string
+          event_id: string
+          user_id: string
+          guest_id: string | null
+          debt_type: DebtType
+          description: string
+          amount: number
+          status: DebtStatus
+          paid_at: string | null
+          settled_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          user_id: string
+          guest_id?: string | null
+          debt_type: DebtType
+          description: string
+          amount?: number
+          status?: DebtStatus
+          paid_at?: string | null
+          settled_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          user_id?: string
+          guest_id?: string | null
+          debt_type?: DebtType
+          description?: string
+          amount?: number
+          status?: DebtStatus
+          paid_at?: string | null
+          settled_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_debts_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_debts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_debts_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "event_guests"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -460,6 +535,43 @@ export interface Database {
       finalize_event_mvp: {
         Args: {
           p_event_id: string
+        }
+        Returns: Json
+      }
+      get_user_push_subscriptions: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: {
+          id: string
+          endpoint: string
+          keys_p256dh: string
+          keys_auth: string
+        }[]
+      }
+      delete_stale_push_subscriptions: {
+        Args: {
+          p_sub_ids: string[]
+        }
+        Returns: void
+      }
+      generate_event_debts: {
+        Args: {
+          p_event_id: string
+          p_cost_per_player?: number
+        }
+        Returns: Json
+      }
+      settle_member_debts: {
+        Args: {
+          p_user_id: string
+          p_debt_ids?: string[]
+        }
+        Returns: Json
+      }
+      revert_debt_to_pending: {
+        Args: {
+          p_debt_id: string
         }
         Returns: Json
       }
