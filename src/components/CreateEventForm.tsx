@@ -7,6 +7,13 @@ import { MapPin, Users, Check, Loader2, AlertCircle, CircleDollarSign } from 'lu
 export function CreateEventForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [maxCapacity, setMaxCapacity] = useState<number | ''>(14)
+  const [totalCost, setTotalCost] = useState<number | ''>(42000)
+
+  const estimatedProrrated =
+    typeof totalCost === 'number' && totalCost > 0 && typeof maxCapacity === 'number' && maxCapacity > 0
+      ? Math.round(totalCost / maxCapacity)
+      : null
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -130,6 +137,8 @@ export function CreateEventForm() {
             type="number"
             min="2"
             max="100"
+            value={maxCapacity}
+            onChange={(e) => setMaxCapacity(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
             placeholder="Ej: 14 (dejar vacío si no tiene límite)"
             className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-neutral-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900"
           />
@@ -139,29 +148,36 @@ export function CreateEventForm() {
         </p>
       </div>
 
-      {/* Cost per Player */}
+      {/* Total Court Cost */}
       <div>
-        <label htmlFor="cost_per_player" className="block text-xs font-semibold text-neutral-700 mb-1">
-          Costo por Jugador ($)
+        <label htmlFor="total_cost" className="block text-xs font-semibold text-neutral-700 mb-1">
+          Costo Total de la Cancha ($)
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
             <CircleDollarSign className="w-4 h-4" />
           </div>
           <input
-            id="cost_per_player"
-            name="cost_per_player"
+            id="total_cost"
+            name="total_cost"
             type="number"
             min="0"
-            step="100"
-            defaultValue="3500"
-            placeholder="Ej: 3500 (o 0 si es gratis)"
+            step="1000"
+            value={totalCost}
+            onChange={(e) => setTotalCost(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+            placeholder="Ej: 42000 (o 0 si es gratis)"
             className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-neutral-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900"
           />
         </div>
-        <p className="text-[11px] text-neutral-400 mt-1">
-          Monto que se cargará a cada socio confirmado e invitados al finalizar el partido.
-        </p>
+        {estimatedProrrated !== null ? (
+          <p className="text-[11px] text-emerald-800 font-medium mt-1 bg-emerald-50 p-2 rounded-xl border border-emerald-200">
+            Prorrateo automático estimado: <strong className="font-bold text-emerald-900">${estimatedProrrated.toLocaleString('es-CL')}</strong> por jugador (dividido entre los {maxCapacity} convocados).
+          </p>
+        ) : (
+          <p className="text-[11px] text-neutral-400 mt-1">
+            El prorrateo se calcula automáticamente dividiendo este total entre los jugadores convocados.
+          </p>
+        )}
       </div>
 
       {/* Description / Cost notes */}

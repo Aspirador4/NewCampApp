@@ -98,7 +98,7 @@ CREATE POLICY "Only admins can delete debts"
 -- 5. BUSINESS LOGIC RPCS FOR FINANCES
 -- ==============================================================================
 
--- Generate debts for an event (confirmed attendees + approved guests)
+-- Generate debts for an event (prorated from total_cost across confirmed attendees + approved guests)
 CREATE OR REPLACE FUNCTION public.generate_event_debts(
   p_event_id uuid,
   p_cost_per_player integer DEFAULT NULL
@@ -107,6 +107,9 @@ RETURNS jsonb AS $$
 DECLARE
   v_event record;
   v_cost integer;
+  v_confirmed_count integer := 0;
+  v_approved_guests_count integer := 0;
+  v_total_players integer := 0;
   v_attendee record;
   v_guest record;
   v_count integer := 0;
@@ -116,10 +119,37 @@ BEGIN
     RAISE EXCEPTION 'Evento no encontrado';
   END IF;
 
-  v_cost := COALESCE(p_cost_per_player, v_event.cost_per_player, 0);
+  -- Count total players convocados (confirmed members + approved guests)
+  SELECT count(*) INTO v_confirmed_count
+  FROM public.event_attendees
+  WHERE event_id = p_event_id AND status = 'confirmado';
+
+  SELECT count(*) INTO v_approved_guests_count
+  FROM public.event_guests
+  WHERE event_id = p_event_id AND status = 'aprobado';
+
+  v_total_players := v_confirmed_count + v_approved_guests_count;
+
+  -- If no one is registered yet, fallback to max_capacity or 14
+  IF v_total_players <= 0 THEN
+    v_total_players := COALESCE(v_event.max_capacity, 14);
+  END IF;
+
+  -- Compute prorrated cost from total_cost if specified, otherwise fallback to cost_per_player
+  IF v_event.total_cost IS NOT NULL AND v_event.total_cost > 0 THEN
+    v_cost := ROUND(v_event.total_cost::numeric / v_total_players);
+  ELSE
+    v_cost := COALESCE(p_cost_per_player, v_event.cost_per_player, 0);
+  END IF;
+
   IF v_cost <= 0 THEN
     RETURN jsonb_build_object('success', true, 'created', 0, 'message', 'Evento sin costo');
   END IF;
+
+  -- Update cost_per_player on the event with the computed prorated value
+  UPDATE public.events
+  SET cost_per_player = v_cost
+  WHERE id = p_event_id;
 
   -- 1. Asistencia del jugador propio
   FOR v_attendee IN
@@ -133,6 +163,10 @@ BEGIN
       INSERT INTO public.member_debts (event_id, user_id, debt_type, description, amount, status)
       VALUES (p_event_id, v_attendee.user_id, 'partido_propio', 'Asistencia: ' || v_event.title, v_cost, 'pendiente');
       v_count := v_count + 1;
+    ELSE
+      UPDATE public.member_debts
+      SET amount = v_cost, updated_at = now()
+      WHERE event_id = p_event_id AND user_id = v_attendee.user_id AND debt_type = 'partido_propio' AND status = 'pendiente';
     END IF;
   END LOOP;
 
@@ -148,10 +182,20 @@ BEGIN
       INSERT INTO public.member_debts (event_id, user_id, guest_id, debt_type, description, amount, status)
       VALUES (p_event_id, v_guest.invited_by_user_id, v_guest.id, 'invitado', 'Invitado (' || v_guest.guest_name || '): ' || v_event.title, v_cost, 'pendiente');
       v_count := v_count + 1;
+    ELSE
+      UPDATE public.member_debts
+      SET amount = v_cost, updated_at = now()
+      WHERE event_id = p_event_id AND guest_id = v_guest.id AND status = 'pendiente';
     END IF;
   END LOOP;
 
-  RETURN jsonb_build_object('success', true, 'created', v_count);
+  RETURN jsonb_build_object(
+    'success', true,
+    'created', v_count,
+    'total_cost', v_event.total_cost,
+    'total_players', v_total_players,
+    'prorrated_cost', v_cost
+  );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

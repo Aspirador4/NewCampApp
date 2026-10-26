@@ -10,6 +10,11 @@ interface AttendeeSummary {
   registered_at: string
 }
 
+interface GuestSummary {
+  id: string
+  status: string
+}
+
 interface EventWithAttendees {
   id: string
   title: string
@@ -20,6 +25,7 @@ interface EventWithAttendees {
   max_capacity: number | null
   status: string
   event_attendees: AttendeeSummary[] | null
+  event_guests: GuestSummary[] | null
 }
 
 interface EventosPageProps {
@@ -44,6 +50,10 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         user_id,
         status,
         registered_at
+      ),
+      event_guests (
+        id,
+        status
       )
     `)
     .order('start_time', { ascending: filtro === 'finalizados' ? false : true })
@@ -161,7 +171,10 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         ) : (
           events.map((event) => {
             const attendees = event.event_attendees || []
-            const confirmedCount = attendees.filter((a) => a.status === 'confirmado').length
+            const guests = event.event_guests || []
+            const confirmedAttendeesCount = attendees.filter((a) => a.status === 'confirmado').length
+            const approvedGuestsCount = guests.filter((g) => g.status === 'aprobado').length
+            const totalConfirmed = confirmedAttendeesCount + approvedGuestsCount
             const waitlistCount = attendees.filter((a) => a.status === 'lista_espera').length
 
             // Check if current user is registered
@@ -171,8 +184,8 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
             const userStatus = userAttendee?.status
 
             const maxCap = event.max_capacity
-            const isFull = maxCap ? confirmedCount >= maxCap : false
-            const percentFilled = maxCap ? Math.min(100, (confirmedCount / maxCap) * 100) : 0
+            const isFull = maxCap ? totalConfirmed >= maxCap : false
+            const percentFilled = maxCap ? Math.min(100, (totalConfirmed / maxCap) * 100) : 0
 
             return (
               <Link
@@ -224,7 +237,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                     <div className="flex items-center gap-1.5 font-semibold text-neutral-700">
                       <Users className="w-3.5 h-3.5 text-neutral-500" />
                       <span>
-                        {maxCap ? `${confirmedCount} / ${maxCap} cupos` : `${confirmedCount} confirmados`}
+                        {maxCap ? `${totalConfirmed} / ${maxCap} cupos` : `${totalConfirmed} confirmados`}
                       </span>
                     </div>
 

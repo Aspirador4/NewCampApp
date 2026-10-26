@@ -319,12 +319,23 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             </div>
           )}
 
-          {Boolean(event.cost_per_player && event.cost_per_player > 0) && (
+          {(Boolean(event.total_cost && event.total_cost > 0) || Boolean(event.cost_per_player && event.cost_per_player > 0)) && (
             <div className="flex items-center gap-2">
               <CircleDollarSign className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-              <span className="font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
-                ${event.cost_per_player.toLocaleString('es-CL')} por jugador
-              </span>
+              <div className="text-xs">
+                {event.total_cost && event.total_cost > 0 ? (
+                  <span className="font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60 inline-flex flex-wrap items-center gap-1">
+                    <span>Cancha: ${event.total_cost.toLocaleString('es-CL')}</span>
+                    <span className="text-emerald-700 font-medium">
+                      • Prorrateo: ${Math.round(event.total_cost / (totalConfirmedCount > 0 ? totalConfirmedCount : (maxCap || 14))).toLocaleString('es-CL')} c/u
+                    </span>
+                  </span>
+                ) : (
+                  <span className="font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                    ${event.cost_per_player.toLocaleString('es-CL')} por jugador
+                  </span>
+                )}
+              </div>
             </div>
           )}
         </div>

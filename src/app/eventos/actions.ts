@@ -24,7 +24,7 @@ export async function createEvent(formData: FormData) {
   const startTime = formData.get('start_time') as string
   const location = (formData.get('location') as string)?.trim()
   const maxCapacityRaw = formData.get('max_capacity') as string
-  const costPerPlayerRaw = formData.get('cost_per_player') as string
+  const totalCostRaw = formData.get('total_cost') as string
 
   if (!title || !startDate || !startTime || !location) {
     return { error: 'Por favor completa todos los campos obligatorios' }
@@ -32,7 +32,13 @@ export async function createEvent(formData: FormData) {
 
   const startTimestamp = new Date(`${startDate}T${startTime}:00`).toISOString()
   const maxCapacity = maxCapacityRaw ? parseInt(maxCapacityRaw, 10) : null
-  const costPerPlayer = costPerPlayerRaw !== null && costPerPlayerRaw !== '' ? parseInt(costPerPlayerRaw, 10) : 3500
+  const totalCost = totalCostRaw !== null && totalCostRaw !== '' ? parseInt(totalCostRaw, 10) : null
+  const costPerPlayer =
+    totalCost && totalCost > 0
+      ? maxCapacity && maxCapacity > 0
+        ? Math.round(totalCost / maxCapacity)
+        : Math.round(totalCost / 14)
+      : 0
 
   const { data: newEvent, error: insertError } = await supabase
     .from('events')
@@ -43,7 +49,8 @@ export async function createEvent(formData: FormData) {
       start_time: startTimestamp,
       location,
       max_capacity: maxCapacity && maxCapacity > 0 ? maxCapacity : null,
-      cost_per_player: isNaN(costPerPlayer) ? 3500 : costPerPlayer,
+      total_cost: totalCost && totalCost > 0 ? totalCost : null,
+      cost_per_player: costPerPlayer,
       status: 'convocado',
       created_by: user.id,
     })
@@ -107,7 +114,15 @@ async function fallbackJoinEvent(supabase: SupabaseClient<Database>, eventId: st
     .eq('event_id', eventId)
     .eq('status', 'confirmado')
 
-  const isFull = event.max_capacity && (confirmedCount || 0) >= event.max_capacity
+  // Count approved guests
+  const { count: approvedGuestsCount } = await supabase
+    .from('event_guests')
+    .select('*', { count: 'exact', head: true })
+    .eq('event_id', eventId)
+    .eq('status', 'aprobado')
+
+  const totalConfirmed = (confirmedCount || 0) + (approvedGuestsCount || 0)
+  const isFull = event.max_capacity && totalConfirmed >= event.max_capacity
   const targetStatus = isFull ? 'lista_espera' : 'confirmado'
   const action = isFull ? 'entro_espera' : 'confirmo'
 

@@ -24,6 +24,10 @@ export default async function Home() {
       event_attendees (
         id,
         status
+      ),
+      event_guests (
+        id,
+        status
       )
     `)
     .in('status', ['convocado', 'en_curso'])
@@ -31,9 +35,13 @@ export default async function Home() {
     .limit(1);
 
   const nextEvent = upcomingEvents?.[0] || null;
-  const confirmedCount = nextEvent?.event_attendees?.filter(
+  const confirmedAttendees = nextEvent?.event_attendees?.filter(
     (a: { id: string; status: string }) => a.status === 'confirmado'
   ).length || 0;
+  const approvedGuests = nextEvent?.event_guests?.filter(
+    (g: { id: string; status: string }) => g.status === 'aprobado'
+  ).length || 0;
+  const confirmedCount = confirmedAttendees + approvedGuests;
 
   return (
     <div className="flex-1 flex flex-col p-5 pb-24">

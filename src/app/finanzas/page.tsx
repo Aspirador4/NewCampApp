@@ -57,7 +57,7 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
   // If admin, fetch all club debts
   let allDebts: AdminDebtItem[] = []
   if (isAdmin) {
-    const { data: allDebtsRaw } = await supabase
+    const { data: allDebtsRaw, error: allDebtsErr } = await supabase
       .from('member_debts')
       .select(`
         id,
@@ -74,13 +74,17 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
           title,
           start_time
         ),
-        profiles (
+        profiles:user_id (
           id,
           full_name,
           avatar_url
         )
       `)
       .order('created_at', { ascending: false })
+
+    if (allDebtsErr) {
+      console.error('Error fetching admin debts:', allDebtsErr)
+    }
 
     allDebts = (allDebtsRaw || []) as unknown as AdminDebtItem[]
   }
