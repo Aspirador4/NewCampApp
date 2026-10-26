@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 import { FinanzasAdminPanel, AdminDebtItem } from '@/components/FinanzasAdminPanel'
 import { FinanzasMemberView, MemberDebtItem } from '@/components/FinanzasMemberView'
-import { Wallet, ArrowLeft, ShieldCheck } from 'lucide-react'
+import { Wallet, ArrowLeft } from 'lucide-react'
 import { BankDetails } from './actions'
 import { getActiveClub } from '@/utils/club'
 
@@ -178,65 +178,54 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
   const activeView = isAdmin && tab === 'admin' ? 'admin' : 'socio'
 
   return (
-    <div className="flex-1 flex flex-col p-5 pb-nav">
+    <div className="flex-1 flex flex-col p-4 sm:p-5 pb-nav">
       {/* Top Header */}
-      <div className="flex items-center justify-between pt-2 pb-4 border-b border-neutral-200">
-        <div className="flex items-center gap-2.5">
+      <div className="flex items-center justify-between pt-2 pb-4 border-b-2 border-neutral-900/10">
+        <div className="flex items-center gap-2">
           <Link
             href="/"
-            className="p-2.5 -ml-2 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+            className="p-2 -ml-1 rounded-xl text-neutral-800 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
             aria-label="Volver al inicio"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
           </Link>
-          <div className="flex items-center gap-2">
-            <div
-              className="p-2.5 rounded-xl text-white shadow-xs"
-              style={{ backgroundColor: 'var(--club-primary, #059669)' }}
-            >
-              <Wallet className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="font-extrabold text-lg text-neutral-900 leading-tight">
-                Finanzas: {club.name}
-              </h1>
-              <p className="text-xs text-neutral-500 font-medium">
-                Control de aranceles y tesorería del club activo
-              </p>
-            </div>
+          <div>
+            <h1 className="font-display font-black text-2xl text-neutral-950 uppercase tracking-tight leading-none">
+              Tercer Tiempo & Finanzas
+            </h1>
+            <p className="font-mono text-[10px] text-neutral-500 uppercase tracking-wider mt-0.5">
+              {club.name} • Tesorería Oficial
+            </p>
           </div>
         </div>
 
-        {isAdmin && (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-neutral-900 text-emerald-400">
-            <ShieldCheck className="w-3 h-3" />
-            <span>Admin</span>
-          </span>
-        )}
+        <div className="w-10 h-10 rounded-xl bg-amber-400 text-neutral-950 flex items-center justify-center border-2 border-neutral-900 shadow-tactile-sm">
+          <Wallet className="w-5 h-5 stroke-[2.5]" />
+        </div>
       </div>
 
-      {/* Admin / Socio Toggle Pills */}
+      {/* Admin / Socio Segmented Locker Tabs */}
       {isAdmin && (
-        <div className="my-3 flex rounded-xl bg-neutral-200/70 p-1 text-xs font-bold min-h-[44px] items-center">
+        <div className="grid grid-cols-2 gap-2 my-3">
           <Link
             href="/finanzas?tab=socio"
-            className={`flex-1 py-2 rounded-lg text-center transition min-h-[38px] flex items-center justify-center active:scale-95 ${
+            className={`btn-tactile py-2.5 px-3 rounded-xl text-center flex items-center justify-center font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 ${
               activeView === 'socio'
-                ? 'bg-white text-neutral-900 shadow-xs'
-                : 'text-neutral-600 hover:text-neutral-900'
+                ? 'bg-neutral-950 text-white shadow-tactile-sm'
+                : 'bg-white text-neutral-700 hover:bg-neutral-50'
             }`}
           >
-            Mi Cuenta
+            Mi Cuenta (Socio)
           </Link>
           <Link
             href="/finanzas?tab=admin"
-            className={`flex-1 py-2 rounded-lg text-center transition min-h-[38px] flex items-center justify-center active:scale-95 ${
+            className={`btn-tactile py-2.5 px-3 rounded-xl text-center flex items-center justify-center font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 ${
               activeView === 'admin'
-                ? 'bg-neutral-900 text-white shadow-xs'
-                : 'text-neutral-600 hover:text-neutral-900'
+                ? 'bg-neutral-950 text-white shadow-tactile-sm'
+                : 'bg-white text-neutral-700 hover:bg-neutral-50'
             }`}
           >
-            Tesorería Admin
+            Tesorería General
           </Link>
         </div>
       )}

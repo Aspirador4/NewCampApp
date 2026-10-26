@@ -55,20 +55,22 @@ export default function NuevoClubPage() {
   const clubInitials = name.trim() ? name.trim().slice(0, 2).toUpperCase() : 'CD'
 
   return (
-    <div className="flex-1 flex flex-col p-5 pb-nav">
+    <div className="flex-1 flex flex-col p-4 sm:p-5 pb-nav">
       {/* Top Header */}
-      <div className="flex items-center gap-3 pt-2 pb-5 border-b border-neutral-200">
+      <div className="flex items-center gap-2 pt-2 pb-4 border-b-2 border-neutral-900/10">
         <Link
           href="/"
-          className="p-2.5 -ml-2 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+          className="p-2 -ml-1 rounded-xl text-neutral-800 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
           aria-label="Volver al inicio"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-neutral-900">Crear Nuevo Club</h1>
-          <p className="text-xs text-neutral-500">
-            Administra tus propios partidos, miembros y finanzas independientes
+          <h1 className="font-display font-black text-2xl uppercase tracking-tight text-neutral-950 leading-none">
+            Crear Nuevo Club
+          </h1>
+          <p className="font-mono text-[10px] text-neutral-500 uppercase tracking-wider mt-0.5">
+            Configuración de Nueva Institución Deportiva
           </p>
         </div>
       </div>

@@ -426,20 +426,20 @@ export function CreateEventForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full min-h-[48px] py-3.5 px-4 rounded-xl text-white font-bold text-sm shadow-md transition active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+        className="btn-tactile w-full min-h-[48px] py-3.5 px-4 rounded-2xl text-white font-display font-black text-base uppercase tracking-wider border-2 border-neutral-900 shadow-tactile flex items-center justify-center gap-2 disabled:opacity-50"
         style={{
           backgroundColor: 'var(--club-primary, #059669)',
         }}
       >
         {loading ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            <span>Publicando Evento...</span>
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span>Publicando Convocatoria...</span>
           </>
         ) : (
           <>
-            <Check className="w-4 h-4" />
-            <span>Publicar Convocatoria</span>
+            <Check className="w-5 h-5 stroke-[3]" />
+            <span>Publicar Convocatoria Oficial</span>
           </>
         )}
       </button>

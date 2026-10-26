@@ -50,20 +50,22 @@ export default async function UnirseDirectorioPage() {
   })
 
   return (
-    <div className="flex-1 flex flex-col p-5 pb-nav">
+    <div className="flex-1 flex flex-col p-4 sm:p-5 pb-nav">
       {/* Top Header */}
-      <div className="flex items-center gap-3 pt-2 pb-5 border-b border-neutral-200">
+      <div className="flex items-center gap-2 pt-2 pb-4 border-b-2 border-neutral-900/10">
         <Link
           href="/"
-          className="p-2.5 -ml-2 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+          className="p-2 -ml-1 rounded-xl text-neutral-800 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
           aria-label="Volver al inicio"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-neutral-900">Explorar Clubes</h1>
-          <p className="text-xs text-neutral-500">
-            Únete a comunidades deportivas o solicita admisión
+          <h1 className="font-display font-black text-2xl uppercase tracking-tight text-neutral-950 leading-none">
+            Explorar Clubes
+          </h1>
+          <p className="font-mono text-[10px] text-neutral-500 uppercase tracking-wider mt-0.5">
+            Directorio Deportivo General
           </p>
         </div>
       </div>
@@ -95,11 +97,11 @@ export default async function UnirseDirectorioPage() {
             <Link
               key={c.id}
               href={`/club/unirse/${c.slug}`}
-              className="flex items-center justify-between p-4 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-300 hover:shadow-xs transition active:scale-98 min-h-[72px]"
+              className="btn-tactile flex items-center justify-between p-4 rounded-3xl bg-white border-2 border-neutral-900 shadow-tactile transition min-h-[76px]"
             >
               <div className="flex items-center gap-3.5 min-w-0">
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-base shadow-xs flex-shrink-0"
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold text-base border-2 border-neutral-900 shadow-tactile-sm flex-shrink-0"
                   style={{
                     background: `linear-gradient(135deg, ${c.theme.gradientFrom}, ${c.theme.gradientTo})`,
                   }}
@@ -109,15 +111,15 @@ export default async function UnirseDirectorioPage() {
                     <img
                       src={c.logo_url}
                       alt={c.name}
-                      className="w-full h-full object-cover rounded-xl"
+                      className="w-full h-full object-cover rounded-2xl"
                     />
                   ) : (
-                    <Flame className="w-6 h-6" />
+                    <Flame className="w-6 h-6 stroke-[2.5]" />
                   )}
                 </div>
 
                 <div className="min-w-0">
-                  <h3 className="font-bold text-neutral-900 text-sm truncate">
+                  <h3 className="font-display font-black text-base uppercase text-neutral-950 truncate leading-tight">
                     {c.name}
                   </h3>
                   <p className="text-xs text-neutral-500 line-clamp-1 mt-0.5">

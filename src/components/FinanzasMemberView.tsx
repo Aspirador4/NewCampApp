@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, AlertCircle, Copy, Check, Calendar, ArrowRight, ShieldCheck } from 'lucide-react'
-import Link from 'next/link'
+import { CheckCircle2, AlertCircle, Copy, Check, Calendar } from 'lucide-react'
 import { BankDetails } from '@/app/finanzas/actions'
 import { EmptyState } from '@/components/EmptyState'
 
@@ -59,105 +58,102 @@ Email: ${bankDetails.email}`
     <div className="space-y-4">
       {/* Debt Status Card */}
       {pending.length === 0 ? (
-        <div
-          className="text-white rounded-2xl p-5 shadow-md space-y-2"
-          style={{
-            background: 'linear-gradient(135deg, var(--club-gradient-from, #059669), var(--club-gradient-to, #0f766e))',
-          }}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-white/20 text-white">
-              Estado Financiero
-            </span>
-            <span
-              className="inline-flex items-center gap-1 text-xs font-bold bg-white px-2.5 py-0.5 rounded-full shadow-xs"
-              style={{ color: 'var(--club-primary, #059669)' }}
-            >
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Al día</span>
-            </span>
+        <div className="relative overflow-hidden rounded-3xl border-2 border-neutral-900 bg-neutral-950 text-white shadow-tactile p-5">
+          <div className="absolute inset-0 bg-mesh-pattern-white opacity-10 pointer-events-none" />
+          <div className="relative space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+                ESTADO FINANCIERO OFICIAL
+              </span>
+              <span className="inline-flex items-center gap-1 font-mono text-[10px] font-black uppercase bg-emerald-400 text-neutral-950 px-2.5 py-0.5 rounded-full border border-neutral-900 shadow-tactile-sm">
+                <CheckCircle2 className="w-3.5 h-3.5 stroke-[3]" />
+                <span>Al día ✓</span>
+              </span>
+            </div>
+            <h2 className="font-display font-black text-2xl uppercase tracking-tight text-white leading-tight">
+              ¡Estás al día, {userName.split(' ')[0]}!
+            </h2>
+            <p className="font-sans text-xs text-neutral-300">
+              No registras cuotas pendientes por canchas ni terceros tiempos. ¡Excelente compromiso con el club!
+            </p>
           </div>
-          <h2 className="text-xl font-black">¡Estás al día, {userName.split(' ')[0]}!</h2>
-          <p className="text-xs text-white/90">
-            No tienes partidos pendientes de pago. ¡Gracias por mantener tu compromiso con el club!
-          </p>
         </div>
       ) : (
-        <div className="bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-2xl p-5 shadow-md space-y-3">
+        <div className="relative overflow-hidden rounded-3xl border-2 border-neutral-900 bg-amber-500 text-neutral-950 shadow-tactile p-5 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-black/20 text-white">
-              Saldo Pendiente
+            <span className="font-mono text-[10px] font-black uppercase tracking-widest text-neutral-950">
+              SALDO PENDIENTE POR LIQUIDAR
             </span>
-            <span className="inline-flex items-center gap-1 text-xs font-bold bg-white text-amber-900 px-2 py-0.5 rounded-full shadow-xs">
-              <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
-              <span>{pending.length} partido(s)</span>
+            <span className="inline-flex items-center gap-1 font-mono text-[10px] font-black uppercase bg-neutral-950 text-amber-400 px-2.5 py-0.5 rounded-full">
+              <AlertCircle className="w-3.5 h-3.5" />
+              <span>{pending.length} cuota(s)</span>
             </span>
           </div>
 
           <div>
-            <p className="text-xs text-amber-100 font-medium">Monto total adeudado</p>
-            <p className="text-3xl font-black tracking-tight">
+            <p className="font-mono text-[10px] text-neutral-900 uppercase font-bold">Monto Total Adeudado</p>
+            <p className="font-display font-black text-4xl text-neutral-950 tracking-tight leading-none mt-0.5">
               ${totalOwed.toLocaleString('es-CL')}
             </p>
           </div>
 
-          <div className="pt-2 border-t border-white/20 flex items-center justify-between text-xs text-amber-100">
+          <div className="pt-2 border-t-2 border-neutral-950/20 flex items-center justify-between font-mono text-[11px] text-neutral-950 font-bold">
             <span>{ownMatchesOwed} partido(s) propio(s)</span>
             {guestMatchesOwed > 0 && (
-              <span className="font-semibold text-white bg-black/20 px-2 py-0.5 rounded-md">
-                {guestMatchesOwed} invitado(s)
+              <span className="bg-neutral-950 text-white px-2 py-0.5 rounded-lg text-[10px]">
+                {guestMatchesOwed} invitado(s) a tu cargo
               </span>
             )}
           </div>
         </div>
       )}
 
-      {/* Bank Account Transfer Card with 1-Click Copy */}
-      <div className="bg-white rounded-2xl p-4 border border-neutral-200/90 shadow-xs space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xs font-bold text-neutral-800 uppercase tracking-wider">
-            Datos de Transferencia
+      {/* Bank Account Transfer Voucher with 1-Click Copy */}
+      <div className="bg-white rounded-3xl p-5 border-2 border-neutral-900 shadow-tactile space-y-3.5">
+        <div className="flex items-center justify-between border-b-2 border-neutral-900/10 pb-2.5">
+          <h3 className="font-display font-black text-base text-neutral-950 uppercase tracking-tight leading-none">
+            Datos Oficiales de Transferencia
           </h3>
-          <span className="text-[10px] text-neutral-400 font-medium">
-            Tesorería Oficial
+          <span className="font-mono text-[10px] text-neutral-500 uppercase font-bold">
+            Tesorería
           </span>
         </div>
 
         {bankDetails.numero_cuenta ? (
-          <div className="space-y-2 text-xs bg-neutral-50 p-3 rounded-xl border border-neutral-200/70">
+          <div className="space-y-2.5 font-mono text-xs bg-neutral-50 p-3.5 rounded-2xl border-2 border-neutral-300">
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <span className="text-[10px] text-neutral-500 uppercase block">Banco</span>
-                <span className="font-semibold text-neutral-800">{bankDetails.banco || '-'}</span>
+                <span className="text-[9px] text-neutral-400 uppercase block leading-none">Banco</span>
+                <span className="font-bold text-neutral-900 text-xs mt-0.5 block">{bankDetails.banco || '-'}</span>
               </div>
               <div>
-                <span className="text-[10px] text-neutral-500 uppercase block">Tipo Cuenta</span>
-                <span className="font-semibold text-neutral-800">{bankDetails.tipo_cuenta || '-'}</span>
+                <span className="text-[9px] text-neutral-400 uppercase block leading-none">Tipo Cuenta</span>
+                <span className="font-bold text-neutral-900 text-xs mt-0.5 block">{bankDetails.tipo_cuenta || '-'}</span>
               </div>
               <div>
-                <span className="text-[10px] text-neutral-500 uppercase block">Nº de Cuenta</span>
-                <span className="font-mono font-bold text-neutral-900">{bankDetails.numero_cuenta}</span>
+                <span className="text-[9px] text-neutral-400 uppercase block leading-none">Nº de Cuenta</span>
+                <span className="font-black text-neutral-950 text-sm mt-0.5 block">{bankDetails.numero_cuenta}</span>
               </div>
               <div>
-                <span className="text-[10px] text-neutral-500 uppercase block">RUT</span>
-                <span className="font-mono font-bold text-neutral-900">{bankDetails.rut || '-'}</span>
+                <span className="text-[9px] text-neutral-400 uppercase block leading-none">RUT</span>
+                <span className="font-black text-neutral-950 text-sm mt-0.5 block">{bankDetails.rut || '-'}</span>
               </div>
             </div>
 
-            <div className="pt-1 border-t border-neutral-200/60">
-              <span className="text-[10px] text-neutral-500 uppercase block">Titular</span>
-              <span className="font-semibold text-neutral-800">{bankDetails.titular || '-'}</span>
+            <div className="pt-2 border-t border-neutral-200">
+              <span className="text-[9px] text-neutral-400 uppercase block leading-none">Titular</span>
+              <span className="font-bold text-neutral-900 text-xs mt-0.5 block">{bankDetails.titular || '-'}</span>
             </div>
             {bankDetails.email && (
               <div>
-                <span className="text-[10px] text-neutral-500 uppercase block">Email Comprobantes</span>
-                <span className="font-medium text-neutral-700">{bankDetails.email}</span>
+                <span className="text-[9px] text-neutral-400 uppercase block leading-none">Email para Comprobante</span>
+                <span className="font-medium text-neutral-700 text-xs mt-0.5 block">{bankDetails.email}</span>
               </div>
             )}
           </div>
         ) : (
-          <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 text-xs text-neutral-500 text-center">
-            El administrador aún no ha configurado los datos bancarios.
+          <div className="p-3.5 bg-neutral-50 rounded-2xl border-2 border-neutral-200 text-xs text-neutral-500 text-center font-mono">
+            El administrador aún no ha configurado los datos bancarios oficiales.
           </div>
         )}
 
@@ -165,20 +161,20 @@ Email: ${bankDetails.email}`
           <button
             type="button"
             onClick={handleCopyTransfer}
-            className={`w-full min-h-[44px] py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition active:scale-98 shadow-xs ${
+            className={`btn-tactile w-full min-h-[44px] py-2.5 px-3 rounded-xl font-display font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 border-2 border-neutral-900 shadow-tactile-sm transition ${
               copied
-                ? 'bg-neutral-900 text-white'
-                : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-neutral-200'
+                ? 'bg-neutral-950 text-emerald-400'
+                : 'bg-white hover:bg-neutral-100 text-neutral-950'
             }`}
           >
             {copied ? (
               <>
-                <Check className="w-4 h-4 text-emerald-400" />
+                <Check className="w-4 h-4 stroke-[3]" />
                 <span>¡Datos Copiados al Portapapeles!</span>
               </>
             ) : (
               <>
-                <Copy className="w-4 h-4 text-neutral-500" />
+                <Copy className="w-4 h-4" />
                 <span>Copiar Datos de Transferencia</span>
               </>
             )}
@@ -186,20 +182,20 @@ Email: ${bankDetails.email}`
         )}
       </div>
 
-      {/* Tabs: Pendientes vs Pagados */}
-      <div className="flex gap-2 text-xs font-bold">
+      {/* Tabs: Pendientes vs Pagados (Segmented Locker Tabs) */}
+      <div className="grid grid-cols-2 gap-2">
         <button
           type="button"
           onClick={() => setActiveTab('pendientes')}
-          className={`flex-1 min-h-[40px] py-2 rounded-xl transition text-center flex items-center justify-center gap-1.5 active:scale-95 ${
+          className={`btn-tactile min-h-[40px] py-2 rounded-xl transition text-center flex items-center justify-center gap-1.5 font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 ${
             activeTab === 'pendientes'
-              ? 'bg-neutral-900 text-white shadow-xs'
-              : 'bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-50'
+              ? 'bg-neutral-950 text-white shadow-tactile-sm'
+              : 'bg-white text-neutral-700 hover:bg-neutral-50'
           }`}
         >
           <span>Pendientes</span>
           {pending.length > 0 && (
-            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white font-bold">
+            <span className="px-1.5 py-0.2 rounded-md text-[10px] bg-amber-400 text-neutral-950 font-black">
               {pending.length}
             </span>
           )}
@@ -208,15 +204,15 @@ Email: ${bankDetails.email}`
         <button
           type="button"
           onClick={() => setActiveTab('pagados')}
-          className={`flex-1 min-h-[40px] py-2 rounded-xl transition text-center flex items-center justify-center gap-1.5 active:scale-95 ${
+          className={`btn-tactile min-h-[40px] py-2 rounded-xl transition text-center flex items-center justify-center gap-1.5 font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 ${
             activeTab === 'pagados'
-              ? 'bg-neutral-900 text-white shadow-xs'
-              : 'bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-50'
+              ? 'bg-neutral-950 text-white shadow-tactile-sm'
+              : 'bg-white text-neutral-700 hover:bg-neutral-50'
           }`}
         >
           <span>Historial Pagados</span>
           {paid.length > 0 && (
-            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-neutral-200 text-neutral-700">
+            <span className="px-1.5 py-0.2 rounded-md text-[10px] bg-neutral-200 text-neutral-800 font-bold">
               {paid.length}
             </span>
           )}
@@ -224,7 +220,7 @@ Email: ${bankDetails.email}`
       </div>
 
       {/* Debts List */}
-      <div className="space-y-2.5">
+      <div className="space-y-3">
         {activeTab === 'pendientes' ? (
           pending.length === 0 ? (
             <EmptyState
@@ -236,20 +232,20 @@ Email: ${bankDetails.email}`
             pending.map((item) => (
               <div
                 key={item.id}
-                className="bg-white rounded-2xl p-4 border border-amber-200 shadow-xs flex items-center justify-between gap-3"
+                className="btn-tactile bg-white rounded-3xl p-4 border-2 border-neutral-900 shadow-tactile flex items-center justify-between gap-3"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 mb-1">
                     <span
-                      className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-md ${
+                      className={`font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded border border-neutral-900 ${
                         item.debt_type === 'invitado'
-                          ? 'bg-purple-100 text-purple-800'
-                          : 'bg-amber-100 text-amber-800'
+                          ? 'bg-purple-100 text-purple-900'
+                          : 'bg-amber-100 text-amber-900'
                       }`}
                     >
                       {item.debt_type === 'invitado' ? 'Invitado' : 'Partido Propio'}
                     </span>
-                    <span className="text-[10px] text-neutral-400">
+                    <span className="font-mono text-[10px] text-neutral-400">
                       {new Date(item.created_at).toLocaleDateString('es-CL', {
                         day: 'numeric',
                         month: 'short',
@@ -257,27 +253,21 @@ Email: ${bankDetails.email}`
                     </span>
                   </div>
 
-                  <h4 className="font-bold text-sm text-neutral-900 leading-tight">
-                    {item.description}
+                  <h4 className="font-display font-black text-base uppercase text-neutral-950 leading-tight">
+                    {item.events?.title || item.description}
                   </h4>
-
                   {item.events && (
-                    <Link
-                      href={`/eventos/${item.event_id}`}
-                      className="inline-flex items-center gap-1 text-[11px] text-neutral-500 hover:text-neutral-800 mt-1"
-                    >
-                      <Calendar className="w-3 h-3 text-neutral-400" />
-                      <span className="truncate">{item.events.title}</span>
-                      <ArrowRight className="w-2.5 h-2.5" />
-                    </Link>
+                    <p className="font-sans text-[11px] text-neutral-500 mt-0.5">
+                      {item.description}
+                    </p>
                   )}
                 </div>
 
-                <div className="text-right flex-shrink-0">
-                  <p className="text-base font-black text-amber-600">
+                <div className="text-right flex-shrink-0 pl-2">
+                  <span className="font-display font-black text-2xl text-neutral-950 block leading-tight">
                     ${item.amount.toLocaleString('es-CL')}
-                  </p>
-                  <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full inline-block mt-0.5">
+                  </span>
+                  <span className="font-mono text-[9px] font-black uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-300 inline-block mt-0.5">
                     Pendiente
                   </span>
                 </div>
@@ -286,42 +276,42 @@ Email: ${bankDetails.email}`
           )
         ) : paid.length === 0 ? (
           <EmptyState
-            icon={ShieldCheck}
+            icon={Calendar}
             title="Sin historial de pagos"
-            description="Aquí aparecerán los partidos y cuotas que hayas saldado con el club."
+            description="Aquí aparecerán los recibos de los partidos que ya hayas abonado."
           />
         ) : (
           paid.map((item) => (
             <div
               key={item.id}
-              className="bg-white rounded-2xl p-3.5 border border-neutral-200/80 shadow-xs flex items-center justify-between opacity-80"
+              className="bg-white rounded-3xl p-4 border-2 border-neutral-300 shadow-tactile-sm flex items-center justify-between gap-3 opacity-90"
             >
               <div className="min-w-0">
-                <span className="text-[9px] font-bold uppercase text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">
-                  {item.debt_type === 'invitado' ? 'Invitado' : 'Partido Propio'}
-                </span>
-                <p className="font-semibold text-xs text-neutral-800 mt-1 truncate">
-                  {item.description}
-                </p>
-                <p className="text-[10px] text-neutral-400">
-                  Pagado el{' '}
-                  {item.paid_at
-                    ? new Date(item.paid_at).toLocaleDateString('es-CL', {
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-neutral-100 text-neutral-700 border border-neutral-300">
+                    {item.debt_type === 'invitado' ? 'Invitado' : 'Partido Propio'}
+                  </span>
+                  {item.paid_at && (
+                    <span className="font-mono text-[10px] text-neutral-400">
+                      Pagado el {new Date(item.paid_at).toLocaleDateString('es-CL', {
                         day: 'numeric',
                         month: 'short',
-                        year: 'numeric',
-                      })
-                    : '-'}
-                </p>
+                      })}
+                    </span>
+                  )}
+                </div>
+
+                <h4 className="font-display font-black text-base uppercase text-neutral-950 leading-tight">
+                  {item.events?.title || item.description}
+                </h4>
               </div>
 
-              <div className="text-right flex-shrink-0">
-                <p className="text-sm font-bold text-neutral-700">
+              <div className="text-right flex-shrink-0 pl-2">
+                <span className="font-display font-black text-xl text-neutral-900 block leading-tight">
                   ${item.amount.toLocaleString('es-CL')}
-                </p>
-                <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-700">
-                  <CheckCircle2 className="w-3 h-3" />
-                  Pagado
+                </span>
+                <span className="font-mono text-[9px] font-bold uppercase text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300 inline-block mt-0.5">
+                  ✓ Liquidado
                 </span>
               </div>
             </div>

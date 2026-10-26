@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
-import { Plus, Calendar, MapPin, Users, ChevronRight, CheckCircle2, Clock, User } from 'lucide-react'
+import { Plus, Calendar, MapPin, Users, ArrowLeft, Clock, ArrowRight } from 'lucide-react'
 import { EventType, GenderCategory } from '@/types/database.types'
 import { getActiveClub } from '@/utils/club'
 import { EmptyState } from '@/components/EmptyState'
@@ -112,84 +112,86 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
 
   const formatEventDate = (isoString: string) => {
     const date = new Date(isoString)
-    return date.toLocaleDateString('es-AR', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
+    const weekday = date.toLocaleDateString('es-AR', { weekday: 'short' }).toUpperCase()
+    const day = date.getDate()
+    const month = date.toLocaleDateString('es-AR', { month: 'short' }).toUpperCase()
+    const time = date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+    return { weekday, day, month, time }
   }
 
   return (
-    <div className="flex-1 flex flex-col p-5 pb-nav">
+    <div className="flex-1 flex flex-col p-4 sm:p-5 pb-nav">
       {/* Top Header */}
-      <div className="flex items-center justify-between pt-2 pb-4 border-b border-neutral-200">
-        <div>
-          <h1 className="font-extrabold text-xl text-neutral-900 leading-tight">
-            Eventos
-          </h1>
-          <p className="text-xs text-neutral-500 font-medium truncate max-w-[210px]">
-            {club.name} • Convocatorias oficiales
-          </p>
+      <div className="flex items-center justify-between pt-2 pb-4 border-b-2 border-neutral-900/10">
+        <div className="flex items-center gap-2">
+          <Link
+            href="/"
+            className="p-2 -ml-1 rounded-xl text-neutral-800 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+            aria-label="Volver al inicio"
+          >
+            <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
+          </Link>
+          <div>
+            <h1 className="font-display font-black text-2xl text-neutral-950 uppercase tracking-tight leading-none">
+              Partidos & Eventos
+            </h1>
+            <p className="font-mono text-[10px] text-neutral-500 uppercase tracking-wider mt-0.5">
+              {club.name} • Fixture Oficial
+            </p>
+          </div>
         </div>
 
         <Link
           href="/eventos/nuevo"
-          className="min-h-[44px] flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-white font-bold text-xs shadow-xs transition active:scale-95"
-          style={{
-            backgroundColor: 'var(--club-primary, #059669)',
-          }}
+          className="btn-tactile min-h-[42px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-white font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 shadow-tactile-sm"
+          style={{ backgroundColor: 'var(--club-primary, #059669)' }}
         >
-          <Plus className="w-4 h-4" />
-          <span>Crear</span>
+          <Plus className="w-4 h-4 stroke-[3]" />
+          <span>Convocar</span>
         </Link>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex gap-2 my-3.5 overflow-x-auto pb-1 text-xs font-semibold no-scrollbar">
+      {/* Filter Tabs (Segmented Locker Navigation) */}
+      <div className="flex gap-2 my-3 overflow-x-auto pb-1 text-xs no-scrollbar">
         <Link
           href={`/eventos?filtro=proximos${tipo ? `&tipo=${tipo}` : ''}`}
-          className={`min-h-[38px] px-3.5 py-2 rounded-full whitespace-nowrap transition flex items-center justify-center active:scale-95 ${
+          className={`min-h-[38px] px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 ${
             filtro === 'proximos'
-              ? 'bg-neutral-900 text-white'
-              : 'bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-50'
+              ? 'bg-neutral-950 text-white shadow-tactile-sm'
+              : 'bg-white text-neutral-700 hover:bg-neutral-50'
           }`}
         >
           Próximos
         </Link>
         <Link
           href={`/eventos?filtro=finalizados${tipo ? `&tipo=${tipo}` : ''}`}
-          className={`min-h-[38px] px-3.5 py-2 rounded-full whitespace-nowrap transition flex items-center justify-center active:scale-95 ${
+          className={`min-h-[38px] px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 ${
             filtro === 'finalizados'
-              ? 'bg-neutral-900 text-white'
-              : 'bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-50'
+              ? 'bg-neutral-950 text-white shadow-tactile-sm'
+              : 'bg-white text-neutral-700 hover:bg-neutral-50'
           }`}
         >
-          Finalizados
+          Historial Finalizados
         </Link>
         {isAdmin && pendingClosureCount && pendingClosureCount > 0 && (
           <Link
             href={`/eventos?filtro=pendientes_cierre${tipo ? `&tipo=${tipo}` : ''}`}
-            className={`min-h-[38px] px-3.5 py-2 rounded-full whitespace-nowrap transition flex items-center gap-1.5 active:scale-95 ${
+            className={`min-h-[38px] px-3.5 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 ${
               filtro === 'pendientes_cierre'
-                ? 'bg-amber-600 text-white font-bold'
-                : 'bg-amber-50 text-amber-900 border border-amber-300 font-semibold'
+                ? 'bg-amber-500 text-neutral-950 shadow-tactile-sm'
+                : 'bg-amber-100 text-amber-950 hover:bg-amber-200'
             }`}
           >
-            <span>⚠️ Cierre Pendiente</span>
-            <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-200 text-amber-900">
-              {pendingClosureCount}
-            </span>
+            <span>⚠️ Liquidar ({pendingClosureCount})</span>
           </Link>
         )}
         {isAdmin && (
           <Link
             href={`/eventos?filtro=pendientes${tipo ? `&tipo=${tipo}` : ''}`}
-            className={`min-h-[38px] px-3.5 py-2 rounded-full whitespace-nowrap transition flex items-center gap-1.5 active:scale-95 ${
+            className={`min-h-[38px] px-3.5 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 ${
               filtro === 'pendientes'
-                ? 'bg-amber-500 text-white font-bold'
-                : 'bg-white text-amber-700 border border-amber-300 hover:bg-amber-50'
+                ? 'bg-amber-500 text-neutral-950 shadow-tactile-sm'
+                : 'bg-white text-amber-900 hover:bg-amber-50'
             }`}
           >
             <span>Por Aprobar</span>
@@ -197,33 +199,24 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         )}
       </div>
 
-      {/* Type Filter Chips */}
-      <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 text-xs font-medium no-scrollbar">
+      {/* Type Filter Pills */}
+      <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 text-xs font-mono no-scrollbar">
         {[
-          { key: 'todos', label: 'Todos' },
-          { key: 'partido', label: '⚽ Partidos' },
-          { key: 'entrenamiento', label: '🏃 Entrenamientos' },
-          { key: 'otro', label: '✨ Otros' },
+          { key: 'todos', label: 'TODOS' },
+          { key: 'partido', label: '⚽ PARTIDOS' },
+          { key: 'entrenamiento', label: '🏃 ENTRENAMIENTOS' },
+          { key: 'otro', label: '✨ OTROS' },
         ].map((item) => {
           const isActive = (!tipo && item.key === 'todos') || tipo === item.key
           return (
             <Link
               key={item.key}
               href={`/eventos?filtro=${filtro}&tipo=${item.key}`}
-              className={`min-h-[34px] px-3 py-1.5 rounded-lg whitespace-nowrap transition flex items-center justify-center active:scale-95 ${
+              className={`min-h-[32px] px-3 py-1 rounded-lg whitespace-nowrap transition flex items-center justify-center font-bold text-[10px] border ${
                 isActive
-                  ? 'font-bold border'
-                  : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                  ? 'bg-neutral-900 text-white border-neutral-900'
+                  : 'bg-white text-neutral-600 border-neutral-300 hover:bg-neutral-100'
               }`}
-              style={
-                isActive
-                  ? {
-                      backgroundColor: 'var(--club-primary-light, #ecfdf5)',
-                      color: 'var(--club-primary, #059669)',
-                      borderColor: 'var(--club-primary-border, #a7f3d0)',
-                    }
-                  : undefined
-              }
             >
               {item.label}
             </Link>
@@ -231,16 +224,16 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         })}
       </div>
 
-      {/* Events List */}
-      <div className="space-y-3.5">
+      {/* Events Feed (Matchday Ticket Stubs) */}
+      <div className="space-y-4">
         {events.length === 0 ? (
           <EmptyState
             icon={Calendar}
-            title="No hay eventos en esta sección"
+            title="Sin eventos en esta sección"
             description={
               filtro === 'pendientes_cierre'
                 ? 'No hay eventos pendientes de liquidación y cierre financiero.'
-                : 'Aún no se han convocado eventos con estos filtros.'
+                : 'No se encontraron convocatorias activas para los filtros seleccionados.'
             }
             action={
               isAdmin && filtro === 'proximos'
@@ -265,152 +258,140 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
 
             const maxCap = event.max_capacity
             const isFull = maxCap ? totalConfirmed >= maxCap : false
-            const percentFilled = maxCap ? Math.min(100, (totalConfirmed / maxCap) * 100) : 0
+            const percentFilled = maxCap ? Math.min(100, Math.round((totalConfirmed / maxCap) * 100)) : 0
+            const { weekday, day, month, time } = formatEventDate(event.start_time)
 
             return (
               <Link
                 key={event.id}
                 href={`/eventos/${event.id}`}
-                className="block bg-white rounded-2xl p-4 border border-neutral-200/90 shadow-xs hover:border-neutral-300 transition active:scale-[0.99]"
+                className="btn-tactile block bg-white rounded-3xl border-2 border-neutral-900 shadow-tactile overflow-hidden relative"
               >
-                {/* Card Top: Type & Status */}
-                <div className="flex items-center justify-between mb-2">
+                {/* Perforated notches on sides */}
+                <div className="absolute -left-2.5 top-[60%] -translate-y-1/2 w-5 h-5 bg-neutral-50 rounded-full border-2 border-neutral-900 z-10" />
+                <div className="absolute -right-2.5 top-[60%] -translate-y-1/2 w-5 h-5 bg-neutral-50 rounded-full border-2 border-neutral-900 z-10" />
+
+                {/* Ticket Top Header Bar */}
+                <div className="bg-neutral-900 text-white px-4 py-2 flex items-center justify-between border-b-2 border-neutral-900">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-700 tracking-wider">
-                      {event.event_type === 'partido'
-                        ? '⚽ Partido'
-                        : event.event_type === 'entrenamiento'
-                        ? '🏃 Entrenamiento'
-                        : '✨ ' + event.event_type}
+                    <span className="font-mono text-[9px] font-bold tracking-widest uppercase text-emerald-400">
+                      {event.status === 'convocado'
+                        ? '🟢 ABIERTO'
+                        : event.status === 'en_curso'
+                        ? '🔴 EN VIVO'
+                        : event.status === 'finalizado'
+                        ? '🏁 FINALIZADO'
+                        : '🟡 POR APROBAR'}
                     </span>
-
+                    <span className="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded bg-white/10 text-white border border-white/20">
+                      {event.event_type}
+                    </span>
                     {event.gender_category && (
-                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border ${
-                        event.gender_category === 'femenino'
-                          ? 'bg-purple-50 text-purple-700 border-purple-200'
-                          : event.gender_category === 'masculino'
-                          ? 'bg-blue-50 text-blue-700 border-blue-200'
-                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      }`}>
-                        {event.gender_category === 'femenino' ? '👩 Femenino' : event.gender_category === 'masculino' ? '👨 Masculino' : '👫 Mixto'}
+                      <span className="font-mono text-[9px] uppercase px-1.5 py-0.2 rounded bg-white/10 text-neutral-300">
+                        {event.gender_category === 'femenino' ? 'Fem' : event.gender_category === 'masculino' ? 'Masc' : 'Mixto'}
                       </span>
                     )}
                   </div>
 
-                  <div>
-                    {event.status === 'pendiente_aprobacion' && (
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
-                        Por Aprobar
-                      </span>
-                    )}
-                    {event.status === 'finalizado' && !event.financial_closed && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1">
-                        <span>⚠️ Cierre Pendiente</span>
-                      </span>
-                    )}
-                    {event.status === 'finalizado' && event.financial_closed && (
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-neutral-200 text-neutral-700">
-                        Finalizado ✓
-                      </span>
-                    )}
-                    {event.status === 'convocado' && (
-                      <span
-                        className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                        style={{
-                          backgroundColor: 'var(--club-primary-light, #ecfdf5)',
-                          color: 'var(--club-primary, #059669)',
-                        }}
-                      >
-                        Convocatoria Abierta
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Event Title */}
-                <h2 className="text-base font-bold text-neutral-900 leading-snug">
-                  {event.title}
-                </h2>
-
-                {/* Date and Location */}
-                <div className="mt-2.5 space-y-1 text-xs text-neutral-600">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
-                    <span className="font-medium capitalize">{formatEventDate(event.start_time)}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
-                    <span className="truncate">{event.location}</span>
-                  </div>
-
-                  {event.creator && (
-                    <div className="flex items-center gap-1.5 text-[11px] text-neutral-500 pt-0.5">
-                      <User className="w-3 h-3 text-neutral-400 flex-shrink-0" />
-                      <span>
-                        Convocado por <strong className="text-neutral-700 font-semibold">{event.creator.full_name}</strong>
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Capacity Bar */}
-                <div className="mt-3.5 pt-3 border-t border-neutral-100">
-                  <div className="flex items-center justify-between text-xs mb-1.5">
-                    <div className="flex items-center gap-1.5 font-semibold text-neutral-700">
-                      <Users className="w-3.5 h-3.5 text-neutral-500" />
-                      <span>
-                        {maxCap ? `${totalConfirmed} / ${maxCap} cupos` : `${totalConfirmed} confirmados`}
-                      </span>
-                    </div>
-
-                    {waitlistCount > 0 && (
-                      <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
-                        +{waitlistCount} en espera
-                      </span>
-                    )}
-                  </div>
-
-                  {maxCap && (
-                    <div className="w-full h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-300"
-                        style={{
-                          width: `${percentFilled}%`,
-                          backgroundColor: isFull ? '#d97706' : 'var(--club-primary, #059669)',
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Bottom User Status / CTA */}
-                <div className="mt-3 flex items-center justify-between pt-2">
                   {userStatus === 'confirmado' ? (
-                    <span
-                      className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg"
-                      style={{
-                        backgroundColor: 'var(--club-primary-light, #ecfdf5)',
-                        color: 'var(--club-primary, #059669)',
-                      }}
-                    >
-                      <CheckCircle2 className="w-3 h-3" />
-                      Estás confirmado
+                    <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-400 text-neutral-950">
+                      ✓ Anotado
                     </span>
                   ) : userStatus === 'lista_espera' ? (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded-lg">
-                      <Clock className="w-3 h-3 text-amber-600" />
-                      En lista de espera
+                    <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-400 text-neutral-950">
+                      En Espera
                     </span>
                   ) : (
-                    <span className="text-[11px] text-neutral-400 font-medium">
-                      Toca para inscribirte
+                    <span className="font-mono text-[9px] text-neutral-400 uppercase">
+                      MATCH #{event.id.slice(0, 4)}
                     </span>
                   )}
+                </div>
 
-                  <div className="flex items-center gap-1 text-xs font-semibold text-neutral-700">
-                    <span>Ver detalle</span>
-                    <ChevronRight className="w-4 h-4 text-neutral-400" />
+                {/* Ticket Body */}
+                <div className="p-4 space-y-3">
+                  <div>
+                    <div className="flex items-center gap-1.5 text-neutral-500 font-mono text-[11px] uppercase tracking-wider">
+                      <MapPin className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
+                      <span className="truncate">{event.location}</span>
+                    </div>
+                    <h2 className="font-display font-black text-2xl uppercase tracking-tight text-neutral-950 leading-tight mt-0.5">
+                      {event.title}
+                    </h2>
+                  </div>
+
+                  {/* Kickoff and Date Box */}
+                  <div className="grid grid-cols-2 gap-2 bg-neutral-100 p-2.5 rounded-2xl border border-neutral-300">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-white border border-neutral-300 flex items-center justify-center font-display font-black text-sm text-neutral-900 shadow-tactile-sm flex-shrink-0">
+                        {day}
+                      </div>
+                      <div className="min-w-0">
+                        <span className="font-mono text-[9px] text-neutral-500 uppercase block leading-none">Fecha</span>
+                        <span className="font-display font-bold text-xs uppercase text-neutral-900 truncate block mt-0.5">{weekday} • {month}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-white border border-neutral-300 flex items-center justify-center font-mono font-bold text-xs text-neutral-900 shadow-tactile-sm flex-shrink-0">
+                        <Clock className="w-4 h-4 text-emerald-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <span className="font-mono text-[9px] text-neutral-500 uppercase block leading-none">Kickoff</span>
+                        <span className="font-mono font-extrabold text-xs text-neutral-900 truncate block mt-0.5">{time} HRS</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Cupos Bar */}
+                  <div className="space-y-1.5 pt-0.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-mono text-[10px] uppercase font-bold text-neutral-500 flex items-center gap-1.5">
+                        <Users className="w-3.5 h-3.5 text-neutral-400" />
+                        <span>Cupos</span>
+                      </span>
+                      <span className="font-mono text-xs font-black text-neutral-900">
+                        {totalConfirmed} {maxCap ? `/ ${maxCap}` : ''}
+                        {waitlistCount > 0 && (
+                          <span className="ml-1 text-amber-700 font-bold">(+{waitlistCount} espera)</span>
+                        )}
+                      </span>
+                    </div>
+
+                    {maxCap && (
+                      <div className="w-full bg-neutral-200 h-2 rounded-full overflow-hidden border border-neutral-300">
+                        <div
+                          className="h-full rounded-full transition-all duration-300"
+                          style={{
+                            width: `${percentFilled}%`,
+                            backgroundColor: isFull ? '#dc2626' : 'var(--club-primary, #059669)',
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Perforation Line */}
+                  <div className="border-b-2 border-dashed border-neutral-300 -mx-4 my-2" />
+
+                  {/* Action Strip */}
+                  <div className="flex items-center justify-between pt-1">
+                    <div>
+                      <span className="font-mono text-[9px] uppercase text-neutral-500 block">Cuota Cancha</span>
+                      <span className="font-display font-black text-base text-neutral-950">
+                        {event.total_cost && event.total_cost > 0
+                          ? `~$${Math.round(event.total_cost / (maxCap || 14)).toLocaleString('es-CL')}`
+                          : event.cost_per_player && event.cost_per_player > 0
+                          ? `$${event.cost_per_player.toLocaleString('es-CL')}`
+                          : 'Gratis'}
+                        <span className="text-[10px] font-sans font-normal text-neutral-500 ml-1">p/jugador</span>
+                      </span>
+                    </div>
+
+                    <div className="btn-tactile bg-neutral-950 text-white font-display text-xs font-black uppercase tracking-wider px-3.5 py-2 rounded-xl border border-neutral-900 shadow-tactile-sm flex items-center gap-1">
+                      <span>Ver Ficha</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
+                    </div>
                   </div>
                 </div>
               </Link>

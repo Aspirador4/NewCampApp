@@ -303,19 +303,19 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
   }
 
   return (
-    <div className="flex-1 flex flex-col p-5 pb-nav">
+    <div className="flex-1 flex flex-col p-4 sm:p-5 pb-nav">
       <EventRealtimeListener eventId={event.id} />
 
       {/* Top Header */}
-      <div className="flex items-center justify-between pt-2 pb-4 border-b border-neutral-200">
+      <div className="flex items-center justify-between pt-2 pb-4 border-b-2 border-neutral-900/10">
         <Link
           href="/eventos"
-          className="p-2.5 -ml-2 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+          className="p-2 -ml-1 rounded-xl text-neutral-800 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
           aria-label="Volver al listado de eventos"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 flex-wrap">
           {event.status !== 'pendiente_aprobacion' && event.status !== 'cancelado' && (
             <>
               <AddToCalendarButton
@@ -343,18 +343,12 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
               />
             </>
           )}
-          <span className="text-[11px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-800 tracking-wider">
+          <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-neutral-900 text-white">
             {event.event_type}
           </span>
           {event.gender_category && (
-            <span className={`text-[11px] font-extrabold px-2.5 py-1 rounded-full border ${
-              event.gender_category === 'femenino'
-                ? 'bg-purple-50 text-purple-700 border-purple-200'
-                : event.gender_category === 'masculino'
-                ? 'bg-blue-50 text-blue-700 border-blue-200'
-                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-            }`}>
-              {event.gender_category === 'femenino' ? '👩 Femenino' : event.gender_category === 'masculino' ? '👨 Masculino' : '👫 Mixto'}
+            <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded border border-neutral-300 bg-neutral-100 text-neutral-800">
+              {event.gender_category === 'femenino' ? 'Fem' : event.gender_category === 'masculino' ? 'Masc' : 'Mixto'}
             </span>
           )}
         </div>
@@ -399,18 +393,18 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         )}
 
         <div className="flex items-start justify-between gap-3">
-          <h1 className="text-xl font-extrabold text-neutral-900 leading-tight">
+          <h1 className="font-display font-black text-3xl uppercase tracking-tight text-neutral-950 leading-tight">
             {event.title}
           </h1>
           <span
-            className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full whitespace-nowrap ${
+            className={`font-mono text-[9px] font-black uppercase px-2.5 py-1 rounded-md border border-neutral-900 whitespace-nowrap shadow-tactile-sm ${
               event.status === 'convocado'
-                ? 'bg-emerald-100 text-emerald-800'
+                ? 'bg-emerald-400 text-neutral-950'
                 : event.status === 'en_curso'
-                ? 'bg-blue-100 text-blue-800 animate-pulse'
+                ? 'bg-blue-400 text-neutral-950 animate-pulse'
                 : event.status === 'pendiente_aprobacion'
-                ? 'bg-amber-100 text-amber-900'
-                : 'bg-neutral-200 text-neutral-700'
+                ? 'bg-amber-400 text-neutral-950'
+                : 'bg-neutral-200 text-neutral-800'
             }`}
           >
             {event.status === 'convocado' ? 'Abierto' : event.status === 'pendiente_aprobacion' ? 'Por Aprobar' : event.status}
@@ -654,21 +648,24 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
       {/* Confirmed Players List (Includes Socios and Approved Guests) */}
       <div className="mt-5 space-y-3">
-        <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
-          <h2 className="text-sm font-bold text-neutral-900 flex items-center gap-2">
-            <span>Jugadores Confirmados</span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold">
+        <div className="flex items-center justify-between border-b-2 border-neutral-900/10 pb-2">
+          <h2 className="font-display font-black text-lg text-neutral-950 uppercase tracking-tight flex items-center gap-2">
+            <span>Plantel Confirmado</span>
+            <span className="font-mono text-xs px-2 py-0.5 rounded-md bg-emerald-400 text-neutral-950 border border-neutral-900 font-black">
               {totalConfirmedCount}{maxCap ? `/${maxCap}` : ''}
             </span>
           </h2>
+          <span className="font-mono text-[10px] text-neutral-400 uppercase">
+            Nómina Oficial
+          </span>
         </div>
 
         {totalConfirmedCount === 0 ? (
-          <p className="text-xs text-neutral-400 py-3 text-center">
-            Aún no hay jugadores confirmados. ¡Sé el primero!
+          <p className="font-mono text-xs text-neutral-400 py-3 text-center">
+            Aún no hay jugadores confirmados. ¡Sé el primero en anotarte!
           </p>
         ) : (
-          <div className="divide-y divide-neutral-100 bg-white rounded-2xl border border-neutral-200/80 shadow-xs overflow-hidden">
+          <div className="divide-y-2 divide-neutral-100 bg-white rounded-3xl border-2 border-neutral-900 shadow-tactile overflow-hidden">
             {/* Confirmed Socios */}
             {confirmedAttendees.map((attendee, index) => {
               const p = attendee.profiles
@@ -812,17 +809,20 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       {/* Waitlist Section */}
       {waitlistAttendees.length > 0 && (
         <div className="mt-6 space-y-3">
-          <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
-            <h2 className="text-sm font-bold text-neutral-900 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-500" />
-              <span>Lista de Espera</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-extrabold">
+          <div className="flex items-center justify-between border-b-2 border-neutral-900/10 pb-2">
+            <h2 className="font-display font-black text-lg text-neutral-950 uppercase tracking-tight flex items-center gap-2">
+              <Clock className="w-5 h-5 text-amber-500 stroke-[2.5]" />
+              <span>Lista de Espera Oficial</span>
+              <span className="font-mono text-xs px-2 py-0.5 rounded-md bg-amber-400 text-neutral-950 border border-neutral-900 font-black">
                 {waitlistAttendees.length}
               </span>
             </h2>
+            <span className="font-mono text-[10px] text-neutral-400 uppercase">
+              Auto-promoción
+            </span>
           </div>
 
-          <div className="divide-y divide-neutral-100 bg-white rounded-2xl border border-neutral-200/80 shadow-xs overflow-hidden">
+          <div className="divide-y-2 divide-neutral-100 bg-white rounded-3xl border-2 border-neutral-900 shadow-tactile overflow-hidden">
             {waitlistAttendees.map((attendee, index) => {
               const p = attendee.profiles
               const isCurrentUser = attendee.user_id === user.id

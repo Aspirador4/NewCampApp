@@ -22,29 +22,29 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <div className="flex-1 flex flex-col justify-between p-6">
       {/* Top Branding */}
-      <div className="pt-8 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-emerald-600 flex items-center justify-center text-white mx-auto shadow-lg mb-4">
-          <Flame className="w-9 h-9" />
+      <div className="pt-8 text-center space-y-2">
+        <div className="w-16 h-16 rounded-2xl bg-neutral-950 border-2 border-neutral-900 flex items-center justify-center text-emerald-400 mx-auto shadow-tactile mb-4">
+          <Flame className="w-9 h-9 fill-current" />
         </div>
-        <h1 className="text-2xl font-extrabold text-neutral-900 tracking-tight">
+        <h1 className="font-display font-black text-3xl uppercase tracking-tight text-neutral-950 leading-tight">
           Club Deportivo
         </h1>
-        <p className="text-sm text-neutral-500 mt-1">
-          Ingresa a tu cuenta para confirmar asistencias, votar MVP y ver estadísticas
+        <p className="font-mono text-xs text-neutral-500 uppercase tracking-wider max-w-xs mx-auto">
+          Portal Oficial de Acceso para Socios y Jugadores
         </p>
       </div>
 
       {/* Login Card Form */}
       <div className="my-auto py-6">
-        <div className="bg-white rounded-2xl p-5 border border-neutral-200/80 shadow-sm">
+        <div className="bg-white rounded-3xl p-6 border-2 border-neutral-900 shadow-tactile">
           <LoginForm initialError={error} />
         </div>
       </div>
 
       {/* Footer Info */}
       <div className="pb-4 text-center">
-        <p className="text-xs text-neutral-400">
-          Acceso rápido y seguro mediante Google
+        <p className="font-mono text-[10px] text-neutral-400 uppercase tracking-wider">
+          Autenticación Rápida y Segura • Acceso Exclusivo
         </p>
       </div>
     </div>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { joinEvent, leaveEvent } from '@/app/eventos/actions'
-import { Check, Loader2, AlertCircle, Clock, CheckCircle2 } from 'lucide-react'
+import { Check, Loader2, AlertCircle, Clock, CheckCircle2, UserMinus } from 'lucide-react'
 
 interface EventAttendanceCTAProps {
   eventId: string
@@ -49,10 +49,8 @@ export function EventAttendanceCTA({
 
   if (eventClosed) {
     return (
-      <div className="p-3.5 rounded-xl bg-neutral-100 border border-neutral-200 text-center">
-        <p className="text-xs font-semibold text-neutral-600">
-          La convocatoria para este evento ya ha concluido.
-        </p>
+      <div className="p-4 rounded-2xl bg-neutral-100 border-2 border-neutral-300 text-center font-mono text-xs text-neutral-600">
+        🏁 Convocatoria finalizada. Inscripciones cerradas.
       </div>
     )
   }
@@ -60,7 +58,7 @@ export function EventAttendanceCTA({
   return (
     <div className="space-y-3">
       {error && (
-        <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 text-red-700 text-xs border border-red-200">
+        <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 text-red-700 text-xs border-2 border-red-300">
           <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
           <span>{error}</span>
         </div>
@@ -68,29 +66,17 @@ export function EventAttendanceCTA({
 
       {/* State 1: User is confirmed */}
       {userStatus === 'confirmado' && (
-        <div
-          className="border rounded-2xl p-4 flex flex-col gap-3"
-          style={{
-            backgroundColor: 'var(--club-primary-light, #ecfdf5)',
-            borderColor: 'var(--club-primary-border, #a7f3d0)',
-          }}
-        >
-          <div className="flex items-center gap-2.5">
-            <div
-              className="p-2 rounded-xl text-white shadow-xs"
-              style={{ backgroundColor: 'var(--club-primary, #059669)' }}
-            >
-              <CheckCircle2 className="w-5 h-5" />
+        <div className="border-2 border-neutral-900 bg-emerald-50 rounded-3xl p-4 shadow-tactile flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center border-2 border-neutral-900 shadow-tactile-sm flex-shrink-0">
+              <CheckCircle2 className="w-6 h-6 stroke-[2.5]" />
             </div>
             <div>
-              <p
-                className="text-xs font-bold"
-                style={{ color: 'var(--club-primary, #059669)' }}
-              >
+              <p className="font-display font-black text-base text-emerald-950 uppercase tracking-tight leading-tight">
                 ¡Tu cupo está confirmado!
               </p>
-              <p className="text-[11px] text-neutral-600">
-                Estás en la lista oficial de jugadores convocados.
+              <p className="font-sans text-xs text-emerald-800 mt-0.5">
+                Estás registrado en la nómina oficial del partido.
               </p>
             </div>
           </div>
@@ -99,27 +85,27 @@ export function EventAttendanceCTA({
             type="button"
             onClick={() => setShowCancelModal(true)}
             disabled={loading}
-            className="w-full min-h-[44px] py-2 px-3 rounded-xl border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition active:scale-98"
+            className="btn-tactile w-full py-2.5 px-3 rounded-xl border-2 border-neutral-900 bg-white hover:bg-neutral-100 text-neutral-900 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5"
           >
-            Darse de baja
+            <UserMinus className="w-3.5 h-3.5 text-neutral-600" />
+            <span>Darme de baja</span>
           </button>
         </div>
       )}
 
       {/* State 2: User is in waitlist */}
       {userStatus === 'lista_espera' && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-col gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-amber-500 text-white shadow-xs">
-              <Clock className="w-5 h-5" />
+        <div className="bg-amber-50 border-2 border-neutral-900 rounded-3xl p-4 shadow-tactile flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500 text-neutral-950 flex items-center justify-center border-2 border-neutral-900 shadow-tactile-sm flex-shrink-0">
+              <Clock className="w-6 h-6 stroke-[2.5]" />
             </div>
             <div>
-              <p className="text-xs font-bold text-amber-900">
-                Estás en lista de espera
-                {waitlistPosition ? ` (Puesto #${waitlistPosition})` : ''}
+              <p className="font-display font-black text-base text-amber-950 uppercase tracking-tight leading-tight">
+                En Lista de Espera {waitlistPosition ? `• Puesto #${waitlistPosition}` : ''}
               </p>
-              <p className="text-[11px] text-amber-700">
-                Si un jugador confirmado se da de baja, ascenderás automáticamente.
+              <p className="font-sans text-xs text-amber-800 mt-0.5">
+                Si un titular se da de baja, ascenderás automáticamente de forma atómica.
               </p>
             </div>
           </div>
@@ -128,7 +114,7 @@ export function EventAttendanceCTA({
             type="button"
             onClick={() => setShowCancelModal(true)}
             disabled={loading}
-            className="w-full min-h-[44px] py-2 px-3 rounded-xl border border-amber-300 bg-white hover:bg-amber-50 text-amber-800 text-xs font-semibold transition active:scale-98"
+            className="btn-tactile w-full py-2.5 px-3 rounded-xl border-2 border-neutral-900 bg-white hover:bg-neutral-100 text-neutral-900 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition"
           >
             Salir de la lista de espera
           </button>
@@ -142,24 +128,24 @@ export function EventAttendanceCTA({
             type="button"
             onClick={handleJoin}
             disabled={loading}
-            className={`w-full min-h-[48px] py-3.5 px-4 rounded-xl text-white font-bold text-sm shadow-md transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50`}
+            className={`btn-tactile w-full py-3.5 px-4 rounded-2xl text-white font-display font-black text-base uppercase tracking-wider border-2 border-neutral-900 shadow-tactile flex items-center justify-center gap-2 disabled:opacity-50`}
             style={{
               backgroundColor: isFull ? '#d97706' : 'var(--club-primary, #059669)',
             }}
           >
             {loading ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Procesando...</span>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Procesando inscripción...</span>
               </>
             ) : isFull ? (
               <>
-                <Clock className="w-4 h-4" />
+                <Clock className="w-5 h-5 stroke-[2.5]" />
                 <span>Entrar a Lista de Espera</span>
               </>
             ) : (
               <>
-                <Check className="w-4 h-4" />
+                <Check className="w-5 h-5 stroke-[3]" />
                 <span>Confirmar Mi Asistencia (1-Click)</span>
               </>
             )}
@@ -169,50 +155,47 @@ export function EventAttendanceCTA({
 
       {/* Modal for cancellation */}
       {showCancelModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-5 w-full max-w-sm shadow-xl space-y-4">
+        <div className="fixed inset-0 bg-neutral-950/70 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-3xl border-2 border-neutral-900 shadow-tactile p-5 w-full max-w-sm space-y-4">
             <div>
-              <h3 className="font-extrabold text-base text-neutral-900">
+              <h3 className="font-display font-black text-xl uppercase tracking-tight text-neutral-950">
                 ¿Confirmas darte de baja?
               </h3>
-              <p className="text-xs text-neutral-500 mt-1">
+              <p className="text-xs text-neutral-600 mt-1 font-sans">
                 {userStatus === 'confirmado'
                   ? 'Tu cupo se liberará y el primer jugador en lista de espera ascenderá de inmediato.'
-                  : 'Saldrás de la lista de espera para este evento.'}
+                  : 'Saldrás de la fila de espera de esta convocatoria.'}
               </p>
             </div>
 
             <div>
-              <label htmlFor="cancel-reason" className="block text-xs font-semibold text-neutral-700 mb-1">
-                Motivo (opcional)
+              <label className="block text-[11px] font-mono font-bold uppercase text-neutral-700 mb-1">
+                Motivo (opcional):
               </label>
               <input
-                id="cancel-reason"
                 type="text"
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
-                placeholder="Ej: Lesión, viaje, trabajo..."
-                className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 text-base sm:text-xs bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900"
+                placeholder="Ej. Lesión, trabajo..."
+                className="w-full text-xs p-3 rounded-xl border-2 border-neutral-300 focus:border-neutral-900 focus:outline-none bg-white text-neutral-900"
               />
             </div>
 
-            <div className="flex gap-2.5 pt-1">
+            <div className="flex items-center gap-2 pt-1">
               <button
                 type="button"
                 onClick={() => setShowCancelModal(false)}
-                disabled={loading}
-                className="flex-1 min-h-[44px] py-2.5 px-3 rounded-xl border border-neutral-300 font-semibold text-xs text-neutral-700 hover:bg-neutral-50 active:scale-95 transition"
+                className="btn-tactile flex-1 py-2.5 px-3 rounded-xl border-2 border-neutral-300 text-neutral-800 font-display font-black text-xs uppercase"
               >
                 Volver
               </button>
-
               <button
                 type="button"
                 onClick={handleLeave}
                 disabled={loading}
-                className="flex-1 min-h-[44px] py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-700 font-bold text-xs text-white shadow-xs flex items-center justify-center gap-1.5 active:scale-95 transition"
+                className="btn-tactile flex-1 py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-display font-black text-xs uppercase border-2 border-neutral-900 shadow-tactile-sm"
               >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirmar baja'}
+                {loading ? 'Liberando...' : 'Confirmar Baja'}
               </button>
             </div>
           </div>

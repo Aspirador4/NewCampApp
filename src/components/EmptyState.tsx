@@ -28,23 +28,23 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div
-      className={`bg-white rounded-2xl p-7 sm:p-8 border border-neutral-200/80 shadow-xs text-center flex flex-col items-center justify-center ${className}`}
+      className={`bg-white rounded-3xl p-7 sm:p-8 border-2 border-neutral-900 shadow-tactile text-center flex flex-col items-center justify-center ${className}`}
     >
       <div
-        className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3.5 shadow-inner transition-transform"
+        className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3.5 border-2 border-neutral-900 shadow-tactile-sm transition-transform"
         style={{
           backgroundColor: 'var(--club-primary-light, #ecfdf5)',
           color: 'var(--club-primary, #059669)',
         }}
       >
-        <Icon className="w-7 h-7 stroke-[1.75]" />
+        <Icon className="w-7 h-7 stroke-[2]" />
       </div>
 
-      <h3 className="text-base font-bold text-neutral-900 tracking-tight">
+      <h3 className="font-display font-black text-xl uppercase text-neutral-950 tracking-tight">
         {title}
       </h3>
 
-      <p className="text-xs text-neutral-500 mt-1.5 max-w-xs leading-relaxed">
+      <p className="text-xs text-neutral-500 mt-1 max-w-xs leading-relaxed font-sans">
         {description}
       </p>
 
@@ -54,7 +54,7 @@ export function EmptyState({
             action.href ? (
               <Link
                 href={action.href}
-                className="w-full sm:w-auto flex-1 min-h-[44px] px-4 py-2.5 rounded-xl font-bold text-xs shadow-xs transition active:scale-95 flex items-center justify-center gap-1.5"
+                className="btn-tactile w-full sm:w-auto flex-1 min-h-[44px] px-4 py-2.5 rounded-xl font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 shadow-tactile-sm transition flex items-center justify-center gap-1.5"
                 style={{
                   backgroundColor: 'var(--club-primary, #059669)',
                   color: 'var(--club-primary-text, #ffffff)',
@@ -66,7 +66,7 @@ export function EmptyState({
               <button
                 type="button"
                 onClick={action.onClick}
-                className="w-full sm:w-auto flex-1 min-h-[44px] px-4 py-2.5 rounded-xl font-bold text-xs shadow-xs transition active:scale-95 flex items-center justify-center gap-1.5"
+                className="btn-tactile w-full sm:w-auto flex-1 min-h-[44px] px-4 py-2.5 rounded-xl font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 shadow-tactile-sm transition flex items-center justify-center gap-1.5"
                 style={{
                   backgroundColor: 'var(--club-primary, #059669)',
                   color: 'var(--club-primary-text, #ffffff)',

@@ -98,33 +98,32 @@ export default async function MiembrosPage() {
   members.sort((a, b) => a.full_name.localeCompare(b.full_name))
 
   return (
-    <div className="flex-1 flex flex-col p-5 pb-nav">
+    <div className="flex-1 flex flex-col p-4 sm:p-5 pb-nav">
       {/* Top Header */}
-      <div className="flex items-center justify-between pt-2 pb-4 border-b border-neutral-200">
-        <div className="flex items-center gap-2.5">
+      <div className="flex items-center justify-between pt-2 pb-4 border-b-2 border-neutral-900/10">
+        <div className="flex items-center gap-2">
           <Link
             href="/"
-            className="p-2.5 -ml-2 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+            className="p-2 -ml-1 rounded-xl text-neutral-800 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
             aria-label="Volver al inicio"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
           </Link>
-          <div className="flex items-center gap-2">
-            <div
-              className="p-2.5 rounded-xl text-white shadow-xs"
-              style={{ backgroundColor: 'var(--club-primary, #059669)' }}
-            >
-              <Users className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="font-extrabold text-lg text-neutral-900 leading-tight">
-                Miembros: {club.name}
-              </h1>
-              <p className="text-xs text-neutral-500 font-medium">
-                Directorio oficial y gestión de socios
-              </p>
-            </div>
+          <div>
+            <h1 className="font-display font-black text-2xl text-neutral-950 uppercase tracking-tight leading-none">
+              Plantel Oficial
+            </h1>
+            <p className="font-mono text-[10px] text-neutral-500 uppercase tracking-wider mt-0.5">
+              {club.name} • Directorio de Socios
+            </p>
           </div>
+        </div>
+
+        <div
+          className="w-10 h-10 rounded-xl text-white flex items-center justify-center border-2 border-neutral-900 shadow-tactile-sm"
+          style={{ backgroundColor: 'var(--club-primary, #059669)' }}
+        >
+          <Users className="w-5 h-5 stroke-[2.5]" />
         </div>
       </div>
 

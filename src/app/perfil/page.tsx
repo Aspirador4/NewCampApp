@@ -127,23 +127,23 @@ export default async function PerfilPage() {
     .eq('events.club_id', club.id)
 
   return (
-    <div className="flex-1 flex flex-col p-5 pb-nav">
+    <div className="flex-1 flex flex-col p-4 sm:p-5 pb-nav">
       {/* Top Header */}
-      <div className="flex items-center justify-between pt-2 pb-4 border-b border-neutral-200">
-        <div className="flex items-center gap-2.5">
+      <div className="flex items-center justify-between pt-2 pb-4 border-b-2 border-neutral-900/10">
+        <div className="flex items-center gap-2">
           <Link
             href="/"
-            className="p-2.5 -ml-2 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+            className="p-2 -ml-1 rounded-xl text-neutral-800 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
             aria-label="Volver al inicio"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
           </Link>
           <div>
-            <h1 className="font-extrabold text-lg text-neutral-900 leading-tight">
-              Mi Perfil
+            <h1 className="font-display font-black text-2xl text-neutral-950 uppercase tracking-tight leading-none">
+              Ficha del Socio
             </h1>
-            <p className="text-xs text-neutral-500 font-medium">
-              {club.name} • Socio Activo
+            <p className="font-mono text-[10px] text-neutral-500 uppercase tracking-wider mt-0.5">
+              {club.name} • Perfil Oficial
             </p>
           </div>
         </div>
@@ -151,69 +151,66 @@ export default async function PerfilPage() {
         {/* Financial shortcut badge */}
         <Link
           href="/finanzas"
-          className={`min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-bold transition active:scale-95 ${
+          className={`btn-tactile min-h-[40px] flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-neutral-900 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition ${
             (pendingDebtsCount || 0) > 0
-              ? 'bg-amber-50 text-amber-800 border-amber-300 shadow-xs animate-pulse'
-              : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              ? 'bg-amber-400 text-neutral-950'
+              : 'bg-emerald-400 text-neutral-950'
           }`}
           title="Ver estado de cuenta"
         >
-          <Wallet className="w-4 h-4" />
+          <Wallet className="w-4 h-4 stroke-[2.5]" />
           <span>
             {(pendingDebtsCount || 0) > 0
               ? `${pendingDebtsCount} ${(pendingDebtsCount || 0) === 1 ? 'deuda' : 'deudas'}`
-              : 'Al día'}
+              : 'Al día ✓'}
           </span>
         </Link>
       </div>
 
       {/* Stats Summary Cards */}
       <div className="grid grid-cols-3 gap-2.5 my-4">
-        <div className="bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-xs flex flex-col items-center text-center">
-          <div className="p-2 rounded-xl bg-amber-50 text-amber-600 mb-1">
-            <Trophy className="w-4 h-4" />
+        <div className="bg-white p-3 rounded-2xl border-2 border-neutral-900 shadow-tactile-sm flex flex-col items-center text-center">
+          <div className="w-7 h-7 rounded-lg bg-amber-500 text-neutral-950 flex items-center justify-center mb-1">
+            <Trophy className="w-4 h-4 stroke-[2.5]" />
           </div>
-          <span className="text-base font-extrabold text-neutral-900 leading-none">
+          <span className="font-display font-black text-2xl text-neutral-950 leading-none">
             {userStats.mvp_count}
           </span>
-          <span className="text-[10px] text-neutral-400 font-medium mt-1">
-            MVPs Ganados
+          <span className="font-mono text-[9px] text-neutral-500 uppercase font-bold mt-1">
+            MVPs
           </span>
         </div>
 
-        <div className="bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-xs flex flex-col items-center text-center">
+        <div className="bg-white p-3 rounded-2xl border-2 border-neutral-900 shadow-tactile-sm flex flex-col items-center text-center">
           <div
-            className="p-2 rounded-xl mb-1"
-            style={{
-              backgroundColor: 'var(--club-primary-light, #ecfdf5)',
-              color: 'var(--club-primary, #059669)',
-            }}
+            className="w-7 h-7 rounded-lg text-white flex items-center justify-center mb-1"
+            style={{ backgroundColor: 'var(--club-primary, #059669)' }}
           >
-            <CalendarCheck className="w-4 h-4" />
+            <CalendarCheck className="w-4 h-4 stroke-[2.5]" />
           </div>
-          <span className="text-base font-extrabold text-neutral-900 leading-none">
+          <span className="font-display font-black text-2xl text-neutral-950 leading-none">
             {userStats.matches_played}
           </span>
-          <span className="text-[10px] text-neutral-400 font-medium mt-1">
+          <span className="font-mono text-[9px] text-neutral-500 uppercase font-bold mt-1">
             Partidos
           </span>
         </div>
 
-        <div className="bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-xs flex flex-col items-center text-center">
-          <div className="p-2 rounded-xl bg-blue-50 text-blue-600 mb-1">
-            <Award className="w-4 h-4" />
+        <div className="bg-white p-3 rounded-2xl border-2 border-neutral-900 shadow-tactile-sm flex flex-col items-center text-center">
+          <div className="w-7 h-7 rounded-lg bg-blue-500 text-white flex items-center justify-center mb-1">
+            <Award className="w-4 h-4 stroke-[2.5]" />
           </div>
-          <span className="text-base font-extrabold text-neutral-900 leading-none">
+          <span className="font-display font-black text-2xl text-neutral-950 leading-none">
             {userStats.mvp_votes_received}
           </span>
-          <span className="text-[10px] text-neutral-400 font-medium mt-1">
-            Votos MVP
+          <span className="font-mono text-[9px] text-neutral-500 uppercase font-bold mt-1">
+            Votos
           </span>
         </div>
       </div>
 
       {/* Main Profile Form */}
-      <div className="flex-1 bg-white rounded-2xl p-4 border border-neutral-200/80 shadow-xs">
+      <div className="flex-1 bg-white rounded-3xl p-5 border-2 border-neutral-900 shadow-tactile">
         <ProfileForm profile={profile} fieldDefinitions={definitions} />
       </div>
 
