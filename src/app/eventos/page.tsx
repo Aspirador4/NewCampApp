@@ -155,7 +155,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
       <div className="flex gap-2 my-3 overflow-x-auto pb-1 text-xs no-scrollbar">
         <Link
           href={`/eventos?filtro=proximos${tipo ? `&tipo=${tipo}` : ''}`}
-          className={`min-h-[38px] px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 ${
+          className={`btn-tactile min-h-[38px] px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 ${
             filtro === 'proximos'
               ? 'bg-neutral-950 text-white shadow-tactile-sm'
               : 'bg-white text-neutral-700 hover:bg-neutral-50'
@@ -165,7 +165,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         </Link>
         <Link
           href={`/eventos?filtro=finalizados${tipo ? `&tipo=${tipo}` : ''}`}
-          className={`min-h-[38px] px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 ${
+          className={`btn-tactile min-h-[38px] px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 ${
             filtro === 'finalizados'
               ? 'bg-neutral-950 text-white shadow-tactile-sm'
               : 'bg-white text-neutral-700 hover:bg-neutral-50'
@@ -176,9 +176,9 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         {isAdmin && pendingClosureCount && pendingClosureCount > 0 && (
           <Link
             href={`/eventos?filtro=pendientes_cierre${tipo ? `&tipo=${tipo}` : ''}`}
-            className={`min-h-[38px] px-3.5 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 ${
+            className={`btn-tactile min-h-[38px] px-3.5 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 ${
               filtro === 'pendientes_cierre'
-                ? 'bg-amber-500 text-neutral-950 shadow-tactile-sm'
+                ? 'bg-amber-400 text-neutral-950 shadow-tactile-sm'
                 : 'bg-amber-100 text-amber-950 hover:bg-amber-200'
             }`}
           >
@@ -188,9 +188,9 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         {isAdmin && (
           <Link
             href={`/eventos?filtro=pendientes${tipo ? `&tipo=${tipo}` : ''}`}
-            className={`min-h-[38px] px-3.5 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 ${
+            className={`btn-tactile min-h-[38px] px-3.5 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 ${
               filtro === 'pendientes'
-                ? 'bg-amber-500 text-neutral-950 shadow-tactile-sm'
+                ? 'bg-amber-400 text-neutral-950 shadow-tactile-sm'
                 : 'bg-white text-amber-900 hover:bg-amber-50'
             }`}
           >
@@ -200,7 +200,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
       </div>
 
       {/* Type Filter Pills */}
-      <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 text-xs font-mono no-scrollbar">
+      <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 text-xs no-scrollbar">
         {[
           { key: 'todos', label: 'TODOS' },
           { key: 'partido', label: '⚽ PARTIDOS' },
@@ -212,10 +212,10 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
             <Link
               key={item.key}
               href={`/eventos?filtro=${filtro}&tipo=${item.key}`}
-              className={`min-h-[32px] px-3 py-1 rounded-lg whitespace-nowrap transition flex items-center justify-center font-bold text-[10px] border ${
+              className={`btn-tactile min-h-[32px] px-3 py-1 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 ${
                 isActive
-                  ? 'bg-neutral-900 text-white border-neutral-900'
-                  : 'bg-white text-neutral-600 border-neutral-300 hover:bg-neutral-100'
+                  ? 'bg-neutral-950 text-white shadow-tactile-sm'
+                  : 'bg-white text-neutral-800 hover:bg-neutral-100'
               }`}
             >
               {item.label}

@@ -63,11 +63,11 @@ ${eventUrl}`
     <button
       type="button"
       onClick={handleShare}
-      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs shadow-xs transition active:scale-95"
+      className="btn-tactile inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border-2 border-neutral-900 bg-[#25D366] hover:bg-[#20ba5a] text-neutral-950 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition active:scale-95"
       title="Compartir por WhatsApp"
     >
-      {copied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
-      <span>{copied ? '¡Compartido!' : 'Compartir en WhatsApp'}</span>
+      {copied ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Share2 className="w-3.5 h-3.5 stroke-[2.5]" />}
+      <span>{copied ? '¡Compartido!' : 'Compartir Convocatoria'}</span>
     </button>
   )
 }

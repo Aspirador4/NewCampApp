@@ -24,8 +24,8 @@ export function DynamicProfileFields({
 
   return (
     <div className="space-y-4 pt-2">
-      <div className="border-t border-neutral-200/80 pt-4">
-        <h3 className="text-xs font-bold text-neutral-800 uppercase tracking-wider mb-3">
+      <div className="border-t-2 border-neutral-900/10 pt-4">
+        <h3 className="font-display font-black text-xs text-neutral-900 uppercase tracking-wider mb-3">
           Datos Deportivos Adicionales
         </h3>
 
@@ -48,8 +48,8 @@ export function DynamicProfileFields({
             // READ-ONLY VIEW
             if (readOnly) {
               return (
-                <div key={def.id} className="py-1 border-b border-neutral-100 last:border-b-0 pb-2">
-                  <span className="block text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">
+                <div key={def.id} className="py-2 border-b border-neutral-200/80 last:border-b-0 pb-2">
+                  <span className="block font-mono text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
                     {def.label}
                   </span>
 
@@ -59,7 +59,7 @@ export function DynamicProfileFields({
                         selectedList.map((item) => (
                           <span
                             key={item}
-                            className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold"
+                            className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-display font-black uppercase tracking-wider border border-neutral-300"
                             style={{
                               backgroundColor: 'var(--club-primary-light, #ecfdf5)',
                               color: 'var(--club-primary, #059669)',
@@ -73,12 +73,12 @@ export function DynamicProfileFields({
                       )}
                     </div>
                   ) : def.field_type === 'boolean' ? (
-                    <span className="text-sm font-medium text-neutral-800 mt-0.5 block">
+                    <span className="text-sm font-bold text-neutral-900 mt-0.5 block">
                       {Boolean(rawValue) ? 'Sí' : 'No'}
                     </span>
                   ) : (
-                    <span className="text-sm font-medium text-neutral-800 mt-0.5 block">
-                      {stringValue || <span className="text-neutral-400 italic">No especificado</span>}
+                    <span className="text-sm font-bold text-neutral-900 mt-0.5 block">
+                      {stringValue || <span className="text-neutral-400 italic font-normal">No especificado</span>}
                     </span>
                   )}
                 </div>
@@ -90,7 +90,7 @@ export function DynamicProfileFields({
               <div key={def.id} className="space-y-1.5">
                 <label
                   htmlFor={`dynamic-${def.field_key}`}
-                  className="block text-xs font-semibold text-neutral-700"
+                  className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900"
                 >
                   {def.label}
                   {def.is_required && <span className="text-red-500 ml-1">*</span>}
@@ -114,10 +114,10 @@ export function DynamicProfileFields({
                                 : [...selectedList, opt]
                               onChange(def.field_key, updated as unknown as Json)
                             }}
-                            className={`min-h-[38px] px-3 py-1.5 rounded-xl text-xs font-semibold border transition flex items-center gap-1.5 active:scale-95 ${
+                            className={`min-h-[38px] px-3 py-1.5 rounded-xl text-xs font-display font-black uppercase tracking-wider border-2 transition flex items-center gap-1.5 active:scale-95 ${
                               isSelected
-                                ? 'text-white border-transparent shadow-xs'
-                                : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50'
+                                ? 'text-white border-neutral-900 shadow-tactile-sm'
+                                : 'bg-white text-neutral-800 border-neutral-300 hover:border-neutral-900'
                             }`}
                             style={
                               isSelected
@@ -135,12 +135,12 @@ export function DynamicProfileFields({
                     {/* Summary tags of selected items */}
                     {selectedList.length > 0 && (
                       <div className="pt-1 flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[10px] text-neutral-400 font-semibold uppercase">Seleccionadas:</span>
+                        <span className="font-mono text-[9px] text-neutral-400 font-bold uppercase tracking-wider">Seleccionadas:</span>
                         <div className="flex flex-wrap gap-1">
                           {selectedList.map((item) => (
                             <span
                               key={item}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold"
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-display font-black uppercase border border-neutral-300"
                               style={{
                                 backgroundColor: 'var(--club-primary-light, #ecfdf5)',
                                 color: 'var(--club-primary, #059669)',
@@ -176,7 +176,7 @@ export function DynamicProfileFields({
                     value={stringValue}
                     required={def.is_required}
                     onChange={(e) => onChange && onChange(def.field_key, e.target.value)}
-                    className="w-full px-3.5 py-3 rounded-xl border border-neutral-300 text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900 text-neutral-900"
+                    className="input-tactile w-full px-3.5 py-2.5 text-xs font-medium"
                   >
                     <option value="">Selecciona una opción</option>
                     {optionsList.map((optVal, idx) => (
@@ -201,7 +201,7 @@ export function DynamicProfileFields({
                       onChange(def.field_key, e.target.value === '' ? null : Number(e.target.value))
                     }
                     placeholder={`Ingresa ${def.label.toLowerCase()}`}
-                    className="w-full px-3.5 py-3 rounded-xl border border-neutral-300 text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900 text-neutral-900"
+                    className="input-tactile w-full px-3.5 py-2.5 text-xs font-mono font-medium"
                   />
                 )}
 
@@ -213,9 +213,9 @@ export function DynamicProfileFields({
                       id={`dynamic-${def.field_key}`}
                       checked={Boolean(rawValue)}
                       onChange={(e) => onChange && onChange(def.field_key, e.target.checked)}
-                      className="w-5 h-5 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300"
+                      className="w-5 h-5 rounded border-2 border-neutral-900 text-neutral-900 focus:ring-0"
                     />
-                    <span className="text-sm text-neutral-700">Habilitar / Sí</span>
+                    <span className="font-display font-black text-xs uppercase tracking-wider text-neutral-900">Habilitar / Sí</span>
                   </label>
                 )}
 
@@ -228,7 +228,7 @@ export function DynamicProfileFields({
                     required={def.is_required}
                     onChange={(e) => onChange && onChange(def.field_key, e.target.value)}
                     placeholder={`Ingresa ${def.label.toLowerCase()}`}
-                    className="w-full px-3.5 py-3 rounded-xl border border-neutral-300 text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900 text-neutral-900"
+                    className="input-tactile w-full px-3.5 py-2.5 text-xs font-medium"
                   />
                 )}
               </div>

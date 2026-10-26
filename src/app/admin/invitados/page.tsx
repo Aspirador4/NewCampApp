@@ -112,35 +112,37 @@ export default async function AdminInvitadosPage() {
       {/* Main Content */}
       <div className="mt-4 space-y-6">
         {eventsMap.size === 0 ? (
-          <div className="bg-white rounded-2xl p-8 border border-neutral-200/80 shadow-sm text-center">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3">
-              <ShieldCheck className="w-6 h-6" />
+          <div className="bg-white rounded-3xl p-8 border-2 border-neutral-900 shadow-tactile text-center space-y-3">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-100 border-2 border-neutral-900 shadow-tactile-sm text-emerald-950 flex items-center justify-center mx-auto">
+              <ShieldCheck className="w-7 h-7 stroke-[2.5]" />
             </div>
-            <h3 className="text-sm font-bold text-neutral-900">
-              ¡Al día! No hay invitados pendientes
-            </h3>
-            <p className="text-xs text-neutral-500 mt-1">
-              Todas las postulaciones de invitados externos han sido procesadas.
-            </p>
+            <div>
+              <h3 className="font-display font-black text-lg uppercase tracking-tight text-neutral-950">
+                ¡Al día! No hay invitados pendientes
+              </h3>
+              <p className="text-xs text-neutral-500 mt-1 font-sans">
+                Todas las postulaciones de invitados externos han sido procesadas por el tribunal del club.
+              </p>
+            </div>
           </div>
         ) : (
           Array.from(eventsMap.values()).map(({ event, guests }) => (
             <div
               key={event.id}
-              className="bg-white rounded-2xl p-4 border border-neutral-200 shadow-sm space-y-3"
+              className="bg-white rounded-3xl p-5 border-2 border-neutral-900 shadow-tactile space-y-4"
             >
-              <div className="border-b border-neutral-100 pb-2">
+              <div className="border-b-2 border-neutral-900/10 pb-3">
                 <Link
                   href={`/eventos/${event.id}`}
-                  className="font-bold text-sm text-neutral-900 hover:text-emerald-600 transition"
+                  className="font-display font-black text-lg uppercase tracking-tight text-neutral-950 hover:underline transition"
                 >
                   {event.title}
                 </Link>
-                <div className="flex items-center gap-3 mt-1 text-[11px] text-neutral-500">
+                <div className="flex items-center gap-3 mt-1.5 font-mono text-[10px] text-neutral-500">
                   <div className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-neutral-400" />
+                    <Calendar className="w-3.5 h-3.5 text-neutral-400 stroke-[2.5]" />
                     <span>
-                      {new Date(event.start_time).toLocaleDateString('es-AR', {
+                      {new Date(event.start_time).toLocaleDateString('es-CL', {
                         day: 'numeric',
                         month: 'short',
                         hour: '2-digit',
@@ -149,7 +151,7 @@ export default async function AdminInvitadosPage() {
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <MapPin className="w-3 h-3 text-neutral-400" />
+                    <MapPin className="w-3.5 h-3.5 text-neutral-400 stroke-[2.5]" />
                     <span className="truncate">{event.location}</span>
                   </div>
                 </div>

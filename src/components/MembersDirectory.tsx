@@ -535,15 +535,15 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
             </div>
 
             {/* Custom Attributes & Profile Info */}
-            <div className="space-y-2.5 pt-2 border-t border-neutral-100 text-xs">
-              <h4 className="font-bold uppercase tracking-wider text-[11px] text-neutral-400">
+            <div className="space-y-2 pt-2 border-t-2 border-neutral-900/10 text-xs">
+              <h4 className="font-display font-black uppercase tracking-wider text-xs text-neutral-500">
                 Ficha Deportiva & Datos
               </h4>
 
               {/* Posiciones */}
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/80">
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border-2 border-neutral-200">
                 <span className="text-neutral-500 font-medium">Posición(es):</span>
-                <span className="font-bold text-neutral-900 text-right">
+                <span className="font-display font-black text-sm uppercase text-neutral-950 text-right">
                   {activeMember.custom_attributes?.posicion
                     ? Array.isArray(activeMember.custom_attributes.posicion)
                       ? (activeMember.custom_attributes.posicion as string[])?.join(', ')
@@ -554,9 +554,9 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
               {/* Camiseta */}
               {Boolean(activeMember.custom_attributes?.numero_camiseta) && (
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/80">
-                  <span className="text-neutral-500 font-medium">Número preferido:</span>
-                  <span className="font-bold text-neutral-900">
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border-2 border-neutral-200">
+                  <span className="text-neutral-500 font-medium">Dorsal preferido:</span>
+                  <span className="font-display font-black text-base text-neutral-950">
                     #{String(activeMember.custom_attributes.numero_camiseta)}
                   </span>
                 </div>
@@ -564,9 +564,9 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
               {/* Pie hábil */}
               {Boolean(activeMember.custom_attributes?.pie_habil) && (
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/80">
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border-2 border-neutral-200">
                   <span className="text-neutral-500 font-medium">Pie hábil:</span>
-                  <span className="font-bold text-neutral-900">
+                  <span className="font-display font-black text-sm uppercase text-neutral-950">
                     {String(activeMember.custom_attributes.pie_habil)}
                   </span>
                 </div>
@@ -574,9 +574,9 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
               {/* Fecha de nacimiento & Edad */}
               {activeMember.birth_date && (
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/80">
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border-2 border-neutral-200">
                   <span className="text-neutral-500 font-medium">Edad / Nacimiento:</span>
-                  <span className="font-bold text-neutral-900">
+                  <span className="font-mono text-xs font-bold text-neutral-900">
                     {getAgeString(activeMember.birth_date)}
                   </span>
                 </div>
@@ -584,9 +584,9 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
               {/* Género */}
               {activeMember.gender && (
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/80">
-                  <span className="text-neutral-500 font-medium">Género:</span>
-                  <span className="font-bold text-neutral-900 capitalize">
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border-2 border-neutral-200">
+                  <span className="text-neutral-500 font-medium">Categoría:</span>
+                  <span className="font-display font-black text-xs uppercase text-neutral-950">
                     {activeMember.gender}
                   </span>
                 </div>
@@ -595,20 +595,20 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
             {/* Admin Management Section */}
             {isAdmin && (
-              <div className="pt-3 border-t border-neutral-100 space-y-2">
-                <h4 className="font-bold uppercase tracking-wider text-[11px] text-neutral-400 flex items-center gap-1.5">
-                  <Shield className="w-3.5 h-3.5 text-neutral-500" />
+              <div className="pt-3 border-t-2 border-neutral-900/10 space-y-2">
+                <h4 className="font-display font-black uppercase tracking-wider text-xs text-neutral-500 flex items-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5 text-neutral-700 stroke-[2.5]" />
                   <span>Gestión de Miembro (Admin)</span>
                 </h4>
 
                 <div className="flex flex-col gap-2">
                   {/* Assign / Remove Admin Role */}
-                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 border border-neutral-200">
+                  <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border-2 border-neutral-200">
                     <div>
-                      <p className="text-xs font-bold text-neutral-800">
-                        Rol: <span className="uppercase text-neutral-900 font-extrabold">{activeMember.system_role === 'admin' ? 'Administrador' : 'Socio'}</span>
+                      <p className="font-display font-black text-xs uppercase text-neutral-950">
+                        Rol: <span>{activeMember.system_role === 'admin' ? 'Administrador' : 'Socio'}</span>
                       </p>
-                      <p className="text-[10px] text-neutral-500">
+                      <p className="font-mono text-[9px] text-neutral-500">
                         {activeMember.system_role === 'admin'
                           ? 'Acceso total de administración'
                           : 'Acceso estándar de socio'}
@@ -618,16 +618,16 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                       type="button"
                       onClick={() => handleRoleChange(activeMember.id, activeMember.system_role === 'admin' ? 'member' : 'admin')}
                       disabled={actionLoading === activeMember.id}
-                      className={`min-h-[40px] py-1.5 px-3 rounded-xl font-bold text-xs transition active:scale-95 flex items-center gap-1.5 shadow-xs ${
+                      className={`btn-tactile min-h-[40px] py-1.5 px-3.5 rounded-xl border-2 border-neutral-900 font-display font-black text-xs uppercase tracking-wider transition active:scale-95 flex items-center gap-1.5 shadow-tactile-sm ${
                         activeMember.system_role === 'admin'
-                          ? 'bg-neutral-200 hover:bg-neutral-300 text-neutral-800'
-                          : 'bg-neutral-900 hover:bg-neutral-800 text-white'
+                          ? 'bg-neutral-200 hover:bg-neutral-300 text-neutral-950'
+                          : 'bg-neutral-950 hover:bg-neutral-900 text-white'
                       }`}
                     >
                       {actionLoading === activeMember.id ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       ) : (
-                        <Shield className="w-3.5 h-3.5" />
+                        <Shield className="w-3.5 h-3.5 stroke-[2.5]" />
                       )}
                       <span>{activeMember.system_role === 'admin' ? 'Quitar Admin' : 'Hacer Admin'}</span>
                     </button>
@@ -639,12 +639,12 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                       type="button"
                       onClick={() => handleDelete(activeMember.id, activeMember.full_name)}
                       disabled={actionLoading === activeMember.id}
-                      className="w-full min-h-[44px] py-2 px-3 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-98 disabled:opacity-50"
+                      className="btn-tactile w-full min-h-[44px] py-2 px-3 rounded-xl border-2 border-neutral-900 bg-rose-50 hover:bg-rose-100 text-rose-800 font-display font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition active:scale-98 disabled:opacity-50 shadow-tactile-sm"
                     >
                       {actionLoading === activeMember.id ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       ) : (
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-3.5 h-3.5 stroke-[2.5]" />
                       )}
                       <span>Eliminar Miembro del Club</span>
                     </button>
@@ -656,7 +656,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
             <button
               type="button"
               onClick={() => setActiveMember(null)}
-              className="w-full min-h-[44px] py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-xs transition active:scale-98"
+              className="btn-tactile w-full min-h-[44px] py-2.5 rounded-xl border-2 border-neutral-900 bg-neutral-950 hover:bg-neutral-900 text-white font-display font-black text-xs uppercase tracking-wider transition active:scale-98 shadow-tactile-sm"
             >
               Cerrar Ficha
             </button>

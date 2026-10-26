@@ -31,13 +31,13 @@ export function JoinClubForm({ clubId, initialStatus, initialMotivation = '' }: 
         type="button"
         onClick={handleSwitch}
         disabled={loading}
-        className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition active:scale-98 flex items-center justify-center gap-2"
+        className="btn-tactile w-full py-3 px-4 rounded-xl border-2 border-neutral-900 bg-neutral-950 hover:bg-neutral-900 text-white font-display font-black text-xs uppercase tracking-wider shadow-tactile transition active:scale-98 flex items-center justify-center gap-2 min-h-[44px]"
       >
         {loading ? (
           <Loader2 className="w-4 h-4 animate-spin" />
         ) : (
           <>
-            Entrar a este club
+            Entrar al Vestuario de este Club
             <ArrowRight className="w-4 h-4" />
           </>
         )}
@@ -63,11 +63,11 @@ export function JoinClubForm({ clubId, initialStatus, initialMotivation = '' }: 
 
   if (success) {
     return (
-      <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-2">
+      <div className="p-5 rounded-3xl bg-white border-2 border-neutral-900 shadow-tactile text-center space-y-2">
         <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-        <h4 className="font-bold text-emerald-950 text-sm">¡Solicitud Enviada!</h4>
-        <p className="text-xs text-emerald-700">
-          Los administradores han recibido tu solicitud. Te notificaremos cuando seas admitido.
+        <h4 className="font-display font-black text-lg text-neutral-950 uppercase tracking-tight">¡Solicitud Enviada!</h4>
+        <p className="text-xs text-neutral-600 font-sans">
+          Los administradores han recibido tu solicitud. Te notificaremos cuando tu pase sea validado.
         </p>
       </div>
     )
@@ -76,7 +76,7 @@ export function JoinClubForm({ clubId, initialStatus, initialMotivation = '' }: 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2.5">
+        <div className="p-3.5 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-900 text-xs flex items-center gap-2.5 font-medium">
           <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-600" />
           <span>{error}</span>
         </div>
@@ -84,10 +84,10 @@ export function JoinClubForm({ clubId, initialStatus, initialMotivation = '' }: 
 
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-bold text-neutral-700 uppercase tracking-wider">
-            Carta de Presentación / Motivación
+          <label className="font-display font-black text-xs text-neutral-900 uppercase tracking-wider">
+            Carta de Presentación / Referencia Deportiva
           </label>
-          <span className="text-[11px] text-neutral-400">
+          <span className="font-mono text-[10px] text-neutral-400">
             {motivation.length}/100
           </span>
         </div>
@@ -96,28 +96,25 @@ export function JoinClubForm({ clubId, initialStatus, initialMotivation = '' }: 
           maxLength={100}
           value={motivation}
           onChange={(e) => setMotivation(e.target.value)}
-          placeholder="Ej: Juego de volante y me invitó Marcos. Quiero sumarme a los partidos..."
-          className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+          placeholder="Ej: Juego de medio campo y me invitó Marcos. Quiero sumarme a las convocatorias..."
+          className="input-tactile w-full px-3.5 py-2.5 text-xs font-medium placeholder-neutral-400"
         />
-        <p className="text-[11px] text-neutral-400">
-          Cuéntale brevemente a los administradores tu motivación o quién te invitó.
+        <p className="text-[11px] text-neutral-500 font-sans">
+          Indica tu posición en cancha o quién del club te recomendó para agilizar la aprobación.
         </p>
       </div>
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50"
+        className="btn-tactile w-full py-3 px-4 rounded-xl border-2 border-neutral-900 bg-neutral-950 hover:bg-neutral-900 text-white font-display font-black text-xs uppercase tracking-wider shadow-tactile transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50 min-h-[44px]"
       >
         {loading ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Enviando solicitud...
-          </>
+          <Loader2 className="w-4 h-4 animate-spin" />
         ) : (
           <>
             <Send className="w-4 h-4" />
-            Enviar Solicitud de Admisión
+            <span>Enviar Solicitud de Fichaje</span>
           </>
         )}
       </button>

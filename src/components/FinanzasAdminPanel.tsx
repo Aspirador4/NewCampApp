@@ -188,53 +188,53 @@ export function FinanzasAdminPanel({
     <div className="space-y-4">
       {/* Alert Messages */}
       {error && (
-        <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 text-red-700 text-xs border border-red-200">
-          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+        <div className="flex items-start gap-2 p-3.5 rounded-2xl bg-rose-50 text-rose-900 text-xs border-2 border-rose-300 shadow-tactile-sm font-medium">
+          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-rose-600" />
           <span>{error}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="flex items-start gap-2 p-3 rounded-xl bg-emerald-50 text-emerald-800 text-xs border border-emerald-200">
+        <div className="flex items-start gap-2 p-3.5 rounded-2xl bg-emerald-50 text-emerald-950 text-xs border-2 border-emerald-300 shadow-tactile-sm font-semibold">
           <CheckCircle2 className="w-4 h-4 mt-0.5 text-emerald-600 flex-shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {/* Global Club Financial Health Card */}
-      <div className="bg-neutral-900 text-white rounded-2xl p-4 shadow-md space-y-3">
+      <div className="bg-neutral-950 text-white rounded-3xl p-5 border-2 border-neutral-900 shadow-tactile space-y-4 relative overflow-hidden bg-mesh-pattern-white">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300">
+          <span className="font-mono text-[10px] font-black uppercase tracking-wider text-emerald-400 bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">
             Resumen General de Tesorería
           </span>
-          <span className="text-xs font-semibold text-neutral-400">
+          <span className="font-mono text-[10px] font-bold text-neutral-400">
             {pendingDebts.length} cobro(s) pendiente(s)
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 pt-1">
+        <div className="grid grid-cols-2 gap-4 pt-1">
           <div>
-            <p className="text-[11px] text-neutral-400">Por Cobrar en el Club</p>
-            <p className="text-2xl font-black text-amber-400 tracking-tight">
+            <p className="font-mono text-[10px] text-neutral-400 uppercase tracking-wider">Por Cobrar en el Club</p>
+            <p className="font-display font-black text-3xl text-amber-400 tracking-tight leading-none mt-1">
               ${totalClubDebt.toLocaleString('es-CL')}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-[11px] text-neutral-400">Jugadores Deudores</p>
-            <p className="text-2xl font-black text-white tracking-tight">
+            <p className="font-mono text-[10px] text-neutral-400 uppercase tracking-wider">Jugadores Deudores</p>
+            <p className="font-display font-black text-3xl text-white tracking-tight leading-none mt-1">
               {playerSummaries.length}
             </p>
           </div>
         </div>
 
         {/* Club Settings & Bank Config Button */}
-        <div className="pt-2 border-t border-neutral-800 flex justify-end">
+        <div className="pt-3 border-t-2 border-neutral-800 flex justify-end">
           <button
             type="button"
             onClick={() => setIsEditingSettings(true)}
-            className="min-h-[44px] text-xs font-bold text-neutral-200 hover:text-white bg-neutral-800 hover:bg-neutral-700 py-2 px-3 rounded-xl border border-neutral-700 flex items-center gap-1.5 transition active:scale-95"
+            className="btn-tactile min-h-[44px] text-xs font-display font-black uppercase tracking-wider text-neutral-900 bg-white hover:bg-neutral-100 py-2 px-3.5 rounded-xl border-2 border-neutral-900 shadow-tactile-sm flex items-center gap-1.5 transition active:scale-95"
           >
-            <Settings2 className="w-4 h-4 text-emerald-400" />
+            <Settings2 className="w-4 h-4 text-emerald-600 stroke-[2.5]" />
             <span>Configuración & Colores del Club</span>
           </button>
         </div>
@@ -242,39 +242,39 @@ export function FinanzasAdminPanel({
 
       {/* Partidos Pendientes de Cierre Financiero */}
       {pendingClosureEvents.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-3 shadow-xs">
+        <div className="bg-amber-50 border-2 border-neutral-900 shadow-tactile rounded-3xl p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-amber-700 flex-shrink-0" />
-              <h4 className="text-xs font-bold uppercase tracking-wider text-amber-950">
+              <h4 className="font-display font-black text-sm uppercase tracking-wider text-amber-950">
                 Partidos Pendientes de Cierre ({pendingClosureEvents.length})
               </h4>
             </div>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">
+            <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded border border-amber-300 bg-amber-200 text-amber-950 uppercase">
               Por Liquidar
             </span>
           </div>
 
-          <p className="text-xs text-amber-800 leading-relaxed">
+          <p className="text-xs text-amber-900 leading-relaxed font-sans">
             Los siguientes partidos finalizaron en cancha pero aún no se han liquidado las cuotas a los jugadores. Haz clic en <strong>Cerrar Finanzas</strong> para liquidar los cobros.
           </p>
 
-          <div className="divide-y divide-amber-200/80 bg-white rounded-xl border border-amber-200 overflow-hidden">
+          <div className="divide-y-2 divide-neutral-900/10 bg-white rounded-2xl border-2 border-neutral-900 overflow-hidden">
             {pendingClosureEvents.map((ev) => (
               <div key={ev.id} className="p-3 flex items-center justify-between gap-3 hover:bg-amber-50/50 transition">
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-neutral-900 truncate">{ev.title}</p>
-                  <p className="text-[11px] text-neutral-500">
+                  <p className="font-display font-black text-sm text-neutral-950 uppercase tracking-tight truncate">{ev.title}</p>
+                  <p className="font-mono text-[10px] text-neutral-500 mt-0.5">
                     {new Date(ev.start_time).toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short' })} • {ev.confirmed_count} jugadores
                     {ev.total_cost ? ` • Total Cancha: $${ev.total_cost.toLocaleString('es-CL')}` : ''}
                   </p>
                 </div>
                 <Link
                   href={`/eventos/${ev.id}`}
-                  className="min-h-[44px] py-2 px-3.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center gap-1 transition active:scale-95 shadow-xs flex-shrink-0"
+                  className="btn-tactile min-h-[44px] py-2 px-3.5 rounded-xl border-2 border-neutral-900 bg-amber-400 hover:bg-amber-500 text-neutral-950 font-display font-black text-xs uppercase tracking-wider flex items-center gap-1 transition active:scale-95 shadow-tactile-sm flex-shrink-0"
                 >
                   <span>Cerrar Finanzas</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
+                  <ChevronRight className="w-3.5 h-3.5 stroke-[2.5]" />
                 </Link>
               </div>
             ))}
@@ -285,30 +285,30 @@ export function FinanzasAdminPanel({
       {/* Settings Modal (Bank details + Palette Picker) */}
       {isEditingSettings && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4">
-          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 space-y-4 max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
-            <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
-              <h3 className="font-extrabold text-base text-neutral-900">
+          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl border-2 border-neutral-900 shadow-tactile p-6 space-y-4 max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
+            <div className="flex items-center justify-between border-b-2 border-neutral-900/10 pb-3">
+              <h3 className="font-display font-black text-xl text-neutral-950 uppercase tracking-tight">
                 Ajustes & Finanzas del Club
               </h3>
               <button
                 type="button"
                 onClick={() => setIsEditingSettings(false)}
-                className="w-10 h-10 rounded-full text-neutral-400 hover:text-neutral-700 flex items-center justify-center"
+                className="w-10 h-10 rounded-full hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 flex items-center justify-center transition"
                 aria-label="Cerrar modal"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 stroke-[2.5]" />
               </button>
             </div>
 
             <form onSubmit={handleSaveSettings} className="space-y-4 text-xs">
               {/* 10-Color Palette Customizer */}
               {clubId && (
-                <div className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-2">
-                  <label className="text-xs font-bold text-neutral-800 uppercase tracking-wider flex items-center gap-1.5">
+                <div className="p-3.5 rounded-2xl bg-neutral-50 border-2 border-neutral-200 space-y-2">
+                  <label className="font-display font-black text-xs text-neutral-900 uppercase tracking-wider flex items-center gap-1.5">
                     <Palette className="w-3.5 h-3.5 text-neutral-600" />
                     Color Institucional del Club (10 Paletas)
                   </label>
-                  <p className="text-[11px] text-neutral-500">
+                  <p className="text-[11px] text-neutral-500 font-sans">
                     Cambia la personalidad de los botones, medallas y navegación de todos los miembros.
                   </p>
                   <PalettePicker
@@ -321,7 +321,7 @@ export function FinanzasAdminPanel({
 
               {/* Bank Details */}
               <div className="space-y-2.5">
-                <h4 className="text-xs font-bold text-neutral-800 uppercase tracking-wider">
+                <h4 className="font-display font-black text-xs text-neutral-900 uppercase tracking-wider">
                   Cuenta de Transferencia para Socios
                 </h4>
 
@@ -332,7 +332,7 @@ export function FinanzasAdminPanel({
                     required
                     value={bankForm.banco}
                     onChange={(e) => setBankForm({ ...bankForm, banco: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium text-base sm:text-xs"
+                    className="input-tactile w-full px-3 py-2 text-xs font-medium"
                   />
                 </div>
 
@@ -344,7 +344,7 @@ export function FinanzasAdminPanel({
                     value={bankForm.tipo_cuenta}
                     onChange={(e) => setBankForm({ ...bankForm, tipo_cuenta: e.target.value })}
                     placeholder="Ej: Cuenta Corriente / Cuenta Vista"
-                    className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium text-base sm:text-xs"
+                    className="input-tactile w-full px-3 py-2 text-xs font-medium"
                   />
                 </div>
 
@@ -356,7 +356,7 @@ export function FinanzasAdminPanel({
                     required
                     value={bankForm.numero_cuenta}
                     onChange={(e) => setBankForm({ ...bankForm, numero_cuenta: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium text-base sm:text-xs"
+                    className="input-tactile w-full px-3 py-2 text-xs font-medium font-mono"
                   />
                 </div>
 
@@ -367,7 +367,7 @@ export function FinanzasAdminPanel({
                     required
                     value={bankForm.titular}
                     onChange={(e) => setBankForm({ ...bankForm, titular: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium text-base sm:text-xs"
+                    className="input-tactile w-full px-3 py-2 text-xs font-medium"
                   />
                 </div>
 
@@ -379,7 +379,7 @@ export function FinanzasAdminPanel({
                       required
                       value={bankForm.rut}
                       onChange={(e) => setBankForm({ ...bankForm, rut: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium text-base sm:text-xs"
+                      className="input-tactile w-full px-3 py-2 text-xs font-medium font-mono"
                     />
                   </div>
                   <div>
@@ -389,24 +389,24 @@ export function FinanzasAdminPanel({
                       required
                       value={bankForm.email}
                       onChange={(e) => setBankForm({ ...bankForm, email: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 bg-white text-neutral-900 font-medium text-base sm:text-xs"
+                      className="input-tactile w-full px-3 py-2 text-xs font-medium"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-neutral-100 flex gap-2">
+              <div className="pt-3 border-t-2 border-neutral-900/10 flex gap-2">
                 <button
                   type="button"
                   onClick={() => setIsEditingSettings(false)}
-                  className="flex-1 min-h-[44px] py-2.5 rounded-xl bg-neutral-100 font-bold text-neutral-700 active:scale-95 transition"
+                  className="btn-tactile flex-1 min-h-[44px] py-2.5 rounded-xl border-2 border-neutral-900 bg-white hover:bg-neutral-100 font-display font-black text-xs uppercase tracking-wider text-neutral-800 transition shadow-tactile-sm"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={savingSettings}
-                  className="flex-1 min-h-[44px] py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-bold flex items-center justify-center gap-1.5 disabled:opacity-50 active:scale-95 transition"
+                  className="btn-tactile flex-1 min-h-[44px] py-2.5 rounded-xl border-2 border-neutral-900 bg-neutral-950 hover:bg-neutral-900 text-white font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm flex items-center justify-center gap-1.5 disabled:opacity-50 transition"
                 >
                   {savingSettings ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   <span>Guardar Ajustes</span>
@@ -419,7 +419,7 @@ export function FinanzasAdminPanel({
 
       {/* Debtors List */}
       <div className="space-y-3">
-        <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-700 px-1">
+        <h4 className="font-display font-black text-sm uppercase tracking-wider text-neutral-950 px-1">
           Jugadores con Saldo Pendiente ({playerSummaries.length})
         </h4>
 
@@ -437,21 +437,21 @@ export function FinanzasAdminPanel({
             return (
               <div
                 key={player.user_id}
-                className="bg-white border border-neutral-200 rounded-2xl p-3.5 shadow-xs space-y-3"
+                className="bg-white border-2 border-neutral-900 rounded-3xl p-4 shadow-tactile space-y-3"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-neutral-200 text-neutral-700 font-bold flex items-center justify-center text-sm overflow-hidden flex-shrink-0">
+                    <div className="w-11 h-11 rounded-2xl bg-neutral-900 border-2 border-neutral-900 shadow-tactile-sm text-white font-display font-black flex items-center justify-center text-base overflow-hidden flex-shrink-0">
                       {player.full_name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <h5 className="font-bold text-sm text-neutral-900 leading-tight">
+                      <h5 className="font-display font-black text-base text-neutral-950 uppercase tracking-tight leading-tight">
                         {player.full_name}
                       </h5>
-                      <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-neutral-500">
+                      <div className="flex items-center gap-1.5 mt-0.5 font-mono text-[10px] text-neutral-500">
                         <span>{player.pending_debts.length} partido(s)</span>
                         {player.guest_matches_count > 0 && (
-                          <span className="text-amber-700 font-medium">
+                          <span className="text-amber-700 font-bold">
                             • {player.guest_matches_count} invitado(s)
                           </span>
                         )}
@@ -460,27 +460,27 @@ export function FinanzasAdminPanel({
                   </div>
 
                   <div className="text-right flex-shrink-0">
-                    <p className="text-sm font-black text-amber-600">
+                    <p className="font-display font-black text-xl text-amber-600 leading-tight">
                       ${player.total_amount.toLocaleString('es-CL')}
                     </p>
                     <button
                       type="button"
                       onClick={() => setExpandedUser(isExpanded ? null : player.user_id)}
-                      className="text-[11px] font-semibold text-neutral-400 hover:text-neutral-700 flex items-center gap-0.5 ml-auto mt-0.5 min-h-[32px]"
+                      className="font-mono text-[10px] font-bold text-neutral-400 hover:text-neutral-800 flex items-center gap-0.5 ml-auto mt-0.5 min-h-[32px] uppercase"
                     >
                       <span>{isExpanded ? 'Ocultar' : 'Detalle'}</span>
-                      {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                      {isExpanded ? <ChevronUp className="w-3 h-3 stroke-[2.5]" /> : <ChevronDown className="w-3 h-3 stroke-[2.5]" />}
                     </button>
                   </div>
                 </div>
 
                 {/* Settle All Button */}
-                <div className="pt-2 border-t border-neutral-100 flex items-center gap-2">
+                <div className="pt-2 border-t-2 border-neutral-900/10 flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => handleSettleAll(player)}
                     disabled={isUserLoading}
-                    className="flex-1 min-h-[44px] py-2 px-3 rounded-xl text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-xs disabled:opacity-50 active:scale-95"
+                    className="btn-tactile flex-1 min-h-[44px] py-2 px-3 rounded-xl border-2 border-neutral-900 shadow-tactile-sm text-white font-display font-black text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5 disabled:opacity-50"
                     style={{
                       backgroundColor: 'var(--club-primary, #059669)',
                     }}
@@ -496,18 +496,18 @@ export function FinanzasAdminPanel({
 
                 {/* Expanded Details List */}
                 {isExpanded && (
-                  <div className="pt-2 space-y-2 border-t border-neutral-100">
-                    <p className="text-[10px] font-bold uppercase text-neutral-400">Detalle de partidos:</p>
+                  <div className="pt-2 space-y-2 border-t-2 border-neutral-900/10">
+                    <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-neutral-400">Detalle de partidos:</p>
                     {player.pending_debts.map((item) => (
                       <div
                         key={item.id}
-                        className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 flex items-center justify-between text-xs"
+                        className="p-3 rounded-xl bg-neutral-50 border-2 border-neutral-200 flex items-center justify-between text-xs"
                       >
                         <div>
                           <p className="font-semibold text-neutral-900 leading-tight">
                             {item.description}
                           </p>
-                          <p className="text-[10px] text-neutral-500 mt-0.5">
+                          <p className="font-mono text-[10px] text-neutral-500 mt-0.5">
                             {new Date(item.created_at).toLocaleDateString('es-CL', {
                               day: 'numeric',
                               month: 'short',
@@ -515,21 +515,21 @@ export function FinanzasAdminPanel({
                             })}
                           </p>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-neutral-900">
+                        <div className="flex items-center gap-2.5">
+                          <span className="font-display font-black text-sm text-neutral-950">
                             ${item.amount.toLocaleString('es-CL')}
                           </span>
                           <button
                             type="button"
                             onClick={() => handleSettleSingle(player.user_id, item.id)}
                             disabled={loadingDebtId === item.id}
-                            className="min-h-[36px] min-w-[36px] p-1.5 rounded-lg bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition flex items-center justify-center active:scale-95"
+                            className="btn-tactile min-h-[36px] min-w-[36px] p-2 rounded-lg border-2 border-neutral-900 bg-emerald-100 text-emerald-950 hover:bg-emerald-200 transition flex items-center justify-center shadow-tactile-sm"
                             title="Marcar este partido como pagado"
                           >
                             {loadingDebtId === item.id ? (
                               <Loader2 className="w-3.5 h-3.5 animate-spin" />
                             ) : (
-                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
                             )}
                           </button>
                         </div>
@@ -545,30 +545,30 @@ export function FinanzasAdminPanel({
 
       {/* Recently Paid Section */}
       {paidDebts.length > 0 && (
-        <div className="mt-6 pt-4 border-t border-neutral-200 space-y-2">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-500 px-1">
+        <div className="mt-6 pt-4 border-t-2 border-neutral-900/10 space-y-2">
+          <h4 className="font-display font-black text-xs uppercase tracking-wider text-neutral-500 px-1">
             Historial de Pagos Recientes Saneados ({paidDebts.length})
           </h4>
-          <div className="space-y-1.5 max-h-48 overflow-y-auto">
+          <div className="space-y-2 max-h-48 overflow-y-auto">
             {paidDebts.slice(0, 5).map((paid) => (
               <div
                 key={paid.id}
-                className="p-2 rounded-xl bg-neutral-100 border border-neutral-200 flex items-center justify-between text-xs text-neutral-600"
+                className="p-2.5 rounded-xl bg-white border-2 border-neutral-200 flex items-center justify-between text-xs text-neutral-700 shadow-2xs"
               >
                 <div>
-                  <span className="font-semibold text-neutral-900">{paid.profiles?.full_name}</span>
-                  <span className="text-[10px] text-neutral-400 block">{paid.description}</span>
+                  <span className="font-display font-black text-xs uppercase tracking-tight text-neutral-950">{paid.profiles?.full_name}</span>
+                  <span className="font-mono text-[10px] text-neutral-400 block">{paid.description}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-bold">${paid.amount.toLocaleString('es-CL')}</span>
+                  <span className="font-mono font-bold text-xs text-emerald-700">${paid.amount.toLocaleString('es-CL')}</span>
                   <button
                     type="button"
                     onClick={() => handleRevert(paid.id)}
                     disabled={loadingDebtId === paid.id}
-                    className="p-1 text-neutral-400 hover:text-amber-600 transition"
+                    className="p-1.5 rounded-lg text-neutral-400 hover:text-amber-700 hover:bg-neutral-100 transition"
                     title="Revertir a pendiente"
                   >
-                    <RefreshCw className="w-3 h-3" />
+                    <RefreshCw className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>

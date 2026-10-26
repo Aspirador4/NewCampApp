@@ -68,14 +68,14 @@ export function EventGuestsSection({
   return (
     <div className="mt-6 space-y-4">
       {/* Header and Add Button */}
-      <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
+      <div className="flex items-center justify-between border-b-2 border-neutral-900/10 pb-2">
         <div className="flex items-center gap-2">
-          <UserCheck className="w-4 h-4 text-emerald-600" />
-          <h2 className="text-sm font-bold text-neutral-900">
+          <UserCheck className="w-5 h-5 text-neutral-900 stroke-[2.5]" />
+          <h2 className="font-display font-black text-lg text-neutral-950 uppercase tracking-tight">
             Invitados Externos
           </h2>
           {approvedGuests.length > 0 && (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold">
+            <span className="font-mono text-xs px-2 py-0.5 rounded border-2 border-neutral-900 bg-neutral-950 text-white font-bold shadow-tactile-sm">
               {approvedGuests.length}
             </span>
           )}
@@ -83,7 +83,7 @@ export function EventGuestsSection({
       </div>
 
       {error && (
-        <div className="p-2.5 rounded-xl bg-red-50 text-red-700 text-xs border border-red-200">
+        <div className="p-3 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-900 text-xs font-medium">
           {error}
         </div>
       )}
@@ -93,55 +93,55 @@ export function EventGuestsSection({
 
       {/* Admin Moderation Box for Pending Guests */}
       {isAdmin && pendingGuests.length > 0 && (
-        <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 space-y-3">
+        <div className="bg-amber-50 border-2 border-neutral-900 shadow-tactile rounded-3xl p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 uppercase tracking-wider">
-              <ShieldCheck className="w-4 h-4 text-amber-600" />
+            <div className="flex items-center gap-1.5 font-display font-black text-xs text-amber-950 uppercase tracking-wider">
+              <ShieldCheck className="w-4 h-4 text-amber-600 stroke-[2.5]" />
               <span>Aprobaciones Pendientes ({pendingGuests.length})</span>
             </div>
-            <span className="text-[10px] text-amber-700 font-medium">Solo administradores</span>
+            <span className="font-mono text-[9px] font-bold text-amber-950 bg-amber-200 px-2 py-0.5 rounded border border-amber-300 uppercase">Solo admin</span>
           </div>
 
-          <div className="divide-y divide-amber-200/60 bg-white rounded-xl border border-amber-200 overflow-hidden shadow-xs">
+          <div className="divide-y-2 divide-neutral-900/10 bg-white rounded-2xl border-2 border-neutral-900 overflow-hidden">
             {pendingGuests.map((guest) => {
               const isLoading = actionLoading === guest.id
 
               return (
                 <div key={guest.id} className="p-3 flex items-center justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-neutral-900 truncate">
+                    <p className="font-display font-black text-sm text-neutral-950 uppercase tracking-tight truncate">
                       {guest.guest_name}
                     </p>
-                    <p className="text-[10px] text-neutral-500">
-                      Invitado por: <span className="font-semibold text-neutral-700">{guest.inviter?.full_name || 'Socio'}</span>
+                    <p className="font-mono text-[10px] text-neutral-500">
+                      Invitado por: <span className="font-bold text-neutral-800">{guest.inviter?.full_name || 'Socio'}</span>
                     </p>
                     {guest.guest_contact && (
-                      <div className="flex items-center gap-1 text-[10px] text-neutral-500 mt-0.5">
+                      <div className="flex items-center gap-1 font-mono text-[10px] text-neutral-500 mt-0.5">
                         <Phone className="w-3 h-3 text-neutral-400" />
                         <span>{guest.guest_contact}</span>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       type="button"
                       onClick={() => handleApprove(guest.id)}
                       disabled={isLoading}
-                      className="p-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition active:scale-95 disabled:opacity-50"
+                      className="btn-tactile p-2 rounded-xl border-2 border-neutral-900 bg-emerald-500 hover:bg-emerald-600 text-neutral-950 font-bold text-xs shadow-tactile-sm transition active:scale-95 disabled:opacity-50"
                       title="Aprobar invitado"
                     >
-                      {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                      {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5 stroke-[2.5]" />}
                     </button>
 
                     <button
                       type="button"
                       onClick={() => handleReject(guest.id)}
                       disabled={isLoading}
-                      className="p-2 rounded-xl bg-red-100 hover:bg-red-200 text-red-700 font-bold text-xs transition active:scale-95 disabled:opacity-50"
+                      className="btn-tactile p-2 rounded-xl border-2 border-neutral-900 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-tactile-sm transition active:scale-95 disabled:opacity-50"
                       title="Rechazar invitado"
                     >
-                      <X className="w-3.5 h-3.5" />
+                      <X className="w-3.5 h-3.5 stroke-[2.5]" />
                     </button>
                   </div>
                 </div>
@@ -153,26 +153,26 @@ export function EventGuestsSection({
 
       {/* Member's own invited guests */}
       {!isAdmin && myGuests.length > 0 && (
-        <div className="bg-neutral-50 rounded-xl p-3 border border-neutral-200 space-y-2">
-          <p className="text-xs font-bold text-neutral-800">
+        <div className="bg-white rounded-3xl p-4 border-2 border-neutral-900 shadow-tactile space-y-3">
+          <p className="font-display font-black text-sm uppercase tracking-wider text-neutral-950">
             Mis Invitaciones ({myGuests.length})
           </p>
 
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             {myGuests.map((guest) => (
               <div
                 key={guest.id}
-                className="bg-white p-2.5 rounded-lg border border-neutral-200/80 flex items-center justify-between text-xs"
+                className="bg-neutral-50 p-3 rounded-2xl border-2 border-neutral-200 flex items-center justify-between text-xs"
               >
                 <div>
-                  <p className="font-bold text-neutral-900">{guest.guest_name}</p>
+                  <p className="font-display font-black text-sm uppercase tracking-tight text-neutral-950">{guest.guest_name}</p>
                   <span
-                    className={`text-[10px] font-semibold uppercase px-1.5 py-0.2 rounded ${
+                    className={`font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded border inline-block mt-0.5 ${
                       guest.status === 'aprobado'
-                        ? 'bg-emerald-100 text-emerald-800'
+                        ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
                         : guest.status === 'pendiente_aprobacion'
-                        ? 'bg-amber-100 text-amber-800'
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-amber-100 text-amber-800 border-amber-300'
+                        : 'bg-rose-100 text-rose-800 border-rose-300'
                     }`}
                   >
                     {guest.status === 'aprobado'
@@ -188,7 +188,7 @@ export function EventGuestsSection({
                     type="button"
                     onClick={() => handleCancel(guest.id)}
                     disabled={actionLoading === guest.id}
-                    className="text-[11px] text-red-600 hover:underline font-medium"
+                    className="font-mono text-[10px] text-rose-600 hover:underline font-bold uppercase"
                   >
                     Cancelar
                   </button>

@@ -111,7 +111,7 @@ export function AvatarUpload({ currentUrl, fullName, editable = true }: AvatarUp
   return (
     <div className="flex flex-col items-center">
       <div className="relative group">
-        <div className="w-24 h-24 rounded-full overflow-hidden bg-neutral-100 border-2 border-emerald-500 shadow-md flex items-center justify-center relative">
+        <div className="w-24 h-24 rounded-3xl overflow-hidden bg-neutral-100 border-2 border-neutral-900 shadow-tactile flex items-center justify-center relative">
           {avatarUrl ? (
             <Image
               src={avatarUrl}
@@ -139,10 +139,10 @@ export function AvatarUpload({ currentUrl, fullName, editable = true }: AvatarUp
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="absolute bottom-0 right-0 p-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg transition active:scale-95 disabled:opacity-50"
+            className="btn-tactile absolute -bottom-1 -right-1 p-2 rounded-xl border-2 border-neutral-900 bg-neutral-950 hover:bg-neutral-900 text-white shadow-tactile-sm transition active:scale-95 disabled:opacity-50 min-h-[36px] min-w-[36px] flex items-center justify-center"
             title="Cambiar foto de perfil"
           >
-            <Camera className="w-4 h-4" />
+            <Camera className="w-4 h-4 stroke-[2.5]" />
           </button>
         )}
 
@@ -156,7 +156,7 @@ export function AvatarUpload({ currentUrl, fullName, editable = true }: AvatarUp
       </div>
 
       {error && (
-        <p className="text-[11px] text-red-600 mt-2 text-center max-w-xs">{error}</p>
+        <p className="font-mono text-[11px] text-rose-600 mt-2 text-center max-w-xs">{error}</p>
       )}
     </div>
   )

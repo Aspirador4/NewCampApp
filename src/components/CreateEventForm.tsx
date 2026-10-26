@@ -85,15 +85,15 @@ export function CreateEventForm() {
   return (
     <form onSubmit={handleSubmit} className="mt-5 space-y-4">
       {error && (
-        <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 text-red-700 text-xs border border-red-200">
-          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+        <div className="flex items-start gap-2 p-3.5 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-900 text-xs font-medium">
+          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-rose-600" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Title */}
       <div>
-        <label htmlFor="title" className="block text-xs font-semibold text-neutral-700 mb-1">
+        <label htmlFor="title" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 mb-1">
           Título del Evento <span className="text-red-500">*</span>
         </label>
         <input
@@ -108,13 +108,13 @@ export function CreateEventForm() {
               ? 'Ej: Entrenamiento Físico & Táctico'
               : 'Ej: Asado de Fin de Mes / Junta de Directorio'
           }
-          className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900"
+          className="input-tactile w-full px-3.5 py-2.5 text-xs font-medium placeholder-neutral-400"
         />
       </div>
 
       {/* Event Type: Only partido, entrenamiento, otro */}
       <div>
-        <label htmlFor="event_type" className="block text-xs font-semibold text-neutral-700 mb-1">
+        <label htmlFor="event_type" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 mb-1">
           Tipo de Evento <span className="text-red-500">*</span>
         </label>
         <select
@@ -123,7 +123,7 @@ export function CreateEventForm() {
           required
           value={eventType}
           onChange={(e) => setEventType(e.target.value as 'partido' | 'entrenamiento' | 'otro')}
-          className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900 font-medium"
+          className="input-tactile w-full px-3.5 py-2.5 text-xs font-display font-black uppercase tracking-wider"
         >
           <option value="partido">⚽ Partido</option>
           <option value="entrenamiento">🏃 Entrenamiento</option>
@@ -133,7 +133,7 @@ export function CreateEventForm() {
 
       {/* Gender Category */}
       <div>
-        <label className="block text-xs font-semibold text-neutral-700 mb-1">
+        <label className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 mb-1">
           Categoría de Género <span className="text-red-500">*</span>
         </label>
         <input type="hidden" name="gender_category" value={genderCategory} />
@@ -147,11 +147,16 @@ export function CreateEventForm() {
               key={cat.value}
               type="button"
               onClick={() => setGenderCategory(cat.value as 'mixto' | 'masculino' | 'femenino')}
-              className={`py-2 px-2.5 rounded-xl text-xs font-semibold border transition text-center ${
+              className={`btn-tactile py-2.5 px-3 rounded-xl font-display font-black text-xs uppercase tracking-wider border-2 transition text-center ${
                 genderCategory === cat.value
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-                  : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50'
+                  ? 'border-neutral-900 shadow-tactile-sm text-white'
+                  : 'bg-white text-neutral-800 border-neutral-300 hover:border-neutral-900'
               }`}
+              style={
+                genderCategory === cat.value
+                  ? { backgroundColor: 'var(--club-primary, #059669)' }
+                  : undefined
+              }
             >
               {cat.label}
             </button>
@@ -162,7 +167,7 @@ export function CreateEventForm() {
       {/* Date & Time */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label htmlFor="start_date" className="block text-xs font-semibold text-neutral-700 mb-1">
+          <label htmlFor="start_date" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 mb-1">
             Fecha <span className="text-red-500">*</span>
           </label>
           <input
@@ -170,12 +175,12 @@ export function CreateEventForm() {
             name="start_date"
             type="date"
             required
-            className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900"
+            className="input-tactile w-full px-3 py-2 text-xs font-mono font-medium"
           />
         </div>
 
         <div>
-          <label htmlFor="start_time" className="block text-xs font-semibold text-neutral-700 mb-1">
+          <label htmlFor="start_time" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 mb-1">
             Hora de Inicio <span className="text-red-500">*</span>
           </label>
           <input
@@ -183,19 +188,19 @@ export function CreateEventForm() {
             name="start_time"
             type="time"
             required
-            className="w-full px-3 py-2.5 rounded-xl border border-neutral-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900"
+            className="input-tactile w-full px-3 py-2 text-xs font-mono font-medium"
           />
         </div>
       </div>
 
       {/* Location */}
       <div>
-        <label htmlFor="location" className="block text-xs font-semibold text-neutral-700 mb-1">
-          Lugar / Dirección <span className="text-red-500">*</span>
+        <label htmlFor="location" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 mb-1">
+          Lugar / Cancha / Sede <span className="text-red-500">*</span>
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
-            <MapPin className="w-4 h-4" />
+            <MapPin className="w-4 h-4 stroke-[2.5]" />
           </div>
           <input
             id="location"
@@ -203,19 +208,19 @@ export function CreateEventForm() {
             type="text"
             required
             placeholder="Ej: Complejo Pasco Club - Cancha 3"
-            className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-neutral-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900"
+            className="input-tactile w-full pl-10 pr-3.5 py-2.5 text-xs font-medium placeholder-neutral-400"
           />
         </div>
       </div>
 
       {/* Max Capacity */}
       <div>
-        <label htmlFor="max_capacity" className="block text-xs font-semibold text-neutral-700 mb-1">
+        <label htmlFor="max_capacity" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 mb-1">
           {eventType === 'otro' ? 'Cupo / Asistentes esperados' : 'Cupo Máximo de Jugadores'}
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
-            <Users className="w-4 h-4" />
+            <Users className="w-4 h-4 stroke-[2.5]" />
           </div>
           <input
             id="max_capacity"
@@ -226,23 +231,23 @@ export function CreateEventForm() {
             value={maxCapacity}
             onChange={(e) => setMaxCapacity(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
             placeholder="Ej: 14 (dejar vacío si no tiene límite)"
-            className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-neutral-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900"
+            className="input-tactile w-full pl-10 pr-3.5 py-2.5 text-xs font-mono font-medium placeholder-neutral-400"
           />
         </div>
-        <p className="text-[11px] text-neutral-400 mt-1">
+        <p className="font-mono text-[10px] text-neutral-400 mt-1 uppercase">
           Al completarse, las siguientes confirmaciones pasan a lista de espera.
         </p>
       </div>
 
       {/* Billing Configuration for PARTIDO */}
       {eventType === 'partido' && (
-        <div>
-          <label htmlFor="total_cost" className="block text-xs font-semibold text-neutral-700 mb-1">
+        <div className="bg-white border-2 border-neutral-900 shadow-tactile-sm rounded-3xl p-4 space-y-2">
+          <label htmlFor="total_cost" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900">
             Costo Total de la Cancha ($)
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
-              <CircleDollarSign className="w-4 h-4" />
+              <CircleDollarSign className="w-4 h-4 stroke-[2.5]" />
             </div>
             <input
               id="total_cost"
@@ -253,15 +258,15 @@ export function CreateEventForm() {
               value={totalCost}
               onChange={(e) => setTotalCost(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
               placeholder="Ej: 42000"
-              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-neutral-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900"
+              className="input-tactile w-full pl-10 pr-3.5 py-2.5 text-xs font-mono font-bold"
             />
           </div>
           {estimatedProrrated !== null ? (
-            <p className="text-[11px] text-emerald-800 font-medium mt-1 bg-emerald-50 p-2.5 rounded-xl border border-emerald-200">
-              Prorrateo estimado por jugador: <strong className="font-bold text-emerald-950">${estimatedProrrated.toLocaleString('es-CL')}</strong> (Total cancha ${Number(totalCost).toLocaleString('es-CL')} ÷ {maxCapacity} convocados).
+            <p className="text-[11px] text-emerald-950 font-medium bg-emerald-50 p-3 rounded-2xl border-2 border-emerald-300">
+              Prorrateo estimado por jugador: <strong className="font-bold text-emerald-950 font-mono">${estimatedProrrated.toLocaleString('es-CL')}</strong> (Total cancha ${Number(totalCost).toLocaleString('es-CL')} ÷ {maxCapacity} convocados).
             </p>
           ) : (
-            <p className="text-[11px] text-neutral-400 mt-1">
+            <p className="font-mono text-[10px] text-neutral-400">
               El cobro se prorratea automáticamente dividiendo este total entre todos los convocados.
             </p>
           )}
@@ -270,18 +275,18 @@ export function CreateEventForm() {
 
       {/* Billing Configuration for ENTRENAMIENTO */}
       {eventType === 'entrenamiento' && (
-        <div className="space-y-3 bg-neutral-50 p-3.5 rounded-2xl border border-neutral-200">
-          <label className="block text-xs font-bold text-neutral-800">
+        <div className="space-y-3 bg-neutral-50 p-4 rounded-3xl border-2 border-neutral-900 shadow-tactile-sm">
+          <label className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900">
             Modalidad de Cobro del Entrenamiento
           </label>
           <div className="grid grid-cols-3 gap-2 text-xs">
             <button
               type="button"
               onClick={() => setTrainingBillingMode('prorrateo')}
-              className={`p-2 rounded-xl font-bold transition text-center ${
+              className={`btn-tactile p-2 rounded-xl border-2 font-display font-black uppercase tracking-wider transition text-center ${
                 trainingBillingMode === 'prorrateo'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-white text-neutral-600 border border-neutral-200'
+                  ? 'border-neutral-900 bg-neutral-950 text-white shadow-tactile-sm'
+                  : 'bg-white text-neutral-800 border-neutral-300 hover:border-neutral-900'
               }`}
             >
               Cancha Total
@@ -289,10 +294,10 @@ export function CreateEventForm() {
             <button
               type="button"
               onClick={() => setTrainingBillingMode('fijo')}
-              className={`p-2 rounded-xl font-bold transition text-center ${
+              className={`btn-tactile p-2 rounded-xl border-2 font-display font-black uppercase tracking-wider transition text-center ${
                 trainingBillingMode === 'fijo'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-white text-neutral-600 border border-neutral-200'
+                  ? 'border-neutral-900 bg-neutral-950 text-white shadow-tactile-sm'
+                  : 'bg-white text-neutral-800 border-neutral-300 hover:border-neutral-900'
               }`}
             >
               Fijo x Jugador
@@ -300,10 +305,10 @@ export function CreateEventForm() {
             <button
               type="button"
               onClick={() => setTrainingBillingMode('gratis')}
-              className={`p-2 rounded-xl font-bold transition text-center ${
+              className={`btn-tactile p-2 rounded-xl border-2 font-display font-black uppercase tracking-wider transition text-center ${
                 trainingBillingMode === 'gratis'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-white text-neutral-600 border border-neutral-200'
+                  ? 'border-neutral-900 bg-neutral-950 text-white shadow-tactile-sm'
+                  : 'bg-white text-neutral-800 border-neutral-300 hover:border-neutral-900'
               }`}
             >
               Gratis ($0)
@@ -312,7 +317,7 @@ export function CreateEventForm() {
 
           {trainingBillingMode === 'prorrateo' && (
             <div>
-              <label htmlFor="total_cost" className="block text-[11px] font-semibold text-neutral-700 mb-1">
+              <label htmlFor="total_cost" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-700 mb-1">
                 Costo Total de la Cancha ($)
               </label>
               <input
@@ -324,10 +329,10 @@ export function CreateEventForm() {
                 value={totalCost}
                 onChange={(e) => setTotalCost(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
                 placeholder="Ej: 35000"
-                className="w-full px-3 py-2 rounded-xl border border-neutral-300 text-sm bg-white"
+                className="input-tactile w-full px-3 py-2 text-xs font-mono font-bold"
               />
               {estimatedProrrated !== null && (
-                <p className="text-[11px] text-emerald-800 font-medium mt-1">
+                <p className="font-mono text-[11px] text-emerald-800 font-bold mt-1">
                   Prorrateo estimado: ${estimatedProrrated.toLocaleString('es-CL')} por jugador.
                 </p>
               )}
@@ -336,7 +341,7 @@ export function CreateEventForm() {
 
           {trainingBillingMode === 'fijo' && (
             <div>
-              <label htmlFor="cost_per_player" className="block text-[11px] font-semibold text-neutral-700 mb-1">
+              <label htmlFor="cost_per_player" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-700 mb-1">
                 Cuota Fija por Jugador ($)
               </label>
               <input
@@ -348,7 +353,7 @@ export function CreateEventForm() {
                 value={fixedCostPerPlayer}
                 onChange={(e) => setFixedCostPerPlayer(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
                 placeholder="Ej: 3000"
-                className="w-full px-3 py-2 rounded-xl border border-neutral-300 text-sm bg-white"
+                className="input-tactile w-full px-3 py-2 text-xs font-mono font-bold"
               />
             </div>
           )}
@@ -357,18 +362,18 @@ export function CreateEventForm() {
 
       {/* Mutable Custom Fields for OTRO */}
       {eventType === 'otro' && (
-        <div className="space-y-2.5 bg-neutral-50 p-3.5 rounded-2xl border border-neutral-200">
+        <div className="space-y-2.5 bg-neutral-50 p-4 rounded-3xl border-2 border-neutral-900 shadow-tactile-sm">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="text-xs font-bold text-neutral-900">Campos Personalizados (Mutable)</h4>
-              <p className="text-[10px] text-neutral-500">Agrega cualquier detalle: qué traer, cuota, temas a tratar, etc.</p>
+              <h4 className="font-display font-black text-xs uppercase tracking-wider text-neutral-950">Campos Personalizados (Mutable)</h4>
+              <p className="text-[10px] text-neutral-500 font-sans">Agrega cualquier detalle: qué traer, cuota, temas a tratar, etc.</p>
             </div>
             <button
               type="button"
               onClick={addCustomField}
-              className="text-xs font-bold text-emerald-700 bg-white hover:bg-emerald-50 border border-emerald-300 py-1 px-2.5 rounded-lg flex items-center gap-1 transition"
+              className="btn-tactile text-xs font-display font-black uppercase tracking-wider text-neutral-950 bg-white hover:bg-neutral-100 border-2 border-neutral-900 py-1.5 px-3 rounded-xl flex items-center gap-1 transition shadow-tactile-sm"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Agregar</span>
             </button>
           </div>
@@ -381,21 +386,21 @@ export function CreateEventForm() {
                   placeholder="Etiqueta (ej: Cuota)"
                   value={field.label}
                   onChange={(e) => updateCustomField(field.id, 'label', e.target.value)}
-                  className="w-1/3 px-2.5 py-1.5 rounded-lg border border-neutral-300 text-xs bg-white font-medium"
+                  className="input-tactile w-1/3 px-3 py-1.5 text-xs font-medium"
                 />
                 <input
                   type="text"
                   placeholder="Detalle (ej: $5.000 por persona)"
                   value={field.value}
                   onChange={(e) => updateCustomField(field.id, 'value', e.target.value)}
-                  className="flex-1 px-2.5 py-1.5 rounded-lg border border-neutral-300 text-xs bg-white"
+                  className="input-tactile flex-1 px-3 py-1.5 text-xs font-medium"
                 />
                 <button
                   type="button"
                   onClick={() => removeCustomField(field.id)}
-                  className="p-1.5 text-neutral-400 hover:text-red-600 transition"
+                  className="p-1.5 text-neutral-400 hover:text-rose-600 transition"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <Trash2 className="w-4 h-4 stroke-[2.5]" />
                 </button>
               </div>
             ))}
@@ -405,7 +410,7 @@ export function CreateEventForm() {
 
       {/* Description / Additional notes */}
       <div>
-        <label htmlFor="description" className="block text-xs font-semibold text-neutral-700 mb-1">
+        <label htmlFor="description" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 mb-1">
           Descripción o Instrucciones Generales (opcional)
         </label>
         <textarea
@@ -413,13 +418,13 @@ export function CreateEventForm() {
           name="description"
           rows={3}
           placeholder="Ej: Llevar camiseta clara y oscura. Llegar 15 minutos antes para calentar."
-          className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-neutral-900"
+          className="input-tactile w-full px-3.5 py-2.5 text-xs font-medium placeholder-neutral-400"
         />
       </div>
 
       {/* Notice for non-admin creators */}
-      <p className="text-[11px] text-neutral-500 bg-neutral-50 p-2.5 rounded-xl border border-neutral-200">
-        ℹ️ Si eres socio, la convocatoria quedará en revisión para aprobación de los administradores antes de publicarse a los miembros.
+      <p className="text-[11px] text-neutral-600 bg-neutral-100 p-3 rounded-2xl border border-neutral-300 font-sans">
+        ℹ️ Si eres socio, la convocatoria quedará en revisión para aprobación de los capitanes antes de publicarse a los miembros.
       </p>
 
       {/* Submit Button */}

@@ -22,34 +22,34 @@ export function PalettePicker({ selectedId, onSelect, disabled = false }: Palett
               type="button"
               disabled={disabled}
               onClick={() => onSelect(palette.id)}
-              className={`p-2.5 rounded-xl border text-left transition-all duration-150 flex flex-col gap-2 min-h-[76px] relative active:scale-95 ${
+              className={`p-2.5 rounded-2xl border-2 text-left transition-all duration-150 flex flex-col gap-2 min-h-[76px] relative active:scale-95 ${
                 isSelected
-                  ? 'border-neutral-900 bg-neutral-50 ring-2 ring-neutral-900 shadow-sm'
-                  : 'border-neutral-200 bg-white hover:border-neutral-300'
+                  ? 'border-neutral-900 bg-white shadow-tactile-sm'
+                  : 'border-neutral-200 bg-white hover:border-neutral-400'
               } disabled:opacity-50`}
             >
               {/* Color swatch row */}
               <div className="flex items-center justify-between w-full">
                 <div
-                  className="w-6 h-6 rounded-lg shadow-inner flex items-center justify-center text-white"
+                  className="w-7 h-7 rounded-xl border border-neutral-900 shadow-xs flex items-center justify-center text-white"
                   style={{
                     background: `linear-gradient(135deg, ${palette.gradientFrom}, ${palette.gradientTo})`,
                   }}
                 >
-                  {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                  {isSelected && <Check className="w-4 h-4 stroke-[3]" />}
                 </div>
 
                 <div
-                  className="w-3 h-3 rounded-full border border-neutral-200"
+                  className="w-3.5 h-3.5 rounded-full border border-neutral-900"
                   style={{ backgroundColor: palette.primaryLight }}
                 />
               </div>
 
               <div>
-                <p className="text-xs font-bold text-neutral-900 leading-tight">
+                <p className="font-display font-black text-xs uppercase tracking-tight text-neutral-950 leading-tight">
                   {palette.name}
                 </p>
-                <p className="text-[10px] text-neutral-400 truncate mt-0.5">
+                <p className="font-mono text-[9px] text-neutral-500 truncate mt-0.5">
                   {palette.description.split(',')[0]}
                 </p>
               </div>

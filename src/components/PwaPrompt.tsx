@@ -120,14 +120,14 @@ export function PwaPrompt() {
     <div className="space-y-3">
       {/* 1. Install Banner (Android / Chrome) */}
       {!isStandalone && deferredPrompt && (
-        <div className="bg-emerald-950 text-white rounded-2xl p-4 shadow-md flex items-center justify-between border border-emerald-800">
+        <div className="bg-neutral-950 text-white rounded-3xl p-4 shadow-tactile flex items-center justify-between border-2 border-neutral-900">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white">
-              <Smartphone className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl bg-amber-400 text-neutral-950 border border-neutral-900 flex items-center justify-center font-bold">
+              <Smartphone className="w-5 h-5 stroke-[2.5]" />
             </div>
             <div>
-              <p className="font-bold text-xs">Instalar Aplicación</p>
-              <p className="text-[11px] text-neutral-300">
+              <p className="font-display font-black text-sm uppercase tracking-tight text-white">Instalar Aplicación</p>
+              <p className="font-mono text-[10px] text-neutral-400">
                 Agrégala a tu pantalla de inicio
               </p>
             </div>
@@ -136,7 +136,7 @@ export function PwaPrompt() {
           <button
             type="button"
             onClick={handleInstallClick}
-            className="px-3 py-1.5 rounded-xl bg-white text-emerald-950 font-bold text-xs shadow-sm hover:bg-neutral-100 transition active:scale-95"
+            className="btn-tactile px-3.5 py-2 rounded-xl border-2 border-neutral-900 bg-white text-neutral-950 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm hover:bg-neutral-100 transition active:scale-95"
           >
             Instalar
           </button>
@@ -145,33 +145,33 @@ export function PwaPrompt() {
 
       {/* 2. iOS Safari Add to Home Tip */}
       {!isStandalone && isIos && (
-        <div className="bg-neutral-100 border border-neutral-200 rounded-2xl p-3.5 flex items-start gap-3 text-xs text-neutral-700">
-          <div className="p-2 rounded-xl bg-white text-neutral-800 shadow-xs mt-0.5">
-            <Share className="w-4 h-4" />
+        <div className="bg-neutral-50 border-2 border-neutral-200 rounded-2xl p-3.5 flex items-start gap-3 text-xs text-neutral-700">
+          <div className="p-2 rounded-xl bg-white border border-neutral-300 text-neutral-900 shadow-xs mt-0.5">
+            <Share className="w-4 h-4 stroke-[2.5]" />
           </div>
           <div>
-            <p className="font-bold text-neutral-900">
+            <p className="font-display font-black text-xs uppercase tracking-wider text-neutral-950">
               Instalar en tu iPhone
             </p>
-            <p className="text-[11px] text-neutral-500 mt-0.5">
-              Presiona el botón <span className="font-semibold text-neutral-800">Compartir</span> en Safari y luego selecciona <span className="font-semibold text-neutral-800">&quot;Agregar a Inicio&quot;</span>.
+            <p className="text-[11px] text-neutral-600 mt-0.5 font-sans">
+              Presiona el botón <span className="font-bold text-neutral-950">Compartir</span> en Safari y luego selecciona <span className="font-bold text-neutral-950">&quot;Agregar a Inicio&quot;</span>.
             </p>
           </div>
         </div>
       )}
 
       {/* 3. Push Notifications Card */}
-      <div className="bg-white rounded-2xl p-4 border border-neutral-200 shadow-sm space-y-3">
+      <div className="bg-white rounded-3xl p-4 border-2 border-neutral-900 shadow-tactile space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
-              <Bell className="w-4 h-4" />
+            <div className="p-2 rounded-xl border-2 border-neutral-900 bg-amber-100 text-neutral-950 shadow-tactile-sm">
+              <Bell className="w-4 h-4 stroke-[2.5]" />
             </div>
             <div>
-              <p className="font-bold text-xs text-neutral-900">
-                Notificaciones Push (VAPID)
+              <p className="font-display font-black text-xs uppercase tracking-wider text-neutral-950">
+                Notificaciones Push Oficiales
               </p>
-              <p className="text-[11px] text-neutral-500">
+              <p className="font-mono text-[10px] text-neutral-500">
                 {pushStatus === 'granted'
                   ? 'Alertas activadas para cupos y partidos'
                   : 'Entérate al instante si subes de lista de espera'}
@@ -180,22 +180,22 @@ export function PwaPrompt() {
           </div>
 
           {pushStatus === 'granted' && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+            <span className="inline-flex items-center gap-1 font-mono text-[9px] font-black uppercase text-emerald-950 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded">
+              <CheckCircle2 className="w-3 h-3 text-emerald-600 stroke-[2.5]" />
               Activas
             </span>
           )}
         </div>
 
         {error && (
-          <div className="flex items-start gap-2 p-2.5 rounded-xl bg-red-50 text-red-700 text-xs border border-red-200">
-            <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <div className="flex items-start gap-2 p-3 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-900 text-xs font-medium">
+            <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-rose-600" />
             <span>{error}</span>
           </div>
         )}
 
         {feedback && (
-          <div className="flex items-start gap-2 p-2.5 rounded-xl bg-emerald-50 text-emerald-800 text-xs border border-emerald-200">
+          <div className="flex items-start gap-2 p-3 rounded-2xl bg-emerald-50 border-2 border-emerald-300 text-emerald-950 text-xs font-semibold">
             <CheckCircle2 className="w-4 h-4 mt-0.5 text-emerald-600 flex-shrink-0" />
             <span>{feedback}</span>
           </div>
@@ -207,12 +207,12 @@ export function PwaPrompt() {
               type="button"
               onClick={handleSubscribePush}
               disabled={pushLoading}
-              className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-xs text-white shadow-xs transition active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-1.5"
+              className="btn-tactile w-full py-2.5 px-4 rounded-xl border-2 border-neutral-900 bg-neutral-950 hover:bg-neutral-900 font-display font-black text-xs uppercase tracking-wider text-white shadow-tactile-sm transition active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px]"
             >
               {pushLoading ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <Bell className="w-3.5 h-3.5" />
+                <Bell className="w-4 h-4 stroke-[2.5]" />
               )}
               <span>Activar Notificaciones en este Dispositivo</span>
             </button>
@@ -223,12 +223,12 @@ export function PwaPrompt() {
               type="button"
               onClick={handleSendTestPush}
               disabled={testLoading}
-              className="w-full py-2 px-3 rounded-xl border border-neutral-300 hover:bg-neutral-50 text-neutral-700 font-medium text-xs transition active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-1.5"
+              className="btn-tactile w-full py-2 px-3 rounded-xl border-2 border-neutral-900 bg-white hover:bg-neutral-100 text-neutral-900 font-display font-black text-xs uppercase tracking-wider transition active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-tactile-sm min-h-[40px]"
             >
               {testLoading ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
-                <Send className="w-3.5 h-3.5 text-neutral-500" />
+                <Send className="w-3.5 h-3.5 text-neutral-600 stroke-[2.5]" />
               )}
               <span>Enviar Notificación de Prueba</span>
             </button>

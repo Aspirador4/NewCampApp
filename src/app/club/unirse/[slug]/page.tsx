@@ -68,89 +68,105 @@ export default async function UnirseClubPage({ params }: UnirseClubPageProps) {
   }
 
   return (
-    <div className="flex-1 flex flex-col p-5 pb-nav">
+    <div className="flex-1 flex flex-col p-4 sm:p-5 pb-nav">
       {/* Top Header */}
-      <div className="flex items-center gap-3 pt-2 pb-5 border-b border-neutral-200">
+      <div className="flex items-center gap-3 pt-2 pb-4 border-b-2 border-neutral-900/10">
         <Link
           href="/club/unirse"
-          className="p-2.5 -ml-2 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+          className="btn-tactile p-2.5 -ml-1 rounded-xl border-2 border-neutral-900 bg-white hover:bg-neutral-100 text-neutral-900 shadow-tactile-sm transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
           aria-label="Volver al directorio de clubes"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-neutral-900">Solicitud de Admisión</h1>
-          <p className="text-xs text-neutral-500">Únete a la comunidad de este club</p>
+          <h1 className="font-display font-black text-2xl text-neutral-950 uppercase tracking-tight leading-none">
+            Solicitud de Fichaje
+          </h1>
+          <p className="font-mono text-[10px] text-neutral-500 uppercase tracking-wider mt-0.5">
+            Postulación a Membresía Deportiva
+          </p>
         </div>
       </div>
 
-      {/* Club Summary Card */}
-      <div className="mt-5 p-5 rounded-3xl bg-gradient-to-br from-neutral-900 to-neutral-800 text-white shadow-xl space-y-4">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-extrabold text-xl shadow-md flex-shrink-0">
-            {club.logo_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={club.logo_url}
-                alt={club.name}
-                className="w-full h-full object-cover rounded-2xl"
-              />
-            ) : (
-              <Flame className="w-8 h-8 text-white" />
-            )}
-          </div>
-
-          <div className="min-w-0">
-            <h2 className="font-extrabold text-lg text-white truncate leading-tight">
-              {club.name}
-            </h2>
-            <p className="text-xs text-emerald-400 font-mono mt-0.5 font-semibold">
-              /{club.slug}
-            </p>
-            <div className="flex items-center gap-2 mt-1.5 text-xs text-neutral-300">
-              <span className="flex items-center gap-1 font-medium">
-                <Users className="w-3.5 h-3.5 text-emerald-400" />
-                {membersCount} {membersCount === 1 ? 'socio activo' : 'socios activos'}
-              </span>
-            </div>
-          </div>
+      {/* Club Matchday Ticket Pass */}
+      <div className="mt-4 bg-white border-2 border-neutral-900 shadow-tactile rounded-3xl overflow-hidden relative">
+        <div className="bg-neutral-950 text-white p-4 border-b-2 border-neutral-900 flex items-center justify-between">
+          <span className="font-mono text-[10px] font-black uppercase tracking-widest text-emerald-400">
+            FICHA OFICIAL DE CLUB
+          </span>
+          <span className="font-mono text-[10px] font-bold text-neutral-400 bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">
+            /{club.slug}
+          </span>
         </div>
 
-        {club.description && (
-          <p className="text-xs text-neutral-300 bg-neutral-800/80 p-3 rounded-2xl border border-neutral-700/60 leading-relaxed">
-            {club.description}
-          </p>
-        )}
+        <div className="p-5 space-y-4">
+          <div className="flex items-start gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-neutral-900 border-2 border-neutral-900 shadow-tactile-sm flex items-center justify-center text-white font-extrabold text-xl overflow-hidden flex-shrink-0">
+              {club.logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={club.logo_url}
+                  alt={club.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Flame className="w-8 h-8 text-white" />
+              )}
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <h2 className="font-display font-black text-2xl text-neutral-950 uppercase tracking-tight leading-none truncate">
+                {club.name}
+              </h2>
+              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold bg-neutral-100 text-neutral-800 px-2 py-0.5 rounded border border-neutral-300">
+                  <Users className="w-3 h-3 text-neutral-600" />
+                  {membersCount} {membersCount === 1 ? 'SOCIO ACTIVO' : 'SOCIOS ACTIVOS'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {club.description && (
+            <p className="text-xs text-neutral-700 bg-neutral-50 p-3.5 rounded-2xl border-2 border-neutral-200 leading-relaxed font-sans">
+              {club.description}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Membership State or Action */}
-      <div className="mt-6">
+      <div className="mt-5">
         {!user ? (
-          <div className="p-6 rounded-3xl bg-neutral-50 border border-neutral-200 text-center space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto">
-              <Building2 className="w-6 h-6" />
+          <div className="p-6 rounded-3xl bg-white border-2 border-neutral-900 shadow-tactile text-center space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-amber-100 border-2 border-neutral-900 shadow-tactile-sm text-neutral-900 flex items-center justify-center mx-auto">
+              <Building2 className="w-7 h-7 stroke-[2.5]" />
             </div>
             <div>
-              <h3 className="font-bold text-neutral-900 text-base">Inicia sesión para continuar</h3>
-              <p className="text-xs text-neutral-500 mt-1">
-                Debes identificarte para enviar tu solicitud de admisión a este club.
+              <h3 className="font-display font-black text-xl uppercase tracking-tight text-neutral-950">
+                Inicia Sesión para Continuar
+              </h3>
+              <p className="text-xs text-neutral-600 mt-1 max-w-xs mx-auto">
+                Debes identificarte en el sistema para enviar tu solicitud de fichaje a este club.
               </p>
             </div>
             <Link
               href={`/login?next=/club/unirse/${club.slug}`}
-              className="inline-flex items-center justify-center w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition active:scale-98"
+              className="btn-tactile inline-flex items-center justify-center w-full py-3 px-4 rounded-xl border-2 border-neutral-900 bg-neutral-950 hover:bg-neutral-900 text-white font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition min-h-[44px]"
             >
               Iniciar Sesión o Registrarse
             </Link>
           </div>
         ) : currentMembership?.approval_status === 'aprobado' ? (
-          <div className="p-6 rounded-3xl bg-emerald-50 border border-emerald-200 text-center space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-md">
-              <CheckCircle2 className="w-6 h-6" />
+          <div className="p-6 rounded-3xl bg-white border-2 border-neutral-900 shadow-tactile text-center space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-100 border-2 border-neutral-900 shadow-tactile-sm text-emerald-800 flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-7 h-7 stroke-[2.5]" />
             </div>
             <div>
-              <h3 className="font-bold text-emerald-950 text-base">¡Ya eres miembro de este club!</h3>
-              <p className="text-xs text-emerald-700 mt-1">
+              <h3 className="font-display font-black text-xl uppercase tracking-tight text-neutral-950">
+                ¡Ya Eres Miembro Oficial!
+              </h3>
+              <p className="text-xs text-neutral-600 mt-1">
                 Tu membresía está aprobada y activa. Puedes cambiar a este club para ver sus eventos y estadísticas.
               </p>
             </div>
@@ -160,37 +176,39 @@ export default async function UnirseClubPage({ params }: UnirseClubPageProps) {
             />
           </div>
         ) : currentMembership?.approval_status === 'pendiente' ? (
-          <div className="p-6 rounded-3xl bg-amber-50 border border-amber-200 text-center space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center mx-auto shadow-md animate-pulse">
-              <Clock className="w-6 h-6" />
+          <div className="p-6 rounded-3xl bg-white border-2 border-neutral-900 shadow-tactile text-center space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-amber-100 border-2 border-neutral-900 shadow-tactile-sm text-amber-800 flex items-center justify-center mx-auto">
+              <Clock className="w-7 h-7 stroke-[2.5] animate-pulse" />
             </div>
             <div>
-              <h3 className="font-bold text-amber-950 text-base">Solicitud en Revisión</h3>
-              <p className="text-xs text-amber-800 mt-1">
-                Tu solicitud fue recibida por los administradores de <strong>{club.name}</strong>. Te notificaremos apenas sea revisada.
+              <h3 className="font-display font-black text-xl uppercase tracking-tight text-neutral-950">
+                Solicitud en Revisión
+              </h3>
+              <p className="text-xs text-neutral-600 mt-1">
+                Tu postulación fue recibida por los capitanes de <strong className="text-neutral-950 font-bold">{club.name}</strong>. Te notificaremos cuando sea validada.
               </p>
             </div>
             {currentMembership.motivation && (
-              <div className="p-3 bg-white/80 rounded-xl border border-amber-200 text-xs text-amber-900 italic">
+              <div className="p-3 bg-neutral-50 rounded-xl border-2 border-neutral-200 text-xs text-neutral-700 italic">
                 &ldquo;{currentMembership.motivation}&rdquo;
               </div>
             )}
             <Link
               href="/"
-              className="inline-flex items-center justify-center w-full py-2.5 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-xs shadow transition active:scale-98"
+              className="btn-tactile inline-flex items-center justify-center w-full py-2.5 px-4 rounded-xl border-2 border-neutral-900 bg-white hover:bg-neutral-100 text-neutral-900 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition min-h-[44px]"
             >
-              Volver al Inicio
+              Volver al Clubhouse
             </Link>
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-xs text-emerald-900">
-              <p className="font-bold flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                Admisión Moderada
+            <div className="p-4 rounded-2xl bg-amber-50 border-2 border-neutral-900 shadow-tactile-sm text-xs text-neutral-900">
+              <p className="font-display font-black text-xs uppercase tracking-wider flex items-center gap-1.5 text-amber-900">
+                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                Admisión Moderada por Directorio
               </p>
-              <p className="text-emerald-700 mt-0.5">
-                Los administradores de <strong>{club.name}</strong> recibirán tu solicitud para habilitar tu acceso completo.
+              <p className="text-neutral-700 mt-1 font-sans">
+                Los administradores de <strong>{club.name}</strong> recibirán tu solicitud y ficha para habilitar tu pase oficial de vestuario.
               </p>
             </div>
 

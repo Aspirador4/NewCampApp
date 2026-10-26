@@ -162,37 +162,37 @@ export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: A
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom duration-300">
+      <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl border-2 border-neutral-900 shadow-tactile p-6 space-y-4 relative max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom duration-300">
         {/* Close Button */}
         <button
           type="button"
           onClick={handleDismiss}
-          className="absolute top-4 right-4 p-2 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-500 transition"
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 transition"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5 stroke-[2.5]" />
         </button>
 
         {/* Header Icon */}
         <div className="flex items-center gap-3 pt-1">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-white flex items-center justify-center shadow-md">
-            <Bell className="w-6 h-6 animate-bounce" />
+          <div className="w-12 h-12 rounded-2xl border-2 border-neutral-900 shadow-tactile-sm bg-amber-400 text-neutral-950 flex items-center justify-center">
+            <Bell className="w-6 h-6 stroke-[2.5] animate-bounce" />
           </div>
           <div>
-            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-              Bienvenido al Club
+            <span className="font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded border border-neutral-300 bg-neutral-100 text-neutral-900">
+              Vestuario & Alertas
             </span>
-            <h3 className="font-extrabold text-lg text-neutral-900 leading-tight mt-0.5">
+            <h3 className="font-display font-black text-2xl text-neutral-950 uppercase tracking-tight leading-none mt-1">
               ¡No te pierdas de nada!
             </h3>
           </div>
         </div>
 
-        <p className="text-xs text-neutral-600 leading-relaxed">
+        <p className="text-xs text-neutral-600 leading-relaxed font-sans">
           Activa las notificaciones y agrega la app a tu pantalla de inicio para enterarte al instante de convocatorias y avisos clave del club.
         </p>
 
         {/* Benefits list */}
-        <div className="space-y-2 bg-neutral-50 p-3.5 rounded-2xl border border-neutral-200/80 text-xs text-neutral-700">
+        <div className="space-y-2 bg-neutral-50 p-4 rounded-2xl border-2 border-neutral-200 text-xs text-neutral-700">
           <div className="flex items-start gap-2.5">
             <Sparkles className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
             <span>Avisos instantáneos de nuevas convocatorias a partidos y entrenamientos.</span>
@@ -203,12 +203,12 @@ export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: A
           </div>
           <div className="flex items-start gap-2.5">
             <Bell className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-            <span>Votaciones de MVP de la fecha y recordatorios de pago.</span>
+            <span>Votaciones de MVP de la fecha y liquidaciones de tesorería.</span>
           </div>
         </div>
 
         {error && (
-          <p className="text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200">
+          <p className="text-xs text-rose-700 bg-rose-50 p-3 rounded-2xl border-2 border-rose-300 font-medium">
             {error}
           </p>
         )}
@@ -216,8 +216,8 @@ export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: A
         {/* Action 1: Notifications */}
         <div>
           {pushSuccess ? (
-            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-center gap-2 text-emerald-800 text-xs font-bold">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <div className="p-3 bg-emerald-50 border-2 border-emerald-300 rounded-2xl flex items-center justify-center gap-2 text-emerald-950 text-xs font-display font-black uppercase tracking-wider">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 stroke-[2.5]" />
               <span>¡Notificaciones activadas en tu cuenta!</span>
             </div>
           ) : (
@@ -225,12 +225,12 @@ export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: A
               type="button"
               onClick={handleActivatePush}
               disabled={pushLoading || pushStatus === 'unsupported'}
-              className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50"
+              className="btn-tactile w-full py-3 px-4 rounded-xl border-2 border-neutral-900 bg-neutral-950 hover:bg-neutral-900 text-white font-display font-black text-xs uppercase tracking-wider shadow-tactile transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50 min-h-[44px]"
             >
               {pushLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <Bell className="w-4 h-4" />
+                <Bell className="w-4 h-4 stroke-[2.5]" />
               )}
               <span>
                 {pushStatus === 'granted'
@@ -243,9 +243,9 @@ export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: A
 
         {/* Action 2: Add to Home Screen (PWA) */}
         {!isStandalone && (
-          <div className="p-3 rounded-xl bg-neutral-100 border border-neutral-200 text-xs space-y-2">
-            <div className="flex items-center gap-2 text-neutral-800 font-bold">
-              <Smartphone className="w-4 h-4 text-neutral-600" />
+          <div className="p-3.5 rounded-2xl bg-neutral-50 border-2 border-neutral-200 text-xs space-y-2">
+            <div className="flex items-center gap-2 text-neutral-950 font-display font-black text-xs uppercase tracking-wider">
+              <Smartphone className="w-4 h-4 text-neutral-700 stroke-[2.5]" />
               <span>Instalar en tu Pantalla de Inicio</span>
             </div>
 
@@ -253,19 +253,19 @@ export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: A
               <button
                 type="button"
                 onClick={handleInstallApp}
-                className="w-full py-2 px-3 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-xs transition flex items-center justify-center gap-1.5"
+                className="btn-tactile w-full py-2.5 px-3 rounded-xl border-2 border-neutral-900 bg-amber-400 hover:bg-amber-500 text-neutral-950 font-display font-black text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5 shadow-tactile-sm"
               >
-                <Smartphone className="w-3.5 h-3.5" />
+                <Smartphone className="w-3.5 h-3.5 stroke-[2.5]" />
                 <span>Instalar App en el Celular</span>
               </button>
             ) : isIos ? (
-              <p className="text-[11px] text-neutral-600 leading-normal">
+              <p className="text-[11px] text-neutral-600 leading-normal font-sans">
                 En Safari de iPhone: toca el botón compartir{' '}
                 <Share className="w-3.5 h-3.5 inline mx-0.5 text-blue-600" /> y luego selecciona{' '}
                 <strong className="text-neutral-900 font-bold">&quot;Agregar a inicio&quot;</strong>.
               </p>
             ) : (
-              <p className="text-[11px] text-neutral-600">
+              <p className="text-[11px] text-neutral-600 font-sans">
                 Abre el menú de tu navegador (tres puntos) y selecciona{' '}
                 <strong className="text-neutral-900 font-bold">&quot;Instalar aplicación&quot;</strong> o{' '}
                 <strong className="text-neutral-900 font-bold">&quot;Agregar a pantalla principal&quot;</strong>.
@@ -278,9 +278,9 @@ export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: A
         <button
           type="button"
           onClick={handleDismiss}
-          className="w-full py-2.5 text-center text-xs font-semibold text-neutral-500 hover:text-neutral-800 transition"
+          className="w-full py-2.5 text-center font-mono text-xs uppercase font-bold text-neutral-500 hover:text-neutral-900 transition"
         >
-          Continuar a la App
+          Continuar al Clubhouse →
         </button>
       </div>
     </div>

@@ -73,15 +73,15 @@ export default async function UnirseDirectorioPage() {
       {/* Clubs List */}
       <div className="mt-5 space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
+          <h2 className="font-display font-black text-xs uppercase tracking-wider text-neutral-500">
             Clubes Disponibles ({clubs.length})
           </h2>
           <Link
             href="/club/nuevo"
-            className="text-xs font-bold text-neutral-700 hover:text-neutral-900 flex items-center gap-1"
+            className="btn-tactile font-display font-black text-xs uppercase tracking-wider text-neutral-950 bg-amber-300 hover:bg-amber-400 border border-neutral-900 px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-2xs"
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Crear uno</span>
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>+ Fundar Club</span>
           </Link>
         </div>
 

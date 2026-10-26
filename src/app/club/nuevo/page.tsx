@@ -83,9 +83,9 @@ export default function NuevoClubPage() {
       )}
 
       {/* Live Brand Preview Card */}
-      <div className="mt-5 p-4 rounded-2xl border border-neutral-200 bg-white shadow-xs flex items-center gap-3.5">
+      <div className="mt-4 p-5 rounded-3xl border-2 border-neutral-900 bg-white shadow-tactile flex items-center gap-4">
         <div
-          className="w-13 h-13 rounded-2xl flex items-center justify-center text-white font-extrabold text-base shadow-md flex-shrink-0 transition-colors"
+          className="w-14 h-14 rounded-2xl border-2 border-neutral-900 shadow-tactile-sm flex items-center justify-center text-white font-display font-black text-lg flex-shrink-0 transition-colors overflow-hidden"
           style={{
             background: `linear-gradient(135deg, ${activePalette.gradientFrom}, ${activePalette.gradientTo})`,
           }}
@@ -95,7 +95,7 @@ export default function NuevoClubPage() {
             <img
               src={logoUrl}
               alt="Vista previa"
-              className="w-full h-full object-cover rounded-2xl"
+              className="w-full h-full object-cover"
               onError={(e) => {
                 e.currentTarget.style.display = 'none'
               }}
@@ -105,23 +105,23 @@ export default function NuevoClubPage() {
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">
-            Vista previa de identidad
+          <p className="font-mono text-[9px] font-black text-neutral-400 uppercase tracking-widest">
+            Vista Previa de Escudo
           </p>
-          <h3 className="font-bold text-neutral-900 text-base truncate">
+          <h3 className="font-display font-black text-xl uppercase tracking-tight text-neutral-950 truncate">
             {name.trim() || 'Nombre de tu Club'}
           </h3>
-          <p className="text-xs text-neutral-500 truncate">
+          <p className="font-mono text-[10px] text-neutral-500 truncate mt-0.5">
             {slug.trim() ? `/club/unirse/${slug}` : '/club/unirse/...'}
           </p>
         </div>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="mt-5 space-y-5">
+      <form onSubmit={handleSubmit} className="mt-5 space-y-4">
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-neutral-700 uppercase tracking-wider">
-            Nombre del Club *
+          <label className="font-display font-black text-xs uppercase tracking-wider text-neutral-900">
+            Nombre Oficial del Club *
           </label>
           <input
             type="text"
@@ -129,21 +129,21 @@ export default function NuevoClubPage() {
             value={name}
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder="Ej: Los Pioneros FC"
-            className="w-full px-3.5 py-3 rounded-xl border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-900 text-base sm:text-sm font-medium transition"
+            className="input-tactile w-full px-3.5 py-2.5 text-xs font-medium placeholder-neutral-400"
           />
         </div>
 
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-neutral-700 uppercase tracking-wider">
+            <label className="font-display font-black text-xs uppercase tracking-wider text-neutral-900">
               Identificador Único (Slug) *
             </label>
-            <span className="text-[11px] text-neutral-400">
+            <span className="font-mono text-[10px] text-neutral-400">
               Para enlaces de invitación
             </span>
           </div>
-          <div className="flex items-center rounded-xl border border-neutral-300 overflow-hidden focus-within:ring-2 focus-within:ring-neutral-900 focus-within:border-neutral-900 bg-neutral-50">
-            <span className="px-3 text-xs text-neutral-500 font-mono select-none">
+          <div className="flex items-center rounded-xl border-2 border-neutral-300 focus-within:border-neutral-900 bg-white overflow-hidden shadow-2xs">
+            <span className="px-3 text-xs text-neutral-400 font-mono select-none">
               /club/unirse/
             </span>
             <input
@@ -155,10 +155,10 @@ export default function NuevoClubPage() {
                 setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9\-]/g, ''))
               }}
               placeholder="los-pioneros-fc"
-              className="w-full py-3 pr-3 bg-transparent text-base sm:text-sm font-mono text-neutral-800 focus:outline-none"
+              className="w-full py-2.5 pr-3 bg-transparent text-xs font-mono font-bold text-neutral-900 focus:outline-none"
             />
           </div>
-          <p className="text-[11px] text-neutral-500">
+          <p className="font-mono text-[10px] text-neutral-400">
             Tus miembros podrán solicitar unirse mediante este enlace.
           </p>
         </div>
@@ -166,12 +166,12 @@ export default function NuevoClubPage() {
         {/* 10 Color Palettes Picker */}
         <div className="space-y-2 pt-1">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-neutral-700 uppercase tracking-wider flex items-center gap-1.5">
-              <Palette className="w-3.5 h-3.5 text-neutral-500" />
-              Paleta de Colores del Club (10 Estilos)
+            <label className="font-display font-black text-xs uppercase tracking-wider text-neutral-900 flex items-center gap-1.5">
+              <Palette className="w-3.5 h-3.5 text-neutral-600 stroke-[2.5]" />
+              Color Institucional (10 Paletas Oficiales)
             </label>
             <span
-              className="text-xs font-semibold px-2 py-0.5 rounded-full"
+              className="font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded border border-neutral-300"
               style={{
                 backgroundColor: activePalette.primaryLight,
                 color: activePalette.primary,
@@ -180,7 +180,7 @@ export default function NuevoClubPage() {
               {activePalette.name}
             </span>
           </div>
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-neutral-500 font-sans">
             Define la personalidad visual del club: botones primarios, medallas y navegación.
           </p>
           <PalettePicker
@@ -191,20 +191,20 @@ export default function NuevoClubPage() {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-neutral-700 uppercase tracking-wider">
-            Descripción o Lema
+          <label className="font-display font-black text-xs uppercase tracking-wider text-neutral-900">
+            Descripción o Lema Deportivo
           </label>
           <textarea
             rows={3}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Grupo de fútbol y asados de los jueves por la noche..."
-            className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-900 text-base sm:text-sm transition"
+            className="input-tactile w-full px-3.5 py-2.5 text-xs font-medium placeholder-neutral-400"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-neutral-700 uppercase tracking-wider">
+          <label className="font-display font-black text-xs uppercase tracking-wider text-neutral-900">
             URL del Escudo / Logo (Opcional)
           </label>
           <input
@@ -212,16 +212,16 @@ export default function NuevoClubPage() {
             value={logoUrl}
             onChange={(e) => setLogoUrl(e.target.value)}
             placeholder="https://ejemplo.com/logo.png"
-            className="w-full px-3.5 py-3 rounded-xl border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-900 text-base sm:text-sm transition"
+            className="input-tactile w-full px-3.5 py-2.5 text-xs font-mono font-medium placeholder-neutral-400"
           />
         </div>
 
-        <div className="p-4 rounded-2xl bg-neutral-100 border border-neutral-200 text-xs text-neutral-800 space-y-1">
-          <p className="font-bold flex items-center gap-1.5 text-neutral-900">
-            <Sparkles className="w-3.5 h-3.5 text-neutral-700" />
+        <div className="p-4 rounded-2xl bg-neutral-100 border-2 border-neutral-200 text-xs text-neutral-800 space-y-1">
+          <p className="font-display font-black text-xs uppercase tracking-wider flex items-center gap-1.5 text-neutral-950">
+            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
             Configuración Automática
           </p>
-          <p className="text-neutral-600">
+          <p className="text-neutral-600 font-sans leading-relaxed">
             Al crear el club serás automáticamente el <strong>Administrador Principal</strong>.
             Podrás convocar partidos, aprobar socios y definir datos bancarios de tesorería.
           </p>
@@ -230,7 +230,7 @@ export default function NuevoClubPage() {
         <button
           type="submit"
           disabled={loading || !name.trim() || !slug.trim()}
-          className="w-full min-h-[48px] py-3.5 px-4 rounded-xl text-white font-bold text-sm shadow-md transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
+          className="btn-tactile w-full min-h-[48px] py-3.5 px-4 rounded-2xl border-2 border-neutral-900 text-white font-display font-black text-xs uppercase tracking-wider shadow-tactile transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
           style={{
             backgroundColor: activePalette.primary,
           }}
@@ -238,12 +238,12 @@ export default function NuevoClubPage() {
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              Creando club...
+              <span>Creando club...</span>
             </>
           ) : (
             <>
-              <Building2 className="w-4 h-4" />
-              Confirmar y Crear Club
+              <Building2 className="w-4 h-4 stroke-[2.5]" />
+              <span>Confirmar y Fundar Club</span>
             </>
           )}
         </button>

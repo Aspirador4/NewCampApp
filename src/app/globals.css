@@ -45,6 +45,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Athletic Headings Default Typography */
+h1, h2, h3, h4, th {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  letter-spacing: -0.015em;
+}
+
 /* Typography Role Classes */
 .font-display {
   font-family: var(--font-display), var(--font-sans), sans-serif;
@@ -82,6 +88,21 @@ body {
 .btn-tactile:active {
   transform: translate(2px, 2px);
   box-shadow: 1px 1px 0px 0px #171717 !important;
+}
+
+/* Tactile Input Style */
+.input-tactile {
+  border: 2px solid #d4d4d4;
+  border-radius: 0.75rem;
+  background-color: #ffffff;
+  color: #171717;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input-tactile:focus {
+  border-color: #171717;
+  outline: none;
+  box-shadow: 2px 2px 0px 0px #171717;
 }
 
 /* Athletic Grid & Jersey Mesh Patterns */
