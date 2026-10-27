@@ -6,13 +6,19 @@ Especificación funcional y técnica de la convocatoria de partidos, control est
 
 ## 1. Principio de Concurrencia y Auto-Promoción
 
-En grupos de fútbol y deportes de club, las bajas de último minuto ocurren frecuentemente. Para evitar la desorganización de los cupos y la intervención manual de los administradores:
-1. Si un evento tiene `max_capacity` definido y se llena, los socios que confirmen a continuación entran automáticamente con estado `lista_espera`.
-2. Cuando cualquier jugador confirmado se baja (acción `bajo` en auditoría):
-   - Su estado cambia a `cancelado`.
-   - El procedimiento almacenado atómico `leave_event` selecciona al primer socio en lista de espera por orden de registro (`registered_at ASC`), bloqueando la fila con `FOR UPDATE SKIP LOCKED`.
-   - Dicho jugador asciende inmediatamente a `confirmado` (`action = 'subio_espera'`).
-   - Se retorna el ID del usuario promovido para disparar la notificación Web Push.
+En grupos de fútbol y deportes de club, las bajas de último minuto y las inscripciones simultáneas ocurren con frecuencia. Para evitar la desorganización de los cupos, sobrecupos (*overbooking*) y la intervención manual de los administradores:
+
+1. **Prevención de Condiciones de Carrera (Pessimistic Locking `FOR UPDATE`)**:
+   - Tanto `join_event`, `leave_event` como `promote_waitlist` adquieren un cerrojo exclusivo a nivel de fila (`SELECT ... FROM events WHERE id = p_event_id FOR UPDATE`).
+   - Si dos jugadores intentan anotarse exactamente en el mismo milisegundo por el último cupo, PostgreSQL serializa las transacciones: la primera reserva el cupo como `confirmado` y la segunda, al ejecutarse inmediatamente después con el conteo actualizado, queda asignada de forma atómica y determinista a `lista_espera`.
+2. **Control Estricto de Capacidad**:
+   - Si un evento tiene `max_capacity` definido y se llena, los socios que confirmen a continuación entran automáticamente con estado `lista_espera`.
+3. **Auto-Promoción Atómica por Baja**:
+   - Cuando cualquier jugador confirmado se baja (acción `bajo` en auditoría vía `leave_event`):
+     - Su estado cambia a `cancelado`.
+     - El procedimiento atómico `promote_waitlist` evalúa la cola unificada de socios e invitados en espera por orden cronológico (`queue_time ASC`).
+     - El primer candidato asciende inmediatamente a `confirmado` (`action = 'subio_espera'`).
+     - Se retorna el registro del promovido para disparar la notificación Web Push en tiempo real.
 
 ```mermaid
 stateDiagram-v2
