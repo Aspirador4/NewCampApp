@@ -12,6 +12,7 @@ export interface EventGuestItem {
   guest_name: string
   guest_contact: string | null
   status: 'pendiente_aprobacion' | 'aprobado' | 'rechazado'
+  is_overcapacity?: boolean
   created_at: string
   inviter?: {
     full_name: string

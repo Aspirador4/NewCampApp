@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { SupabaseClient } from '@supabase/supabase-js'
-import { Database, EventStatus, EventType, GenderCategory, Json } from '@/types/database.types'
+import { Database, EventStatus, EventType, GenderCategory, Json, AttendanceType, AttendeeStatus, AttendanceAction } from '@/types/database.types'
 import { sendPushToUser, sendPushToClubMembers, sendPushToClubAdmins } from '@/app/api/push/actions'
 import { getActiveClub } from '@/utils/club'
 
@@ -123,7 +123,7 @@ export async function createEvent(formData: FormData) {
   redirect(`/eventos/${newEvent.id}`)
 }
 
-export async function joinEvent(eventId: string) {
+export async function joinEvent(eventId: string, attendanceType: AttendanceType = 'jugador') {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -165,20 +165,22 @@ export async function joinEvent(eventId: string) {
     return { error: `Tu cuenta no ha sido admitida en ${clubName}.` }
   }
 
-  // Check event gender category compatibility
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('gender')
-    .eq('id', user.id)
-    .single()
+  // Check event gender category compatibility (only for players)
+  if (attendanceType === 'jugador') {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('gender')
+      .eq('id', user.id)
+      .single()
 
-  if (targetEvent.gender_category && targetEvent.gender_category !== 'mixto') {
-    if (!profile?.gender) {
-      return { error: 'Para inscribirte a este evento debes indicar tu género en tu perfil.' }
-    }
-    if (profile.gender !== targetEvent.gender_category) {
-      const catLabel = targetEvent.gender_category === 'femenino' ? 'Femenina' : 'Masculina'
-      return { error: `Este evento está reservado para la categoría ${catLabel}.` }
+    if (targetEvent.gender_category && targetEvent.gender_category !== 'mixto') {
+      if (!profile?.gender) {
+        return { error: 'Para inscribirte a este evento debes indicar tu género en tu perfil.' }
+      }
+      if (profile.gender !== targetEvent.gender_category) {
+        const catLabel = targetEvent.gender_category === 'femenino' ? 'Femenina' : 'Masculina'
+        return { error: `Este evento está reservado para la categoría ${catLabel}.` }
+      }
     }
   }
 
@@ -186,10 +188,11 @@ export async function joinEvent(eventId: string) {
   const { data, error } = await supabase.rpc('join_event', {
     p_event_id: eventId,
     p_user_id: user.id,
+    p_attendance_type: attendanceType,
   })
 
   if (error) {
-    return fallbackJoinEvent(supabase, eventId, user.id)
+    return fallbackJoinEvent(supabase, eventId, user.id, attendanceType)
   }
 
   revalidatePath(`/eventos/${eventId}`)
@@ -198,7 +201,12 @@ export async function joinEvent(eventId: string) {
   return { success: true, data }
 }
 
-async function fallbackJoinEvent(supabase: SupabaseClient<Database>, eventId: string, userId: string) {
+async function fallbackJoinEvent(
+  supabase: SupabaseClient<Database>, 
+  eventId: string, 
+  userId: string, 
+  attendanceType: AttendanceType = 'jugador'
+) {
   // Check event capacity
   const { data: event, error: eventErr } = await supabase
     .from('events')
@@ -214,24 +222,34 @@ async function fallbackJoinEvent(supabase: SupabaseClient<Database>, eventId: st
     return { error: 'El evento ya no acepta inscripciones' }
   }
 
-  // Count confirmed attendees
-  const { count: confirmedCount } = await supabase
-    .from('event_attendees')
-    .select('*', { count: 'exact', head: true })
-    .eq('event_id', eventId)
-    .eq('status', 'confirmado')
+  let targetStatus: AttendeeStatus = 'confirmado'
+  let action: AttendanceAction = 'confirmo'
 
-  // Count approved guests
-  const { count: approvedGuestsCount } = await supabase
-    .from('event_guests')
-    .select('*', { count: 'exact', head: true })
-    .eq('event_id', eventId)
-    .eq('status', 'aprobado')
+  if (attendanceType === 'espectador') {
+    targetStatus = 'confirmado'
+    action = 'confirmo_espectador'
+  } else {
+    // Count confirmed players
+    const { count: confirmedCount } = await supabase
+      .from('event_attendees')
+      .select('*', { count: 'exact', head: true })
+      .eq('event_id', eventId)
+      .eq('status', 'confirmado')
+      .eq('attendance_type', 'jugador')
 
-  const totalConfirmed = (confirmedCount || 0) + (approvedGuestsCount || 0)
-  const isFull = event.max_capacity && totalConfirmed >= event.max_capacity
-  const targetStatus = isFull ? 'lista_espera' : 'confirmado'
-  const action = isFull ? 'entro_espera' : 'confirmo'
+    // Count approved non-overcapacity guests
+    const { count: approvedGuestsCount } = await supabase
+      .from('event_guests')
+      .select('*', { count: 'exact', head: true })
+      .eq('event_id', eventId)
+      .eq('status', 'aprobado')
+      .eq('is_overcapacity', false)
+
+    const totalConfirmed = (confirmedCount || 0) + (approvedGuestsCount || 0)
+    const isFull = event.max_capacity && totalConfirmed >= event.max_capacity
+    targetStatus = isFull ? 'lista_espera' : 'confirmado'
+    action = isFull ? 'entro_espera' : 'confirmo'
+  }
 
   const { error: upsertErr } = await supabase
     .from('event_attendees')
@@ -239,6 +257,7 @@ async function fallbackJoinEvent(supabase: SupabaseClient<Database>, eventId: st
       event_id: eventId,
       user_id: userId,
       status: targetStatus,
+      attendance_type: attendanceType,
       registered_at: new Date().toISOString(),
     })
 
@@ -250,12 +269,12 @@ async function fallbackJoinEvent(supabase: SupabaseClient<Database>, eventId: st
     event_id: eventId,
     user_id: userId,
     actor_id: userId,
-    action,
+    action: action,
   })
 
   revalidatePath(`/eventos/${eventId}`)
   revalidatePath('/eventos')
-  return { success: true, status: targetStatus }
+  return { success: true, status: targetStatus, attendance_type: attendanceType }
 }
 
 export async function leaveEvent(eventId: string, reason?: string) {

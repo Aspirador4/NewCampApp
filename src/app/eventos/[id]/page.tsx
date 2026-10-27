@@ -10,7 +10,11 @@ import { EventRealtimeListener } from '@/components/EventRealtimeListener'
 import { ShareEventButton } from '@/components/ShareEventButton'
 import { AddToCalendarButton } from '@/components/AddToCalendarButton'
 import { EventFinancialClosure } from '@/components/EventFinancialClosure'
-import { ArrowLeft, Calendar, MapPin, Users, History, Clock, User, UserCheck, CircleDollarSign } from 'lucide-react'
+import { MatchTeamsView } from '@/components/MatchTeamsView'
+import { TeamCandidatePlayer } from '@/components/TeamBuilderModal'
+import { TrainingOvercapacitySection } from '@/components/TrainingOvercapacitySection'
+import { AwardType } from '@/types/database.types'
+import { ArrowLeft, Calendar, MapPin, Users, History, Clock, User, UserCheck, CircleDollarSign, Eye } from 'lucide-react'
 import { formatTime, formatLogTimestamp, DEFAULT_CLUB_TIMEZONE } from '@/utils/date'
 
 interface AttendeeProfile {
@@ -26,6 +30,7 @@ interface AttendeeWithProfile {
   event_id: string
   user_id: string
   status: string
+  attendance_type?: 'jugador' | 'espectador'
   registered_at: string
   profiles: AttendeeProfile | null
 }
@@ -132,6 +137,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       event_id,
       user_id,
       status,
+      attendance_type,
       registered_at,
       profiles (
         id,
@@ -156,6 +162,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       guest_name,
       guest_contact,
       status,
+      is_overcapacity,
       created_at,
       inviter:invited_by_user_id (
         full_name
@@ -167,14 +174,25 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
   const guests = (guestsRaw || []) as unknown as EventGuestItem[]
   const approvedGuests = guests.filter((g) => g.status === 'aprobado')
 
-  // Categorize attendees
-  const confirmedAttendees = attendees.filter((a) => a.status === 'confirmado')
+  // Categorize attendees into Players and Spectators
+  const confirmedPlayers = attendees.filter(
+    (a) => a.status === 'confirmado' && (!a.attendance_type || a.attendance_type === 'jugador')
+  )
+  const spectators = attendees.filter(
+    (a) => a.status === 'confirmado' && a.attendance_type === 'espectador'
+  )
   const waitlistAttendees = attendees.filter((a) => a.status === 'lista_espera')
 
-  const totalConfirmedCount = confirmedAttendees.length + approvedGuests.length
+  // Distinguish regular guests from training overcapacity guests
+  const regularApprovedGuests = approvedGuests.filter((g) => !g.is_overcapacity)
+  const trainingOvercapacityGuests = guests.filter((g) => Boolean(g.is_overcapacity))
+
+  // Total confirmed players that count towards capacity
+  const totalConfirmedCount = confirmedPlayers.length + regularApprovedGuests.length
 
   const userAttendee = attendees.find((a) => a.user_id === user.id)
   const userStatus = userAttendee?.status === 'cancelado' ? null : (userAttendee?.status as 'confirmado' | 'lista_espera' | null)
+  const userAttendanceType = userAttendee?.attendance_type || 'jugador'
 
   const waitlistIndex = waitlistAttendees.findIndex((a) => a.user_id === user.id)
   const waitlistPosition = waitlistIndex !== -1 ? waitlistIndex + 1 : undefined
@@ -202,19 +220,122 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
   const logs = (logsRaw || []) as unknown as LogWithUser[]
 
-  // MVP Voting details
-  const { data: userVote } = await supabase
+  // Fetch candidate stats for auto-balancing algorithm
+  const candidateUserIds = confirmedPlayers.map((a) => a.user_id)
+  const { data: candidateStatsRaw } = await supabase
+    .from('user_stats')
+    .select('user_id, average_rating, matches_won, matches_lost, matches_played')
+    .eq('club_id', event.club_id)
+    .in('user_id', candidateUserIds.length > 0 ? candidateUserIds : ['00000000-0000-0000-0000-000000000000'])
+
+  const statsByUser = new Map((candidateStatsRaw || []).map((s) => [s.user_id, s]))
+
+  const teamCandidates: TeamCandidatePlayer[] = confirmedPlayers.map((a) => {
+    const s = statsByUser.get(a.user_id)
+    const p = a.profiles
+    const custom = (p?.custom_attributes as Record<string, unknown>) || {}
+    const posStr = Array.isArray(custom.posicion)
+      ? (custom.posicion as string[]).join(', ')
+      : custom.posicion
+      ? String(custom.posicion)
+      : 'Mediocampista'
+
+    return {
+      id: a.user_id,
+      fullName: p?.full_name || 'Socio',
+      avatarUrl: p?.avatar_url || null,
+      posicion: posStr,
+      averageRating: s?.average_rating ?? null,
+      matchesWon: s?.matches_won ?? 0,
+      matchesLost: s?.matches_lost ?? 0,
+      matchesPlayed: s?.matches_played ?? 0,
+    }
+  })
+
+  // Fetch event teams and team players
+  const { data: teamsRaw } = await supabase
+    .from('event_teams')
+    .select(`
+      id,
+      name,
+      color,
+      score,
+      event_team_players (
+        user_id,
+        assigned_position,
+        goals,
+        assists,
+        saves,
+        own_goals,
+        profiles:user_id (
+          full_name,
+          avatar_url
+        )
+      )
+    `)
+    .eq('event_id', id)
+    .order('created_at', { ascending: true })
+
+  interface TeamPlayerRow {
+    user_id: string
+    assigned_position: string | null
+    goals: number | null
+    assists: number | null
+    saves: number | null
+    own_goals: number | null
+    profiles: {
+      full_name: string | null
+      avatar_url: string | null
+    } | null
+  }
+
+  const formattedTeams = (teamsRaw || []).map((t) => ({
+    id: t.id,
+    name: t.name,
+    color: t.color,
+    score: t.score,
+    players: ((t.event_team_players as unknown as TeamPlayerRow[]) || []).map((p) => ({
+      userId: p.user_id,
+      fullName: p.profiles?.full_name || 'Jugador',
+      avatarUrl: p.profiles?.avatar_url || null,
+      position: p.assigned_position || 'Jugador',
+      goals: p.goals || 0,
+      assists: p.assists || 0,
+      saves: p.saves || 0,
+      ownGoals: p.own_goals || 0,
+    })),
+  }))
+
+  // User's cast votes for awards
+  const { data: userVotesRaw } = await supabase
     .from('mvp_votes')
-    .select('id, voted_player_id')
+    .select('award_type, voted_player_id')
     .eq('event_id', id)
     .eq('voter_id', user.id)
-    .maybeSingle()
 
-  const hasVoted = Boolean(userVote)
+  const initialUserVotes: Partial<Record<AwardType, string>> = {}
+  userVotesRaw?.forEach((v) => {
+    initialUserVotes[v.award_type as AwardType] = v.voted_player_id
+  })
 
-  const candidates: MvpCandidate[] = confirmedAttendees.map((a) => {
+  const hasVoted = Boolean(userVotesRaw && userVotesRaw.length > 0)
+
+  // User's peer ratings
+  const { data: userRatingsRaw } = await supabase
+    .from('match_player_ratings')
+    .select('evaluated_player_id, rating')
+    .eq('event_id', id)
+    .eq('evaluator_id', user.id)
+
+  const initialUserRatings: Record<string, number> = {}
+  userRatingsRaw?.forEach((r) => {
+    initialUserRatings[r.evaluated_player_id] = Number(r.rating)
+  })
+
+  // Candidates for voting (only confirmed on-pitch players)
+  const candidates: MvpCandidate[] = confirmedPlayers.map((a) => {
     const p = a.profiles
-    const custom = p?.custom_attributes || {}
+    const custom = (p?.custom_attributes as Record<string, unknown>) || {}
     return {
       id: a.user_id,
       full_name: p?.full_name || 'Socio',
@@ -231,11 +352,17 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
   let winners: MvpWinner[] = []
   let allVoteResults: { player_id: string; full_name: string; vote_count: number }[] = []
+  const allWinnersByCategory: Record<AwardType, MvpWinner[]> = {
+    mvp: [],
+    mejor_compañero: [],
+    jugador_sorpresa: [],
+  }
 
   if (!event.mvp_voting_open && event.status === 'finalizado') {
     const { data: allVotes } = await supabase
       .from('mvp_votes')
       .select(`
+        award_type,
         voted_player_id,
         player:voted_player_id (
           id,
@@ -245,9 +372,11 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       `)
       .eq('event_id', id)
 
-    if (allVotes && allVotes.length > 0) {
+    const categories: AwardType[] = ['mvp', 'mejor_compañero', 'jugador_sorpresa']
+    categories.forEach((cat) => {
+      const catVotes = allVotes?.filter((v) => (v.award_type || 'mvp') === cat) || []
       const counts: Record<string, { count: number; name: string; avatar: string | null }> = {}
-      for (const v of allVotes) {
+      for (const v of catVotes) {
         const p = v.player as unknown as { id: string; full_name: string; avatar_url: string | null } | null
         const pId = v.voted_player_id
         if (!counts[pId]) {
@@ -261,15 +390,12 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       }
 
       let maxVotes = 0
-      allVoteResults = Object.entries(counts)
-        .map(([pId, info]) => {
-          if (info.count > maxVotes) maxVotes = info.count
-          return { player_id: pId, full_name: info.name, vote_count: info.count }
-        })
-        .sort((a, b) => b.vote_count - a.vote_count)
+      Object.values(counts).forEach((c) => {
+        if (c.count > maxVotes) maxVotes = c.count
+      })
 
       if (maxVotes > 0) {
-        winners = Object.entries(counts)
+        allWinnersByCategory[cat] = Object.entries(counts)
           .filter(([, info]) => info.count === maxVotes)
           .map(([pId, info]) => ({
             id: pId,
@@ -278,7 +404,18 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             vote_count: info.count,
           }))
       }
-    }
+
+      if (cat === 'mvp') {
+        winners = allWinnersByCategory.mvp
+        allVoteResults = Object.entries(counts)
+          .map(([pId, info]) => ({
+            player_id: pId,
+            full_name: info.name,
+            vote_count: info.count,
+          }))
+          .sort((a, b) => b.vote_count - a.vote_count)
+      }
+    })
   }
 
   const formatEventDate = (isoString: string) => {
@@ -553,6 +690,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         <EventAttendanceCTA
           eventId={event.id}
           userStatus={userStatus}
+          userAttendanceType={userAttendanceType}
           isFull={isFull}
           eventClosed={eventClosed}
           waitlistPosition={waitlistPosition}
@@ -620,7 +758,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           }
           isFinancialClosed={Boolean(event.financial_closed)}
           financialClosedAt={event.financial_closed_at}
-          confirmedAttendees={confirmedAttendees.map((a) => ({
+          confirmedAttendees={confirmedPlayers.map((a) => ({
             userId: a.user_id,
             fullName: a.profiles?.full_name || 'Socio',
             avatarUrl: a.profiles?.avatar_url || null,
@@ -641,7 +779,38 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         />
       )}
 
-      {/* MVP Voting & Results Section (Only for Matches) */}
+      {/* Match Teams View & Builder (For Matches) */}
+      {event.event_type === 'partido' && (
+        <div className="my-3">
+          <MatchTeamsView
+            eventId={event.id}
+            teams={formattedTeams}
+            isPublished={Boolean(event.teams_published)}
+            canManage={canManageEvent}
+            candidates={teamCandidates}
+            eventStatus={event.status}
+            resultRecorded={Boolean(event.result_recorded)}
+          />
+        </div>
+      )}
+
+      {/* Training Overcapacity (Private Admin Section for Trainings) */}
+      {event.event_type === 'entrenamiento' && canManageEvent && (
+        <div className="my-3">
+          <TrainingOvercapacitySection
+            eventId={event.id}
+            isTraining={event.event_type === 'entrenamiento'}
+            canManage={canManageEvent}
+            overcapacityGuests={trainingOvercapacityGuests.map((g) => ({
+              id: g.id,
+              guest_name: g.guest_name,
+              guest_contact: g.guest_contact,
+            }))}
+          />
+        </div>
+      )}
+
+      {/* MVP & Awards Voting Section (Only for Matches) */}
       {event.event_type === 'partido' && (
         <MvpVotingSection
           eventId={event.id}
@@ -653,6 +822,9 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           currentUserId={user.id}
           isAdmin={canManageEvent}
           winners={winners}
+          allWinnersByCategory={allWinnersByCategory}
+          initialUserVotes={initialUserVotes}
+          initialUserRatings={initialUserRatings}
           allVoteResults={allVoteResults}
         />
       )}
@@ -677,10 +849,10 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           </p>
         ) : (
           <div className="divide-y-2 divide-neutral-100 dark:divide-neutral-800 bg-white dark:bg-neutral-900 rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile overflow-hidden">
-            {/* Confirmed Socios */}
-            {confirmedAttendees.map((attendee, index) => {
+            {/* Confirmed Socios (Players) */}
+            {confirmedPlayers.map((attendee, index) => {
               const p = attendee.profiles
-              const custom = p?.custom_attributes || {}
+              const custom = (p?.custom_attributes as Record<string, unknown>) || {}
               const isCurrentUser = attendee.user_id === user.id
 
               return (
@@ -727,7 +899,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                             ? (custom.posicion as string[]).join(', ')
                             : String(custom.posicion || p?.sports_role || 'Jugador')}
                         </span>
-                        {custom.numero_camiseta && (
+                        {Boolean(custom.numero_camiseta) && (
                           <span className="font-mono font-bold text-emerald-700 dark:text-emerald-400">
                             #{String(custom.numero_camiseta)}
                           </span>
@@ -753,15 +925,15 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
               )
             })}
 
-            {/* Approved Guests */}
-            {approvedGuests.map((guest, index) => (
+            {/* Approved Regular Guests */}
+            {regularApprovedGuests.map((guest, index) => (
               <div
                 key={guest.id}
                 className="flex items-center justify-between p-3 bg-neutral-50/70 dark:bg-neutral-800/40"
               >
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold text-neutral-400 w-5 text-center">
-                    #{confirmedAttendees.length + index + 1}
+                    #{confirmedPlayers.length + index + 1}
                   </span>
 
                   <div className="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold text-xs border border-emerald-200 dark:border-emerald-800">
@@ -801,6 +973,70 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           </div>
         )}
       </div>
+
+      {/* Spectators (En la Tribuna) Section */}
+      {spectators.length > 0 && (
+        <div className="mt-5 space-y-3">
+          <div className="flex items-center justify-between border-b-2 border-neutral-900/10 dark:border-neutral-800 pb-2">
+            <h2 className="font-display font-bold text-lg text-neutral-950 dark:text-white uppercase tracking-tight flex items-center gap-2">
+              <Eye className="w-5 h-5 text-blue-500 stroke-[2.5]" />
+              <span>En la Tribuna</span>
+              <span className="font-mono text-xs px-2 py-0.5 rounded-md bg-blue-400 text-neutral-950 border border-neutral-900 font-bold">
+                {spectators.length}
+              </span>
+            </h2>
+            <span className="font-mono text-[10px] text-neutral-400 uppercase">
+              Hinchada & Tercer Tiempo
+            </span>
+          </div>
+
+          <div className="divide-y-2 divide-neutral-100 dark:divide-neutral-800 bg-white dark:bg-neutral-900 rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile overflow-hidden">
+            {spectators.map((spec, index) => {
+              const p = spec.profiles
+              const isCurrentUser = spec.user_id === user.id
+
+              return (
+                <div
+                  key={spec.id}
+                  className={`flex items-center justify-between p-3 transition ${
+                    isCurrentUser ? 'bg-blue-50/70 dark:bg-blue-950/30' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-bold text-neutral-400 w-5 text-center">
+                      #{index + 1}
+                    </span>
+
+                    <div className="w-9 h-9 rounded-full overflow-hidden bg-blue-100 dark:bg-blue-950 relative flex items-center justify-center border border-blue-200 dark:border-blue-800">
+                      {p?.avatar_url ? (
+                        <Image src={p.avatar_url} alt={p.full_name || 'Espectador'} fill className="object-cover" sizes="36px" />
+                      ) : (
+                        <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      )}
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-xs font-bold text-neutral-900 dark:text-white">
+                          {p?.full_name || 'Socio'}
+                        </p>
+                        {isCurrentUser && (
+                          <span className="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-blue-600 text-white">
+                            Tú
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-neutral-500 dark:text-neutral-400">
+                        Espectador confirmado {formatTime(spec.registered_at, clubTimezone)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Guest Management & Invitation Section */}
       <EventGuestsSection

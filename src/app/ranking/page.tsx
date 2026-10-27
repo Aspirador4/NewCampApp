@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/utils/supabase/server'
-import { Trophy, CalendarCheck, User, Flame, ArrowLeft } from 'lucide-react'
+import { Trophy, CalendarCheck, User, Flame, ArrowLeft, HeartHandshake } from 'lucide-react'
 import { Json } from '@/types/database.types'
 import { getActiveClub } from '@/utils/club'
 
@@ -19,6 +19,15 @@ interface UserStatItem {
   mvp_count: number
   mvp_votes_received: number
   social_events_attended: number
+  goals: number | null
+  assists: number | null
+  saves: number | null
+  matches_won: number | null
+  matches_lost: number | null
+  matches_tied: number | null
+  best_teammate_count: number | null
+  surprise_player_count: number | null
+  average_rating: number | null
   mutable_stats: Record<string, Json>
   profiles: {
     id: string
@@ -56,6 +65,15 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
       mvp_count,
       mvp_votes_received,
       social_events_attended,
+      goals,
+      assists,
+      saves,
+      matches_won,
+      matches_lost,
+      matches_tied,
+      best_teammate_count,
+      surprise_player_count,
+      average_rating,
       mutable_stats,
       profiles (
         id,
@@ -79,7 +97,28 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
       if (b.matches_played !== a.matches_played) {
         return b.matches_played - a.matches_played
       }
-      return b.mvp_count - a.mvp_count
+      return (b.matches_won || 0) - (a.matches_won || 0)
+    })
+  } else if (tab === 'goleadores') {
+    sortedStats = [...validStats].sort((a, b) => {
+      const gB = b.goals || 0
+      const gA = a.goals || 0
+      if (gB !== gA) return gB - gA
+      return (b.assists || 0) - (a.assists || 0)
+    })
+  } else if (tab === 'asistencias') {
+    sortedStats = [...validStats].sort((a, b) => {
+      const aB = b.assists || 0
+      const aA = a.assists || 0
+      if (aB !== aA) return aB - aA
+      return (b.goals || 0) - (a.goals || 0)
+    })
+  } else if (tab === 'premios') {
+    sortedStats = [...validStats].sort((a, b) => {
+      const scoreB = (b.best_teammate_count || 0) + (b.surprise_player_count || 0) + (b.mvp_count || 0)
+      const scoreA = (a.best_teammate_count || 0) + (a.surprise_player_count || 0) + (a.mvp_count || 0)
+      if (scoreB !== scoreA) return scoreB - scoreA
+      return (b.best_teammate_count || 0) - (a.best_teammate_count || 0)
     })
   } else {
     // Default: MVPs
@@ -101,6 +140,43 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
 
   // Club summary aggregates
   const totalMvpsAwarded = allStats.reduce((acc, curr) => acc + (curr.mvp_count || 0), 0)
+  const totalGoals = allStats.reduce((acc, curr) => acc + (curr.goals || 0), 0)
+  const totalAssists = allStats.reduce((acc, curr) => acc + (curr.assists || 0), 0)
+
+  const getMetricDisplay = (item: UserStatItem) => {
+    switch (tab) {
+      case 'goleadores':
+        return {
+          main: `${item.goals || 0} ⚽`,
+          sub: `${item.assists || 0} asistencias • ${item.matches_played} PJ`,
+          podium: `${item.goals || 0} Goles`,
+        }
+      case 'asistencias':
+        return {
+          main: `${item.assists || 0} 👟`,
+          sub: `${item.goals || 0} goles • ${item.matches_played} PJ`,
+          podium: `${item.assists || 0} Asist.`,
+        }
+      case 'premios':
+        return {
+          main: `${(item.best_teammate_count || 0) + (item.surprise_player_count || 0)} 🎖️`,
+          sub: `🤝 ${item.best_teammate_count || 0} comp. • ⚡ ${item.surprise_player_count || 0} sorp.`,
+          podium: `${(item.best_teammate_count || 0) + (item.surprise_player_count || 0)} Premios`,
+        }
+      case 'presencias':
+        return {
+          main: `${item.matches_played} PJ`,
+          sub: `${item.matches_won || 0}V - ${item.matches_tied || 0}E - ${item.matches_lost || 0}D`,
+          podium: `${item.matches_played} PJ`,
+        }
+      default:
+        return {
+          main: `${item.mvp_count} 🏆`,
+          sub: `${item.mvp_votes_received} votos • ${item.matches_played} PJ`,
+          podium: `${item.mvp_count} MVPs`,
+        }
+    }
+  }
 
   return (
     <div className="flex-1 flex flex-col p-4 sm:p-5 pb-nav">
@@ -116,7 +192,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
           </Link>
           <div>
             <h1 className="font-display font-bold text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
-              Ranking & MVPs
+              Estadísticas & Salón
             </h1>
             <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mt-0.5">
               {club.name} • Salón de la Fama
@@ -129,30 +205,64 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
         </div>
       </div>
 
-      {/* Segmented Locker Tabs */}
-      <div className="grid grid-cols-2 gap-2 my-4">
+      {/* Segmented Category Filter (Horizontal Scrollable Tabs) */}
+      <div className="flex items-center gap-1.5 overflow-x-auto py-2 my-2 no-scrollbar">
         <Link
           href="/ranking?tab=mvps"
-          className={`btn-tactile py-2.5 px-3 rounded-xl text-center flex items-center justify-center gap-1.5 font-display font-bold text-xs uppercase tracking-wider border-2 ${
+          className={`btn-tactile flex-shrink-0 py-2 px-3 rounded-xl text-center flex items-center gap-1.5 font-display font-bold text-xs uppercase tracking-wider border-2 ${
             tab === 'mvps'
               ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
               : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
           }`}
         >
-          <Trophy className="w-4 h-4 text-amber-400" />
+          <Trophy className="w-3.5 h-3.5 text-amber-500" />
           <span>Ranking MVP</span>
         </Link>
 
         <Link
+          href="/ranking?tab=goleadores"
+          className={`btn-tactile flex-shrink-0 py-2 px-3 rounded-xl text-center flex items-center gap-1.5 font-display font-bold text-xs uppercase tracking-wider border-2 ${
+            tab === 'goleadores'
+              ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
+              : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
+          }`}
+        >
+          <span>⚽ Goleadores</span>
+        </Link>
+
+        <Link
+          href="/ranking?tab=asistencias"
+          className={`btn-tactile flex-shrink-0 py-2 px-3 rounded-xl text-center flex items-center gap-1.5 font-display font-bold text-xs uppercase tracking-wider border-2 ${
+            tab === 'asistencias'
+              ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
+              : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
+          }`}
+        >
+          <span>👟 Asistencias</span>
+        </Link>
+
+        <Link
+          href="/ranking?tab=premios"
+          className={`btn-tactile flex-shrink-0 py-2 px-3 rounded-xl text-center flex items-center gap-1.5 font-display font-bold text-xs uppercase tracking-wider border-2 ${
+            tab === 'premios'
+              ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
+              : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
+          }`}
+        >
+          <HeartHandshake className="w-3.5 h-3.5 text-blue-500" />
+          <span>Compañerismo</span>
+        </Link>
+
+        <Link
           href="/ranking?tab=presencias"
-          className={`btn-tactile py-2.5 px-3 rounded-xl text-center flex items-center justify-center gap-1.5 font-display font-bold text-xs uppercase tracking-wider border-2 ${
+          className={`btn-tactile flex-shrink-0 py-2 px-3 rounded-xl text-center flex items-center gap-1.5 font-display font-bold text-xs uppercase tracking-wider border-2 ${
             tab === 'presencias'
               ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
               : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
           }`}
         >
-          <CalendarCheck className="w-4 h-4 text-emerald-400" />
-          <span>Más Presencias</span>
+          <CalendarCheck className="w-3.5 h-3.5 text-emerald-500" />
+          <span>Presencias</span>
         </Link>
       </div>
 
@@ -163,7 +273,17 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
 
           <div className="relative flex items-center justify-between font-mono text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-4 border-b border-white/10 pb-2">
             <span>PODIO OFICIAL</span>
-            <span>{tab === 'mvps' ? 'GALARDONES MVP' : 'PARTIDOS JUGADOS'}</span>
+            <span>
+              {tab === 'mvps'
+                ? 'GALARDONES MVP'
+                : tab === 'goleadores'
+                ? 'PICHICHI DE ORO'
+                : tab === 'asistencias'
+                ? 'MÁXIMOS ASISTIDORES'
+                : tab === 'premios'
+                ? 'DISTINCIONES DEL CLUB'
+                : 'PARTIDOS JUGADOS'}
+            </span>
           </div>
 
           <div className="relative grid grid-cols-3 gap-2 items-end pt-3 pb-1">
@@ -191,7 +311,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
                     {top2.profiles?.full_name?.split(' ')[0]}
                   </p>
                   <span className="font-mono text-sm font-bold text-neutral-300 mt-0.5">
-                    {tab === 'mvps' ? `${top2.mvp_count} MVPs` : `${top2.matches_played} PJ`}
+                    {getMetricDisplay(top2).podium}
                   </span>
                 </>
               ) : (
@@ -224,7 +344,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
                   </p>
                   <span className="font-display font-bold text-2xl text-white mt-0.5 flex items-center gap-1 leading-none">
                     <Flame className="w-4 h-4 text-amber-400 fill-current" />
-                    {tab === 'mvps' ? `${top1.mvp_count} MVPs` : `${top1.matches_played} PJ`}
+                    {getMetricDisplay(top1).podium}
                   </span>
                 </>
               ) : (
@@ -256,7 +376,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
                     {top3.profiles?.full_name?.split(' ')[0]}
                   </p>
                   <span className="font-mono text-sm font-bold text-amber-500 mt-0.5">
-                    {tab === 'mvps' ? `${top3.mvp_count} MVPs` : `${top3.matches_played} PJ`}
+                    {getMetricDisplay(top3).podium}
                   </span>
                 </>
               ) : (
@@ -285,7 +405,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
               Sin estadísticas registradas aún
             </p>
             <p className="font-sans text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-              Las estadísticas se actualizarán automáticamente al finalizar los partidos y computar las encuestas MVP.
+              Las estadísticas se actualizarán automáticamente al finalizar los partidos, registrar actas y computar las votaciones.
             </p>
           </div>
         ) : (
@@ -294,6 +414,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
               const p = item.profiles
               const isCurrentUser = item.user_id === user.id
               const custom = p?.custom_attributes || {}
+              const metric = getMetricDisplay(item)
 
               return (
                 <div
@@ -357,12 +478,10 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
                   {/* Main Metric */}
                   <div className="text-right flex-shrink-0 pl-2">
                     <span className="font-display font-bold text-xl text-neutral-950 dark:text-white block leading-tight">
-                      {tab === 'mvps' ? item.mvp_count : item.matches_played}
+                      {metric.main}
                     </span>
                     <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase block">
-                      {tab === 'mvps'
-                        ? `${item.mvp_votes_received} votos • ${item.matches_played} PJ`
-                        : `${item.mvp_count} MVPs`}
+                      {metric.sub}
                     </span>
                   </div>
                 </div>
@@ -373,22 +492,40 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
       </div>
 
       {/* Global Club Counter */}
-      <div className="mt-5 bg-white dark:bg-[#14161f] rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile p-4 grid grid-cols-2 gap-3 text-center">
+      <div className="mt-5 bg-white dark:bg-[#14161f] rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile p-4 grid grid-cols-4 gap-1 text-center">
         <div>
-          <span className="font-display font-bold text-2xl text-neutral-950 dark:text-white block leading-tight">
-            {totalMvpsAwarded}
+          <span className="font-display font-bold text-xl sm:text-2xl text-neutral-950 dark:text-white block leading-tight">
+            {totalGoals}
           </span>
-          <span className="font-mono text-[10px] uppercase text-neutral-500 dark:text-neutral-400 font-bold">
-            Premios MVP Oficiales
+          <span className="font-mono text-[9px] uppercase text-neutral-500 dark:text-neutral-400 font-bold">
+            Goles
           </span>
         </div>
 
         <div className="border-l-2 border-neutral-200 dark:border-neutral-800">
-          <span className="font-display font-bold text-2xl text-neutral-950 dark:text-white block leading-tight">
+          <span className="font-display font-bold text-xl sm:text-2xl text-neutral-950 dark:text-white block leading-tight">
+            {totalAssists}
+          </span>
+          <span className="font-mono text-[9px] uppercase text-neutral-500 dark:text-neutral-400 font-bold">
+            Asistencias
+          </span>
+        </div>
+
+        <div className="border-l-2 border-neutral-200 dark:border-neutral-800">
+          <span className="font-display font-bold text-xl sm:text-2xl text-neutral-950 dark:text-white block leading-tight">
+            {totalMvpsAwarded}
+          </span>
+          <span className="font-mono text-[9px] uppercase text-neutral-500 dark:text-neutral-400 font-bold">
+            MVPs
+          </span>
+        </div>
+
+        <div className="border-l-2 border-neutral-200 dark:border-neutral-800">
+          <span className="font-display font-bold text-xl sm:text-2xl text-neutral-950 dark:text-white block leading-tight">
             {validStats.length}
           </span>
-          <span className="font-mono text-[10px] uppercase text-neutral-500 dark:text-neutral-400 font-bold">
-            Jugadores Clasificados
+          <span className="font-mono text-[9px] uppercase text-neutral-500 dark:text-neutral-400 font-bold">
+            Jugadores
           </span>
         </div>
       </div>

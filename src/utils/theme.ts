@@ -16,6 +16,19 @@ export interface ClubThemePalette {
 
 export const CLUB_THEME_PALETTES: ClubThemePalette[] = [
   {
+    id: 'granate-oro',
+    name: 'Granate & Oro',
+    description: 'Identidad oficial del escudo Campana, nobleza granate con acento dorado.',
+    primary: '#7b2d32',
+    primaryHover: '#632327',
+    primaryLight: '#fbf6ee',
+    primaryBorder: '#f3cf97',
+    primaryText: '#ffffff',
+    gradientFrom: '#7b2d32',
+    gradientTo: '#e7ab57',
+    previewHex: '#7b2d32',
+  },
+  {
     id: 'emerald',
     name: 'Verde Cancha',
     description: 'Verde esmeralda clásico deportivo, fresco y equilibrado.',

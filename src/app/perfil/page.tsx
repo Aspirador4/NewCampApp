@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 import { ProfileForm } from '@/components/ProfileForm'
 import { PwaPrompt } from '@/components/PwaPrompt'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { Trophy, CalendarCheck, Award, ArrowLeft, Wallet, Shield, Settings2 } from 'lucide-react'
+import { Trophy, CalendarCheck, Award, ArrowLeft, Wallet, Shield, Settings2, Lock, TrendingUp, TrendingDown, Minus, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { Database } from '@/types/database.types'
 import { getActiveClub } from '@/utils/club'
@@ -115,6 +115,19 @@ export default async function PerfilPage() {
     mvp_count: 0,
     mvp_votes_received: 0,
     social_events_attended: 0,
+    best_teammate_count: 0,
+    surprise_player_count: 0,
+    average_rating: null,
+    last_match_rating: null,
+    previous_average_rating: null,
+    ratings_count: 0,
+    match_history_ratings: [],
+    goals: 0,
+    assists: 0,
+    saves: 0,
+    matches_won: 0,
+    matches_lost: 0,
+    matches_tied: 0,
     mutable_stats: {},
     updated_at: new Date().toISOString(),
   }
@@ -126,6 +139,18 @@ export default async function PerfilPage() {
     .eq('user_id', user.id)
     .eq('status', 'pendiente')
     .eq('events.club_id', club.id)
+
+  const deltaRating = userStats.average_rating !== null && userStats.previous_average_rating !== null
+    ? Number((userStats.average_rating - userStats.previous_average_rating).toFixed(1))
+    : 0
+
+  interface RatingHistoryEntry {
+    event_id: string
+    date: string
+    rating: number
+  }
+
+  const matchHistory = (userStats.match_history_ratings as unknown as RatingHistoryEntry[]) || []
 
   return (
     <div className="flex-1 flex flex-col p-4 sm:p-5 pb-nav">
@@ -207,6 +232,195 @@ export default async function PerfilPage() {
           <span className="font-mono text-[10px] text-neutral-600 dark:text-neutral-400 uppercase font-semibold tracking-wider mt-1">
             Votos
           </span>
+        </div>
+      </div>
+
+      {/* Private Athletic Performance & Evaluation Console */}
+      <div className="bg-white dark:bg-neutral-900 rounded-3xl p-4 sm:p-5 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile mb-4">
+        <div className="flex items-center justify-between pb-3 border-b-2 border-neutral-900/10 dark:border-white/10">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-purple-500 text-white flex items-center justify-center border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm">
+              <Zap className="w-4 h-4 stroke-[2.5]" />
+            </div>
+            <div>
+              <h2 className="font-display font-bold text-base text-neutral-950 dark:text-white uppercase tracking-tight">
+                Rendimiento Deportivo
+              </h2>
+              <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400">
+                Métricas acotadas a {club.name}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border border-neutral-300 dark:border-neutral-700">
+            <Lock className="w-3 h-3 stroke-[2.5]" />
+            <span>CONFIDENCIAL</span>
+          </div>
+        </div>
+
+        <p className="text-[11px] text-neutral-600 dark:text-neutral-400 mt-2.5 mb-3 leading-relaxed">
+          Evaluaciones anónimas de tus compañeros de partido y estadísticas individuales. Solo visible para ti y la capitanía del club para calibrar el algoritmo de equipos.
+        </p>
+
+        {/* Grades & Evolution Grid */}
+        <div className="grid grid-cols-3 gap-2.5 mb-4">
+          {/* Nota Promedio */}
+          <div className="bg-neutral-50 dark:bg-neutral-800/60 p-3 rounded-2xl border-2 border-neutral-900/20 dark:border-white/10 flex flex-col items-center text-center">
+            <span className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase font-bold tracking-wider">
+              Nota Global
+            </span>
+            <div className="flex items-baseline gap-1 my-1">
+              <span className="font-display font-black text-2xl text-neutral-950 dark:text-white">
+                {userStats.average_rating !== null ? Number(userStats.average_rating).toFixed(1) : '—'}
+              </span>
+              <span className="font-mono text-xs text-neutral-400">/10</span>
+            </div>
+            <span className="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono">
+              {userStats.ratings_count} {userStats.ratings_count === 1 ? 'evaluación' : 'evaluaciones'}
+            </span>
+          </div>
+
+          {/* Última Nota */}
+          <div className="bg-neutral-50 dark:bg-neutral-800/60 p-3 rounded-2xl border-2 border-neutral-900/20 dark:border-white/10 flex flex-col items-center text-center">
+            <span className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase font-bold tracking-wider">
+              Última Nota
+            </span>
+            <div className="flex items-baseline gap-1 my-1">
+              <span className="font-display font-black text-2xl text-neutral-950 dark:text-white">
+                {userStats.last_match_rating !== null ? Number(userStats.last_match_rating).toFixed(1) : '—'}
+              </span>
+              <span className="font-mono text-xs text-neutral-400">/10</span>
+            </div>
+            <span className="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono">
+              Último partido
+            </span>
+          </div>
+
+          {/* Tendencia / Evolución */}
+          <div className="bg-neutral-50 dark:bg-neutral-800/60 p-3 rounded-2xl border-2 border-neutral-900/20 dark:border-white/10 flex flex-col items-center text-center">
+            <span className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase font-bold tracking-wider">
+              Evolución
+            </span>
+            <div className="flex items-center gap-1 my-1">
+              {deltaRating > 0 ? (
+                <>
+                  <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400 stroke-[3]" />
+                  <span className="font-display font-black text-2xl text-emerald-600 dark:text-emerald-400">
+                    +{deltaRating}
+                  </span>
+                </>
+              ) : deltaRating < 0 ? (
+                <>
+                  <TrendingDown className="w-5 h-5 text-rose-600 dark:text-rose-400 stroke-[3]" />
+                  <span className="font-display font-black text-2xl text-rose-600 dark:text-rose-400">
+                    {deltaRating}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <Minus className="w-5 h-5 text-neutral-400 stroke-[2.5]" />
+                  <span className="font-display font-black text-2xl text-neutral-500 dark:text-neutral-400">
+                    0.0
+                  </span>
+                </>
+              )}
+            </div>
+            <span className="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono">
+              vs promedio ant.
+            </span>
+          </div>
+        </div>
+
+        {/* Historial de Notas Recientes */}
+        {matchHistory.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase font-bold tracking-wider">
+                Rendimiento por Partido Reciente
+              </span>
+              <span className="font-mono text-[10px] text-neutral-400">
+                Últimos {matchHistory.length}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+              {matchHistory.slice(-8).map((h, i) => (
+                <div
+                  key={`${h.event_id}-${i}`}
+                  className="flex-shrink-0 px-2.5 py-1 rounded-xl bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 flex flex-col items-center"
+                >
+                  <span className="font-display font-bold text-xs text-neutral-900 dark:text-white">
+                    {Number(h.rating).toFixed(1)}
+                  </span>
+                  <span className="font-mono text-[8px] text-neutral-400 uppercase">
+                    {h.date ? new Date(h.date).toLocaleDateString('es-CL', { day: '2-digit', month: 'short' }) : `P${i + 1}`}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Extended Stats: Record & Match Metrics */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-neutral-200 dark:border-neutral-800">
+          <div className="p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 text-center">
+            <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase font-bold block">
+              Récord (V-E-D)
+            </span>
+            <span className="font-display font-bold text-sm text-neutral-950 dark:text-white mt-0.5 block">
+              {userStats.matches_won}V - {userStats.matches_tied}E - {userStats.matches_lost}D
+            </span>
+          </div>
+          <div className="p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 text-center">
+            <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase font-bold block">
+              Goles Marcados
+            </span>
+            <span className="font-display font-bold text-sm text-emerald-600 dark:text-emerald-400 mt-0.5 block">
+              ⚽ {userStats.goals}
+            </span>
+          </div>
+          <div className="p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 text-center">
+            <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase font-bold block">
+              Asistencias
+            </span>
+            <span className="font-display font-bold text-sm text-blue-600 dark:text-blue-400 mt-0.5 block">
+              👟 {userStats.assists}
+            </span>
+          </div>
+          <div className="p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 text-center">
+            <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase font-bold block">
+              Atajadas Clave
+            </span>
+            <span className="font-display font-bold text-sm text-amber-600 dark:text-amber-400 mt-0.5 block">
+              🧤 {userStats.saves}
+            </span>
+          </div>
+        </div>
+
+        {/* Accolades & Distinctions Showcase */}
+        <div className="grid grid-cols-3 gap-2 mt-2">
+          <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center">
+            <span className="font-mono text-[9px] text-amber-700 dark:text-amber-400 uppercase font-bold block">
+              🏆 MVP
+            </span>
+            <span className="font-display font-black text-sm text-amber-800 dark:text-amber-300">
+              {userStats.mvp_count} veces
+            </span>
+          </div>
+          <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/30 text-center">
+            <span className="font-mono text-[9px] text-blue-700 dark:text-blue-400 uppercase font-bold block">
+              🤝 Compañero
+            </span>
+            <span className="font-display font-black text-sm text-blue-800 dark:text-blue-300">
+              {userStats.best_teammate_count} veces
+            </span>
+          </div>
+          <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/30 text-center">
+            <span className="font-mono text-[9px] text-purple-700 dark:text-purple-400 uppercase font-bold block">
+              ⚡ Sorpresa
+            </span>
+            <span className="font-display font-black text-sm text-purple-800 dark:text-purple-300">
+              {userStats.surprise_player_count} veces
+            </span>
+          </div>
         </div>
       </div>
 

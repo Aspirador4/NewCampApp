@@ -14,11 +14,14 @@ export type GenderCategory = 'masculino' | 'femenino' | 'mixto'
 export type EventType = 'partido' | 'entrenamiento' | 'torneo' | 'asado' | 'otro'
 export type EventStatus = 'pendiente_aprobacion' | 'convocado' | 'en_curso' | 'finalizado' | 'cancelado'
 export type AttendeeStatus = 'confirmado' | 'lista_espera' | 'cancelado'
+export type AttendanceType = 'jugador' | 'espectador'
+export type AwardType = 'mvp' | 'mejor_compañero' | 'jugador_sorpresa'
 export type GuestStatus = 'pendiente_aprobacion' | 'aprobado' | 'rechazado'
 export type DebtType = 'partido_propio' | 'invitado'
 export type DebtStatus = 'pendiente' | 'pagado'
 export type AttendanceAction =
   | 'confirmo'
+  | 'confirmo_espectador'
   | 'bajo'
   | 'entro_espera'
   | 'subio_espera'
@@ -243,6 +246,8 @@ export interface Database {
           financial_closed_at: string | null
           reminder_24h_sent: boolean
           reminder_mvp_sent: boolean
+          teams_published: boolean
+          result_recorded: boolean
           created_by: string | null
           created_at: string
           updated_at: string
@@ -268,6 +273,8 @@ export interface Database {
           financial_closed_at?: string | null
           reminder_24h_sent?: boolean
           reminder_mvp_sent?: boolean
+          teams_published?: boolean
+          result_recorded?: boolean
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -293,6 +300,8 @@ export interface Database {
           financial_closed_at?: string | null
           reminder_24h_sent?: boolean
           reminder_mvp_sent?: boolean
+          teams_published?: boolean
+          result_recorded?: boolean
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -320,6 +329,7 @@ export interface Database {
           event_id: string
           user_id: string
           status: AttendeeStatus
+          attendance_type: AttendanceType
           registered_at: string
         }
         Insert: {
@@ -327,6 +337,7 @@ export interface Database {
           event_id: string
           user_id: string
           status?: AttendeeStatus
+          attendance_type?: AttendanceType
           registered_at?: string
         }
         Update: {
@@ -334,6 +345,7 @@ export interface Database {
           event_id?: string
           user_id?: string
           status?: AttendeeStatus
+          attendance_type?: AttendanceType
           registered_at?: string
         }
         Relationships: [
@@ -361,6 +373,7 @@ export interface Database {
           guest_name: string
           guest_contact: string | null
           status: GuestStatus
+          is_overcapacity: boolean
           reviewed_by: string | null
           reviewed_at: string | null
           created_at: string
@@ -372,6 +385,7 @@ export interface Database {
           guest_name: string
           guest_contact?: string | null
           status?: GuestStatus
+          is_overcapacity?: boolean
           reviewed_by?: string | null
           reviewed_at?: string | null
           created_at?: string
@@ -383,6 +397,7 @@ export interface Database {
           guest_name?: string
           guest_contact?: string | null
           status?: GuestStatus
+          is_overcapacity?: boolean
           reviewed_by?: string | null
           reviewed_at?: string | null
           created_at?: string
@@ -469,6 +484,7 @@ export interface Database {
           event_id: string
           voter_id: string
           voted_player_id: string
+          award_type: AwardType
           created_at: string
         }
         Insert: {
@@ -476,6 +492,7 @@ export interface Database {
           event_id: string
           voter_id: string
           voted_player_id: string
+          award_type?: AwardType
           created_at?: string
         }
         Update: {
@@ -483,6 +500,7 @@ export interface Database {
           event_id?: string
           voter_id?: string
           voted_player_id?: string
+          award_type?: AwardType
           created_at?: string
         }
         Relationships: [
@@ -518,6 +536,19 @@ export interface Database {
           mvp_count: number
           mvp_votes_received: number
           social_events_attended: number
+          best_teammate_count: number
+          surprise_player_count: number
+          average_rating: number | null
+          last_match_rating: number | null
+          previous_average_rating: number | null
+          ratings_count: number
+          match_history_ratings: Json[]
+          goals: number
+          assists: number
+          saves: number
+          matches_won: number
+          matches_lost: number
+          matches_tied: number
           mutable_stats: Record<string, Json>
           updated_at: string
         }
@@ -529,6 +560,19 @@ export interface Database {
           mvp_count?: number
           mvp_votes_received?: number
           social_events_attended?: number
+          best_teammate_count?: number
+          surprise_player_count?: number
+          average_rating?: number | null
+          last_match_rating?: number | null
+          previous_average_rating?: number | null
+          ratings_count?: number
+          match_history_ratings?: Json[]
+          goals?: number
+          assists?: number
+          saves?: number
+          matches_won?: number
+          matches_lost?: number
+          matches_tied?: number
           mutable_stats?: Record<string, Json>
           updated_at?: string
         }
@@ -540,6 +584,19 @@ export interface Database {
           mvp_count?: number
           mvp_votes_received?: number
           social_events_attended?: number
+          best_teammate_count?: number
+          surprise_player_count?: number
+          average_rating?: number | null
+          last_match_rating?: number | null
+          previous_average_rating?: number | null
+          ratings_count?: number
+          match_history_ratings?: Json[]
+          goals?: number
+          assists?: number
+          saves?: number
+          matches_won?: number
+          matches_lost?: number
+          matches_tied?: number
           mutable_stats?: Record<string, Json>
           updated_at?: string
         }
@@ -745,6 +802,161 @@ export interface Database {
           }
         ]
       }
+      event_teams: {
+        Row: {
+          id: string
+          event_id: string
+          name: string
+          color: string
+          score: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          name: string
+          color?: string
+          score?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          name?: string
+          color?: string
+          score?: number | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_teams_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      event_team_players: {
+        Row: {
+          id: string
+          event_id: string
+          team_id: string
+          user_id: string
+          assigned_position: string
+          goals: number
+          assists: number
+          saves: number
+          own_goals: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          team_id: string
+          user_id: string
+          assigned_position?: string
+          goals?: number
+          assists?: number
+          saves?: number
+          own_goals?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          team_id?: string
+          user_id?: string
+          assigned_position?: string
+          goals?: number
+          assists?: number
+          saves?: number
+          own_goals?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_team_players_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_team_players_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "event_teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_team_players_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      match_player_ratings: {
+        Row: {
+          id: string
+          event_id: string
+          club_id: string
+          evaluator_id: string
+          evaluated_player_id: string
+          rating: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          club_id: string
+          evaluator_id: string
+          evaluated_player_id: string
+          rating: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          club_id?: string
+          evaluator_id?: string
+          evaluated_player_id?: string
+          rating?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_player_ratings_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_player_ratings_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_player_ratings_evaluator_id_fkey"
+            columns: ["evaluator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_player_ratings_evaluated_player_id_fkey"
+            columns: ["evaluated_player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -804,6 +1016,7 @@ export interface Database {
         Args: {
           p_event_id: string
           p_user_id: string
+          p_attendance_type?: 'jugador' | 'espectador'
         }
         Returns: Json
       }

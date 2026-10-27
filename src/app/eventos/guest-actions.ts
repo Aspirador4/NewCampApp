@@ -296,3 +296,120 @@ export async function rejectGuest(guestId: string, eventId: string) {
   revalidatePath('/admin/invitados')
   return { success: true }
 }
+
+export async function addTrainingOvercapacityGuest(eventId: string, guestName: string, guestContact?: string) {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: 'Debes iniciar sesión' }
+  }
+
+  const trimmedName = guestName?.trim()
+  if (!trimmedName) {
+    return { error: 'El nombre del invitado es requerido' }
+  }
+
+  // Check event exists and is a training
+  const { data: event, error: eventErr } = await supabase
+    .from('events')
+    .select('club_id, created_by, event_type')
+    .eq('id', eventId)
+    .single()
+
+  if (eventErr || !event) {
+    return { error: 'Evento no encontrado' }
+  }
+
+  if (event.event_type !== 'entrenamiento') {
+    return { error: 'El sobrecupo solo está disponible para entrenamientos' }
+  }
+
+  // Check authorization: must be admin or creator
+  const { data: member } = await supabase
+    .from('club_members')
+    .select('system_role, approval_status')
+    .eq('club_id', event.club_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  const isAdmin = member?.system_role === 'admin' && member?.approval_status === 'aprobado'
+  const isCreator = event.created_by === user.id
+
+  if (!isAdmin && !isCreator) {
+    return { error: 'Solo el creador del entrenamiento o un administrador pueden gestionar el sobrecupo' }
+  }
+
+  const { error: insertErr } = await supabase
+    .from('event_guests')
+    .insert({
+      event_id: eventId,
+      invited_by_user_id: user.id,
+      guest_name: trimmedName,
+      guest_contact: guestContact?.trim() || null,
+      status: 'aprobado',
+      is_overcapacity: true,
+      reviewed_by: user.id,
+      reviewed_at: new Date().toISOString(),
+    })
+
+  if (insertErr) {
+    return { error: insertErr.message }
+  }
+
+  await supabase.from('event_attendance_logs').insert({
+    event_id: eventId,
+    user_id: user.id,
+    actor_id: user.id,
+    action: 'invitado_aprobado',
+    reason: `Sobrecupo de entrenamiento añadido: ${trimmedName}`,
+  })
+
+  revalidatePath(`/eventos/${eventId}`)
+  return { success: true }
+}
+
+export async function removeTrainingOvercapacityGuest(eventId: string, guestId: string) {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: 'Debes iniciar sesión' }
+  }
+
+  const { data: event } = await supabase
+    .from('events')
+    .select('club_id, created_by')
+    .eq('id', eventId)
+    .single()
+
+  if (!event) return { error: 'Evento no encontrado' }
+
+  const { data: member } = await supabase
+    .from('club_members')
+    .select('system_role, approval_status')
+    .eq('club_id', event.club_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  const isAdmin = member?.system_role === 'admin' && member?.approval_status === 'aprobado'
+  const isCreator = event.created_by === user.id
+
+  if (!isAdmin && !isCreator) {
+    return { error: 'No autorizado' }
+  }
+
+  const { error: delErr } = await supabase
+    .from('event_guests')
+    .delete()
+    .eq('id', guestId)
+    .eq('event_id', eventId)
+    .eq('is_overcapacity', true)
+
+  if (delErr) {
+    return { error: delErr.message }
+  }
+
+  revalidatePath(`/eventos/${eventId}`)
+  return { success: true }
+}
