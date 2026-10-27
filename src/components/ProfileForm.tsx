@@ -136,14 +136,14 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
           editable={true}
         />
         <div className="mt-3 text-center">
-          <h2 className="font-display font-black text-2xl uppercase tracking-tight text-neutral-950 leading-tight">
+          <h2 className="font-display font-black text-2xl uppercase tracking-tight text-neutral-950 dark:text-white leading-tight">
             {profile.full_name || 'Socio Sin Nombre'}
           </h2>
-          <p className="font-mono text-xs text-neutral-500 mt-0.5">{profile.email}</p>
+          <p className="font-mono text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">{profile.email}</p>
 
           <div className="flex items-center justify-center gap-1.5 mt-2 flex-wrap">
             <span
-              className="font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded border border-neutral-300"
+              className="font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-700"
               style={{
                 backgroundColor: 'var(--club-primary-light, #ecfdf5)',
                 color: 'var(--club-primary, #059669)',
@@ -152,7 +152,7 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
               Rol: {profile.sports_role}
             </span>
             {profile.system_role === 'admin' && (
-              <span className="inline-flex items-center gap-1 font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded bg-neutral-950 text-white border border-neutral-900 shadow-2xs">
+              <span className="inline-flex items-center gap-1 font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded bg-neutral-950 text-white border border-neutral-900 dark:border-neutral-700 shadow-2xs">
                 <ShieldCheck className="w-3 h-3 text-emerald-400 stroke-[2.5]" />
                 <span>Admin</span>
               </span>
@@ -165,14 +165,14 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
       {!isEditing ? (
         /* READ-ONLY SUMMARY VIEW */
         <div className="space-y-4 pt-1">
-          <div className="flex items-center justify-between pb-2 border-b-2 border-neutral-900/10">
-            <h3 className="font-display font-black text-sm text-neutral-950 uppercase tracking-wider">
+          <div className="flex items-center justify-between pb-2 border-b-2 border-neutral-900/10 dark:border-neutral-800">
+            <h3 className="font-display font-black text-sm text-neutral-950 dark:text-white uppercase tracking-wider">
               Información Personal
             </h3>
             <button
               type="button"
               onClick={() => setIsEditing(true)}
-              className="btn-tactile min-h-[40px] px-3.5 py-1.5 rounded-xl border-2 border-neutral-900 bg-white hover:bg-neutral-100 text-xs font-display font-black uppercase tracking-wider text-neutral-900 transition active:scale-95 flex items-center gap-1.5 shadow-tactile-sm"
+              className="btn-tactile min-h-[40px] px-3.5 py-1.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-xs font-display font-black uppercase tracking-wider text-neutral-900 dark:text-white transition active:scale-95 flex items-center gap-1.5 shadow-tactile-sm"
             >
               <Edit3 className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Editar Datos</span>
@@ -180,33 +180,33 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
           </div>
 
           <div className="space-y-2 text-xs">
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border-2 border-neutral-200">
-              <span className="text-neutral-500 font-medium flex items-center gap-1.5">
-                <UserCheck className="w-4 h-4 text-neutral-400 stroke-[2.5]" />
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 dark:bg-neutral-800/60 border-2 border-neutral-200 dark:border-neutral-700">
+              <span className="text-neutral-500 dark:text-neutral-400 font-medium flex items-center gap-1.5">
+                <UserCheck className="w-4 h-4 text-neutral-400 dark:text-neutral-500 stroke-[2.5]" />
                 Nombre completo:
               </span>
-              <span className="font-display font-black text-sm uppercase text-neutral-950">{profile.full_name || 'No especificado'}</span>
+              <span className="font-display font-black text-sm uppercase text-neutral-950 dark:text-white">{profile.full_name || 'No especificado'}</span>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border-2 border-neutral-200">
-              <span className="text-neutral-500 font-medium flex items-center gap-1.5">
-                <Mail className="w-4 h-4 text-neutral-400 stroke-[2.5]" />
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 dark:bg-neutral-800/60 border-2 border-neutral-200 dark:border-neutral-700">
+              <span className="text-neutral-500 dark:text-neutral-400 font-medium flex items-center gap-1.5">
+                <Mail className="w-4 h-4 text-neutral-400 dark:text-neutral-500 stroke-[2.5]" />
                 Correo electrónico:
               </span>
-              <span className="font-mono text-xs font-medium text-neutral-700">{profile.email}</span>
+              <span className="font-mono text-xs font-medium text-neutral-700 dark:text-neutral-300">{profile.email}</span>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border-2 border-neutral-200">
-              <span className="text-neutral-500 font-medium flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-neutral-400 stroke-[2.5]" />
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 dark:bg-neutral-800/60 border-2 border-neutral-200 dark:border-neutral-700">
+              <span className="text-neutral-500 dark:text-neutral-400 font-medium flex items-center gap-1.5">
+                <Calendar className="w-4 h-4 text-neutral-400 dark:text-neutral-500 stroke-[2.5]" />
                 Fecha de nacimiento:
               </span>
-              <span className="font-mono text-xs font-bold text-neutral-900">{formattedBirthDate || 'No especificada'}</span>
+              <span className="font-mono text-xs font-bold text-neutral-900 dark:text-neutral-100">{formattedBirthDate || 'No especificada'}</span>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border-2 border-neutral-200">
-              <span className="text-neutral-500 font-medium">Género:</span>
-              <span className="font-display font-black text-xs uppercase text-neutral-900">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 dark:bg-neutral-800/60 border-2 border-neutral-200 dark:border-neutral-700">
+              <span className="text-neutral-500 dark:text-neutral-400 font-medium">Género:</span>
+              <span className="font-display font-black text-xs uppercase text-neutral-900 dark:text-neutral-100">
                 {profile.gender || 'No especificado'}
               </span>
             </div>
@@ -222,15 +222,15 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
       ) : (
         /* EDIT MODE (Form) */
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b-2 border-neutral-900/10">
-            <h3 className="font-display font-black text-sm uppercase tracking-wider text-neutral-950 flex items-center gap-1.5">
-              <Edit3 className="w-4 h-4 text-neutral-900 stroke-[2.5]" />
+          <div className="flex items-center justify-between pb-2 border-b-2 border-neutral-900/10 dark:border-neutral-800">
+            <h3 className="font-display font-black text-sm uppercase tracking-wider text-neutral-950 dark:text-white flex items-center gap-1.5">
+              <Edit3 className="w-4 h-4 text-neutral-900 dark:text-white stroke-[2.5]" />
               <span>Editando Información Personal</span>
             </h3>
             <button
               type="button"
               onClick={handleCancel}
-              className="w-10 h-10 rounded-full text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 transition flex items-center justify-center"
+              className="w-10 h-10 rounded-full text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition flex items-center justify-center"
               title="Cancelar edición"
               aria-label="Cancelar edición"
             >
@@ -241,7 +241,7 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
           {/* Basic Profile Inputs */}
           <div className="space-y-3.5">
             <div>
-              <label htmlFor="full_name" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 mb-1">
+              <label htmlFor="full_name" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-neutral-100 mb-1">
                 Nombre y Apellido <span className="text-red-500">*</span>
               </label>
               <input
@@ -256,7 +256,7 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
             </div>
 
             <div>
-              <label htmlFor="email" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 mb-1">
+              <label htmlFor="email" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-neutral-100 mb-1">
                 Correo Electrónico
               </label>
               <input
@@ -264,16 +264,16 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
                 type="email"
                 disabled
                 value={profile.email}
-                className="input-tactile w-full px-3.5 py-2.5 text-xs font-mono font-medium bg-neutral-100 text-neutral-500 cursor-not-allowed opacity-80"
+                className="input-tactile w-full px-3.5 py-2.5 text-xs font-mono font-medium bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 cursor-not-allowed opacity-80"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label htmlFor="birth_date" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900">
+                <label htmlFor="birth_date" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-neutral-100">
                   Fecha de Nacimiento
                 </label>
-                <span className="font-mono text-[9px] text-amber-900 font-bold bg-amber-100 px-2 py-0.5 rounded border border-amber-300">
+                <span className="font-mono text-[9px] text-amber-900 dark:text-amber-300 font-bold bg-amber-100 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-300 dark:border-amber-800">
                   +18 años requeridos
                 </span>
               </div>
@@ -285,7 +285,7 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
                 onChange={(e) => setBirthDate(e.target.value)}
                 className="input-tactile w-full px-3.5 py-2.5 text-xs font-mono font-medium"
               />
-              <p className="text-[11px] text-neutral-500 mt-1 font-sans">
+              <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1 font-sans">
                 Debes tener al menos 18 años para participar en el club.
               </p>
             </div>
@@ -293,14 +293,14 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
             {/* Gender Selector */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900">
+                <label className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-neutral-100">
                   Género
                 </label>
-                <span className="font-mono text-[9px] text-neutral-700 font-bold bg-neutral-100 px-2 py-0.5 rounded border border-neutral-300">
+                <span className="font-mono text-[9px] text-neutral-700 dark:text-neutral-300 font-bold bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-700">
                   Categoría deportiva
                 </span>
               </div>
-              <p className="text-[11px] text-neutral-500 mb-2 font-sans">
+              <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mb-2 font-sans">
                 Relevante para convocatorias y eventos por categoría (femenino, masculino o mixto).
               </p>
               <div className="grid grid-cols-3 gap-2">
@@ -315,8 +315,8 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
                     onClick={() => setGender(g.value as 'masculino' | 'femenino' | 'otro')}
                     className={`min-h-[42px] py-2 px-3 rounded-xl font-display font-black text-xs uppercase tracking-wider border-2 transition text-center active:scale-95 ${
                       gender === g.value
-                        ? 'text-white border-neutral-900 shadow-tactile-sm'
-                        : 'bg-white text-neutral-800 border-neutral-300 hover:border-neutral-900'
+                        ? 'text-white border-neutral-900 dark:border-neutral-700 shadow-tactile-sm'
+                        : 'bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 border-neutral-300 dark:border-neutral-700 hover:border-neutral-900 dark:hover:border-neutral-500'
                     }`}
                     style={
                       gender === g.value
@@ -332,7 +332,7 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
 
             {/* Sports Role Selector */}
             <div>
-              <label className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 mb-1.5">
+              <label className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-neutral-100 mb-1.5">
                 Rol en el Club
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -343,8 +343,8 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
                     onClick={() => setSportsRole(role)}
                     className={`min-h-[42px] py-2 px-3 rounded-xl font-display font-black text-xs uppercase tracking-wider border-2 transition active:scale-95 ${
                       sportsRole === role
-                        ? 'text-white border-neutral-900 shadow-tactile-sm'
-                        : 'bg-white text-neutral-800 border-neutral-300 hover:border-neutral-900'
+                        ? 'text-white border-neutral-900 dark:border-neutral-700 shadow-tactile-sm'
+                        : 'bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 border-neutral-300 dark:border-neutral-700 hover:border-neutral-900 dark:hover:border-neutral-500'
                     }`}
                     style={
                       sportsRole === role
@@ -372,7 +372,7 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
             <button
               type="submit"
               disabled={loading}
-              className="btn-tactile w-full min-h-[48px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 border-neutral-900 text-white font-display font-black text-xs uppercase tracking-wider shadow-tactile transition active:scale-[0.98] disabled:opacity-50"
+              className="btn-tactile w-full min-h-[48px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 text-white font-display font-black text-xs uppercase tracking-wider shadow-tactile transition active:scale-[0.98] disabled:opacity-50"
               style={{
                 backgroundColor: 'var(--club-primary, #059669)',
               }}
@@ -391,7 +391,7 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
               type="button"
               onClick={handleCancel}
               disabled={loading}
-              className="btn-tactile w-full min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border-2 border-neutral-900 bg-white hover:bg-neutral-100 text-neutral-900 font-display font-black text-xs uppercase tracking-wider transition active:scale-[0.98] disabled:opacity-50 shadow-tactile-sm"
+              className="btn-tactile w-full min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-900 dark:text-neutral-100 font-display font-black text-xs uppercase tracking-wider transition active:scale-[0.98] disabled:opacity-50 shadow-tactile-sm"
             >
               <X className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Cancelar</span>
@@ -401,12 +401,12 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
       )}
 
       {/* Sign Out Button (always accessible at bottom) */}
-      <div className="pt-3 border-t-2 border-neutral-900/10">
+      <div className="pt-3 border-t-2 border-neutral-900/10 dark:border-neutral-800">
         <button
           type="button"
           onClick={handleSignOut}
           disabled={signingOut || loading}
-          className="btn-tactile w-full min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border-2 border-neutral-900 bg-white hover:bg-rose-50 text-neutral-800 hover:text-rose-700 font-display font-black text-xs uppercase tracking-wider transition active:scale-[0.98] disabled:opacity-50 shadow-tactile-sm"
+          className="btn-tactile w-full min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-neutral-800 dark:text-neutral-200 hover:text-rose-700 dark:hover:text-rose-400 font-display font-black text-xs uppercase tracking-wider transition active:scale-[0.98] disabled:opacity-50 shadow-tactile-sm"
         >
           {signingOut ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />

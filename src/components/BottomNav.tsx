@@ -27,7 +27,7 @@ export function BottomNav({ isAuthenticated }: BottomNavProps) {
   return (
     <nav
       aria-label="Navegación principal inferior"
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur-md border-t-2 border-neutral-900/10 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] px-3 pt-2 pb-[calc(0.6rem+env(safe-area-inset-bottom,0px))]"
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 dark:bg-[#12141c]/95 backdrop-blur-md border-t-2 border-neutral-900/10 dark:border-white/10 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)] px-3 pt-2 pb-[calc(0.6rem+env(safe-area-inset-bottom,0px))]"
     >
       <div className="flex items-center justify-between">
         {navItems.map((item) => {
@@ -42,7 +42,7 @@ export function BottomNav({ isAuthenticated }: BottomNavProps) {
               className={`flex-1 min-h-[46px] min-w-[48px] flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all duration-100 active:scale-95 ${
                 isActive
                   ? 'font-bold'
-                  : 'text-neutral-400 hover:text-neutral-800 font-medium'
+                  : 'text-neutral-400 dark:text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200 font-medium'
               }`}
               style={
                 isActive

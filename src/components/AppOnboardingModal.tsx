@@ -162,53 +162,53 @@ export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: A
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl border-2 border-neutral-900 shadow-tactile p-6 space-y-4 relative max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom duration-300">
+      <div className="bg-white dark:bg-[#14161f] w-full max-w-md rounded-t-3xl sm:rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile p-6 space-y-4 relative max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom duration-300">
         {/* Close Button */}
         <button
           type="button"
           onClick={handleDismiss}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 transition"
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition"
         >
           <X className="w-5 h-5 stroke-[2.5]" />
         </button>
 
         {/* Header Icon */}
         <div className="flex items-center gap-3 pt-1">
-          <div className="w-12 h-12 rounded-2xl border-2 border-neutral-900 shadow-tactile-sm bg-amber-400 text-neutral-950 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm bg-amber-400 text-neutral-950 flex items-center justify-center">
             <Bell className="w-6 h-6 stroke-[2.5] animate-bounce" />
           </div>
           <div>
-            <span className="font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded border border-neutral-300 bg-neutral-100 text-neutral-900">
+            <span className="font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100">
               Vestuario & Alertas
             </span>
-            <h3 className="font-display font-black text-2xl text-neutral-950 uppercase tracking-tight leading-none mt-1">
+            <h3 className="font-display font-black text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none mt-1">
               ¡No te pierdas de nada!
             </h3>
           </div>
         </div>
 
-        <p className="text-xs text-neutral-600 leading-relaxed font-sans">
+        <p className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed font-sans">
           Activa las notificaciones y agrega la app a tu pantalla de inicio para enterarte al instante de convocatorias y avisos clave del club.
         </p>
 
         {/* Benefits list */}
-        <div className="space-y-2 bg-neutral-50 p-4 rounded-2xl border-2 border-neutral-200 text-xs text-neutral-700">
+        <div className="space-y-2 bg-neutral-50 dark:bg-[#1a1d28] p-4 rounded-2xl border-2 border-neutral-200 dark:border-neutral-700 text-xs text-neutral-700 dark:text-neutral-300">
           <div className="flex items-start gap-2.5">
-            <Sparkles className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+            <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
             <span>Avisos instantáneos de nuevas convocatorias a partidos y entrenamientos.</span>
           </div>
           <div className="flex items-start gap-2.5">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
             <span>Alerta inmediata si subes de la Lista de Espera a Cupo Confirmado.</span>
           </div>
           <div className="flex items-start gap-2.5">
-            <Bell className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+            <Bell className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
             <span>Votaciones de MVP de la fecha y liquidaciones de tesorería.</span>
           </div>
         </div>
 
         {error && (
-          <p className="text-xs text-rose-700 bg-rose-50 p-3 rounded-2xl border-2 border-rose-300 font-medium">
+          <p className="text-xs text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 p-3 rounded-2xl border-2 border-rose-300 dark:border-rose-800 font-medium">
             {error}
           </p>
         )}
@@ -216,8 +216,8 @@ export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: A
         {/* Action 1: Notifications */}
         <div>
           {pushSuccess ? (
-            <div className="p-3 bg-emerald-50 border-2 border-emerald-300 rounded-2xl flex items-center justify-center gap-2 text-emerald-950 text-xs font-display font-black uppercase tracking-wider">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 stroke-[2.5]" />
+            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-300 dark:border-emerald-800 rounded-2xl flex items-center justify-center gap-2 text-emerald-950 dark:text-emerald-200 text-xs font-display font-black uppercase tracking-wider">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 stroke-[2.5]" />
               <span>¡Notificaciones activadas en tu cuenta!</span>
             </div>
           ) : (
@@ -225,7 +225,7 @@ export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: A
               type="button"
               onClick={handleActivatePush}
               disabled={pushLoading || pushStatus === 'unsupported'}
-              className="btn-tactile w-full py-3 px-4 rounded-xl border-2 border-neutral-900 bg-neutral-950 hover:bg-neutral-900 text-white font-display font-black text-xs uppercase tracking-wider shadow-tactile transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50 min-h-[44px]"
+              className="btn-tactile w-full py-3 px-4 rounded-xl border-2 border-neutral-900 dark:border-white bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950 font-display font-black text-xs uppercase tracking-wider shadow-tactile transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50 min-h-[44px]"
             >
               {pushLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -243,9 +243,9 @@ export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: A
 
         {/* Action 2: Add to Home Screen (PWA) */}
         {!isStandalone && (
-          <div className="p-3.5 rounded-2xl bg-neutral-50 border-2 border-neutral-200 text-xs space-y-2">
-            <div className="flex items-center gap-2 text-neutral-950 font-display font-black text-xs uppercase tracking-wider">
-              <Smartphone className="w-4 h-4 text-neutral-700 stroke-[2.5]" />
+          <div className="p-3.5 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700 text-xs space-y-2">
+            <div className="flex items-center gap-2 text-neutral-950 dark:text-white font-display font-black text-xs uppercase tracking-wider">
+              <Smartphone className="w-4 h-4 text-neutral-700 dark:text-neutral-300 stroke-[2.5]" />
               <span>Instalar en tu Pantalla de Inicio</span>
             </div>
 
@@ -253,22 +253,22 @@ export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: A
               <button
                 type="button"
                 onClick={handleInstallApp}
-                className="btn-tactile w-full py-2.5 px-3 rounded-xl border-2 border-neutral-900 bg-amber-400 hover:bg-amber-500 text-neutral-950 font-display font-black text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5 shadow-tactile-sm"
+                className="btn-tactile w-full py-2.5 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-amber-400 hover:bg-amber-500 text-neutral-950 font-display font-black text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5 shadow-tactile-sm"
               >
                 <Smartphone className="w-3.5 h-3.5 stroke-[2.5]" />
                 <span>Instalar App en el Celular</span>
               </button>
             ) : isIos ? (
-              <p className="text-[11px] text-neutral-600 leading-normal font-sans">
+              <p className="text-[11px] text-neutral-600 dark:text-neutral-300 leading-normal font-sans">
                 En Safari de iPhone: toca el botón compartir{' '}
-                <Share className="w-3.5 h-3.5 inline mx-0.5 text-blue-600" /> y luego selecciona{' '}
-                <strong className="text-neutral-900 font-bold">&quot;Agregar a inicio&quot;</strong>.
+                <Share className="w-3.5 h-3.5 inline mx-0.5 text-blue-600 dark:text-blue-400" /> y luego selecciona{' '}
+                <strong className="text-neutral-900 dark:text-white font-bold">&quot;Agregar a inicio&quot;</strong>.
               </p>
             ) : (
-              <p className="text-[11px] text-neutral-600 font-sans">
+              <p className="text-[11px] text-neutral-600 dark:text-neutral-300 font-sans">
                 Abre el menú de tu navegador (tres puntos) y selecciona{' '}
-                <strong className="text-neutral-900 font-bold">&quot;Instalar aplicación&quot;</strong> o{' '}
-                <strong className="text-neutral-900 font-bold">&quot;Agregar a pantalla principal&quot;</strong>.
+                <strong className="text-neutral-900 dark:text-white font-bold">&quot;Instalar aplicación&quot;</strong> o{' '}
+                <strong className="text-neutral-900 dark:text-white font-bold">&quot;Agregar a pantalla principal&quot;</strong>.
               </p>
             )}
           </div>
@@ -278,7 +278,7 @@ export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: A
         <button
           type="button"
           onClick={handleDismiss}
-          className="w-full py-2.5 text-center font-mono text-xs uppercase font-bold text-neutral-500 hover:text-neutral-900 transition"
+          className="w-full py-2.5 text-center font-mono text-xs uppercase font-bold text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition"
         >
           Continuar al Clubhouse →
         </button>

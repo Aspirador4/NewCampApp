@@ -58,21 +58,21 @@ export function PendingApprovalScreen({
   const isRejected = currentStatus === 'rechazado'
 
   return (
-    <div className="flex-1 flex flex-col justify-between p-4 sm:p-5 min-h-screen bg-neutral-50 text-neutral-900 pb-8">
+    <div className="flex-1 flex flex-col justify-between p-4 sm:p-5 min-h-screen bg-neutral-50 dark:bg-[#0c0d12] text-neutral-900 dark:text-white pb-8">
       {/* Top Athletic Header */}
-      <div className="flex items-center justify-between pt-2 pb-4 border-b-2 border-neutral-900/10">
+      <div className="flex items-center justify-between pt-2 pb-4 border-b-2 border-neutral-900/10 dark:border-white/10">
         <div className="flex items-center gap-3">
           <div
-            className="w-11 h-11 rounded-2xl flex items-center justify-center text-white border-2 border-neutral-900 shadow-tactile-sm flex-shrink-0"
+            className="w-11 h-11 rounded-2xl flex items-center justify-center text-white border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex-shrink-0"
             style={{ backgroundColor: 'var(--club-primary, #059669)' }}
           >
             <Flame className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="font-display font-black text-xl text-neutral-950 uppercase tracking-tight leading-none truncate max-w-[210px]">
+            <h1 className="font-display font-black text-xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none truncate max-w-[210px]">
               {clubName}
             </h1>
-            <p className="font-mono text-[10px] text-neutral-500 uppercase tracking-wider mt-0.5">
+            <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mt-0.5">
               Ficha Oficial de Admisión
             </p>
           </div>
@@ -81,7 +81,7 @@ export function PendingApprovalScreen({
         <button
           type="button"
           onClick={handleLogout}
-          className="btn-tactile p-2.5 rounded-xl border-2 border-neutral-900 bg-white hover:bg-neutral-100 text-neutral-800 shadow-tactile-sm transition min-h-[44px] min-w-[44px] flex items-center justify-center"
+          className="btn-tactile p-2.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-[#14161f] hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-800 dark:text-neutral-200 shadow-tactile-sm transition min-h-[44px] min-w-[44px] flex items-center justify-center"
           title="Cerrar Sesión"
           aria-label="Cerrar Sesión"
         >
@@ -92,25 +92,25 @@ export function PendingApprovalScreen({
       {/* Main Accreditation / Waiting Pass Card */}
       <div className="my-auto py-4 space-y-4">
         {/* Physical Pass Ticket */}
-        <div className="bg-white border-2 border-neutral-900 shadow-tactile rounded-3xl overflow-hidden relative">
+        <div className="bg-white dark:bg-[#14161f] border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile rounded-3xl overflow-hidden relative">
           {/* Top Pass Header Banner */}
-          <div className={`p-4 border-b-2 border-neutral-900 flex items-center justify-between ${
-            isRejected ? 'bg-rose-50' : 'bg-amber-50'
+          <div className={`p-4 border-b-2 border-neutral-900 dark:border-neutral-700 flex items-center justify-between ${
+            isRejected ? 'bg-rose-50 dark:bg-rose-950/40' : 'bg-amber-50 dark:bg-amber-950/40'
           }`}>
             <div className="flex items-center gap-2">
               {isRejected ? (
-                <ShieldAlert className="w-4 h-4 text-rose-600" />
+                <ShieldAlert className="w-4 h-4 text-rose-600 dark:text-rose-400" />
               ) : (
-                <Clock className="w-4 h-4 text-amber-600" />
+                <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
               )}
               <span className={`font-mono text-[10px] font-black uppercase tracking-wider ${
-                isRejected ? 'text-rose-900' : 'text-amber-900'
+                isRejected ? 'text-rose-900 dark:text-rose-300' : 'text-amber-900 dark:text-amber-300'
               }`}>
                 {isRejected ? 'PASE DENEGADO • TRIBUNAL DE CLUB' : 'PASE PROVISIONAL • EN ESPERA DE REVISIÓN'}
               </span>
             </div>
 
-            <span className="font-mono text-[10px] font-bold text-neutral-500 bg-white px-2 py-0.5 rounded border border-neutral-300">
+            <span className="font-mono text-[10px] font-bold text-neutral-500 dark:text-neutral-400 bg-white dark:bg-[#14161f] px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-700">
               EXP #2026
             </span>
           </div>
@@ -118,13 +118,13 @@ export function PendingApprovalScreen({
           {/* Pass Body with Notches */}
           <div className="p-5 space-y-4 relative">
             {/* Ticket Notches */}
-            <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-5 h-5 bg-neutral-50 rounded-full border-r-2 border-neutral-900 pointer-events-none" />
-            <div className="absolute -right-3 top-1/2 -translate-y-1/2 w-5 h-5 bg-neutral-50 rounded-full border-l-2 border-neutral-900 pointer-events-none" />
+            <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-5 h-5 bg-neutral-50 dark:bg-[#0c0d12] rounded-full border-r-2 border-neutral-900 dark:border-neutral-700 pointer-events-none" />
+            <div className="absolute -right-3 top-1/2 -translate-y-1/2 w-5 h-5 bg-neutral-50 dark:bg-[#0c0d12] rounded-full border-l-2 border-neutral-900 dark:border-neutral-700 pointer-events-none" />
 
             <div className="flex items-start gap-3.5">
               {/* Avatar Icon */}
-              <div className={`w-14 h-14 rounded-2xl border-2 border-neutral-900 shadow-tactile-sm flex items-center justify-center flex-shrink-0 ${
-                isRejected ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-800'
+              <div className={`w-14 h-14 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex items-center justify-center flex-shrink-0 ${
+                isRejected ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300' : 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300'
               }`}>
                 {isRejected ? (
                   <UserX className="w-7 h-7 stroke-[2.5]" />
@@ -136,30 +136,30 @@ export function PendingApprovalScreen({
               <div className="min-w-0 flex-1">
                 <span className={`inline-block font-mono text-[9px] font-extrabold uppercase px-2 py-0.5 rounded border mb-1 ${
                   isRejected
-                    ? 'bg-rose-100 text-rose-800 border-rose-300'
-                    : 'bg-amber-100 text-amber-800 border-amber-300'
+                    ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-800'
+                    : 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800'
                 }`}>
                   {isRejected ? 'Solicitud Rechazada' : 'Postulación en Trámite'}
                 </span>
 
-                <h2 className="font-display font-black text-2xl text-neutral-950 uppercase tracking-tight leading-none truncate">
+                <h2 className="font-display font-black text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none truncate">
                   {fullName}
                 </h2>
-                <p className="font-mono text-[11px] text-neutral-500 mt-1 truncate">
+                <p className="font-mono text-[11px] text-neutral-500 dark:text-neutral-400 mt-1 truncate">
                   {email}
                 </p>
               </div>
             </div>
 
             {/* Status explanation */}
-            <div className="p-3.5 rounded-2xl bg-neutral-50 border-2 border-neutral-200 text-xs text-neutral-700 leading-relaxed font-sans">
+            <div className="p-3.5 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700 text-xs text-neutral-700 dark:text-neutral-300 leading-relaxed font-sans">
               {isRejected ? (
                 <>
-                  Los administradores de <strong className="font-bold text-neutral-950">{clubName}</strong> no pudieron habilitar tu fichaje en este periodo. Puedes enviar un mensaje de apelación a continuación para reconsideración.
+                  Los administradores de <strong className="font-bold text-neutral-950 dark:text-white">{clubName}</strong> no pudieron habilitar tu fichaje en este periodo. Puedes enviar un mensaje de apelación a continuación para reconsideración.
                 </>
               ) : (
                 <>
-                  Tu solicitud de incorporación a <strong className="font-bold text-neutral-950">{clubName}</strong> fue registrada en el sistema. Los capitanes y directivos revisarán tu perfil para darte el visto bueno oficial.
+                  Tu solicitud de incorporación a <strong className="font-bold text-neutral-950 dark:text-white">{clubName}</strong> fue registrada en el sistema. Los capitanes y directivos revisarán tu perfil para darte el visto bueno oficial.
                 </>
               )}
             </div>
@@ -167,11 +167,11 @@ export function PendingApprovalScreen({
             {/* Motivation Form */}
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between">
-                <label className="font-display font-black text-xs uppercase tracking-wider text-neutral-900 flex items-center gap-1.5">
+                <label className="font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-white flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                   <span>Carta de Presentación / Referencia</span>
                 </label>
-                <span className="font-mono text-[10px] text-neutral-400">
+                <span className="font-mono text-[10px] text-neutral-400 dark:text-neutral-500">
                   {motivation.length}/100
                 </span>
               </div>
@@ -183,19 +183,19 @@ export function PendingApprovalScreen({
                   value={motivation}
                   onChange={(e) => setMotivation(e.target.value)}
                   placeholder="Ej: Juego de medio y me invitó Marcos..."
-                  className="input-tactile w-full px-3.5 py-2.5 text-xs font-medium placeholder-neutral-400"
+                  className="input-tactile w-full px-3.5 py-2.5 text-xs font-medium placeholder-neutral-400 dark:placeholder-neutral-500"
                 />
 
                 {error && (
-                  <p className="text-[11px] text-rose-700 bg-rose-50 p-2 rounded-xl border border-rose-200 flex items-center gap-1.5">
+                  <p className="text-[11px] text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 p-2 rounded-xl border border-rose-200 dark:border-rose-800 flex items-center gap-1.5">
                     <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
                     <span>{error}</span>
                   </p>
                 )}
 
                 {success && (
-                  <p className="text-[11px] text-emerald-800 bg-emerald-50 p-2 rounded-xl border border-emerald-200 flex items-center gap-1.5 font-semibold">
-                    <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0 text-emerald-600" />
+                  <p className="text-[11px] text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 p-2 rounded-xl border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5 font-semibold">
+                    <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />
                     <span>¡Mensaje actualizado! Los administradores fueron notificados.</span>
                   </p>
                 )}
@@ -203,7 +203,7 @@ export function PendingApprovalScreen({
                 <button
                   type="submit"
                   disabled={loading || !motivation.trim()}
-                  className="btn-tactile w-full py-2.5 px-4 rounded-xl border-2 border-neutral-900 bg-neutral-950 hover:bg-neutral-900 text-white font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:pointer-events-none min-h-[44px]"
+                  className="btn-tactile w-full py-2.5 px-4 rounded-xl border-2 border-neutral-900 dark:border-white bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:pointer-events-none min-h-[44px]"
                 >
                   {loading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -223,14 +223,14 @@ export function PendingApprovalScreen({
         <div className="space-y-2 pt-1">
           <Link
             href="/club/unirse"
-            className="btn-tactile w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border-2 border-neutral-900 bg-white hover:bg-neutral-100 text-neutral-900 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition min-h-[44px]"
+            className="btn-tactile w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-[#14161f] hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-900 dark:text-white font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition min-h-[44px]"
           >
             <Compass className="w-4 h-4 stroke-[2.5]" />
             <span>Explorar o Unirme a Otro Club</span>
           </Link>
           <Link
             href="/club/nuevo"
-            className="btn-tactile w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border-2 border-neutral-900 bg-amber-300 hover:bg-amber-400 text-neutral-950 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition min-h-[44px]"
+            className="btn-tactile w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 bg-amber-300 dark:bg-amber-400 hover:bg-amber-400 text-neutral-950 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition min-h-[44px]"
           >
             <PlusCircle className="w-4 h-4 stroke-[2.5]" />
             <span>Crear mi propio Club Deportivo</span>
@@ -239,7 +239,7 @@ export function PendingApprovalScreen({
       </div>
 
       {/* Footer Info */}
-      <div className="pt-4 text-center border-t-2 border-neutral-900/10 font-mono text-[10px] text-neutral-400 uppercase tracking-widest">
+      <div className="pt-4 text-center border-t-2 border-neutral-900/10 dark:border-white/10 font-mono text-[10px] text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">
         CampApp Athletic Platform • Sistema de Convocatorias
       </div>
     </div>

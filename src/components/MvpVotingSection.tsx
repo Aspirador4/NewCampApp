@@ -91,36 +91,36 @@ export function MvpVotingSection({
   // 1. Voting is OPEN
   if (mvpVotingOpen) {
     return (
-      <div className="mt-5 bg-amber-50 border-2 border-neutral-900 rounded-3xl p-4 shadow-tactile space-y-4">
+      <div className="mt-5 bg-amber-50 dark:bg-amber-950/40 border-2 border-neutral-900 dark:border-neutral-700 rounded-3xl p-4 shadow-tactile space-y-4">
         {/* Banner Header */}
-        <div className="flex items-center justify-between border-b-2 border-neutral-900/10 pb-2.5">
+        <div className="flex items-center justify-between border-b-2 border-neutral-900/10 dark:border-neutral-800 pb-2.5">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-amber-500 text-neutral-950 flex items-center justify-center border-2 border-neutral-900 shadow-tactile-sm flex-shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-amber-500 text-neutral-950 flex items-center justify-center border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex-shrink-0">
               <Trophy className="w-5 h-5 stroke-[2.5]" />
             </div>
             <div>
-              <h3 className="font-display font-black text-lg text-neutral-950 uppercase tracking-tight leading-none">
+              <h3 className="font-display font-black text-lg text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
                 Votación de Jugador del Partido
               </h3>
-              <p className="font-mono text-[10px] text-amber-900 uppercase tracking-wider mt-0.5">
+              <p className="font-mono text-[10px] text-amber-900 dark:text-amber-300 uppercase tracking-wider mt-0.5">
                 Voto 100% Anónimo • Exclusivo Asistentes
               </p>
             </div>
           </div>
-          <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-200 text-amber-950 border border-amber-400">
+          <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-900/60 text-amber-950 dark:text-amber-200 border border-amber-400 dark:border-amber-700">
             En Curso
           </span>
         </div>
 
         {mvpDeadline && (
-          <div className="flex items-center gap-1.5 font-mono text-[11px] text-amber-900 bg-amber-100/70 px-2.5 py-1.5 rounded-xl border border-amber-300">
-            <Clock className="w-3.5 h-3.5 text-amber-700 flex-shrink-0" />
+          <div className="flex items-center gap-1.5 font-mono text-[11px] text-amber-900 dark:text-amber-300 bg-amber-100/70 dark:bg-amber-900/30 px-2.5 py-1.5 rounded-xl border border-amber-300 dark:border-amber-700">
+            <Clock className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 flex-shrink-0" />
             <span>Cierre: {new Date(mvpDeadline).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} hrs</span>
           </div>
         )}
 
         {error && (
-          <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 text-red-700 text-xs border border-red-200">
+          <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-950/50 text-red-700 dark:text-red-300 text-xs border border-red-200 dark:border-red-800">
             <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
             <span>{error}</span>
           </div>
@@ -129,7 +129,7 @@ export function MvpVotingSection({
         {/* Voting Options: Eligible Candidates */}
         {isConfirmedAttendee && !hasVoted && !successMsg && (
           <div className="space-y-3">
-            <p className="font-display font-bold text-xs uppercase text-neutral-800 tracking-wide">
+            <p className="font-display font-bold text-xs uppercase text-neutral-800 dark:text-neutral-200 tracking-wide">
               Selecciona a tu candidato MVP:
             </p>
 
@@ -143,12 +143,12 @@ export function MvpVotingSection({
                     onClick={() => setSelectedPlayerId(cand.id)}
                     className={`btn-tactile w-full p-2.5 rounded-2xl border-2 text-left flex items-center justify-between transition ${
                       isSelected
-                        ? 'border-neutral-900 bg-white shadow-tactile-sm'
-                        : 'border-neutral-300 bg-white/70 hover:bg-white'
+                        ? 'border-neutral-900 dark:border-neutral-700 bg-white dark:bg-neutral-800 shadow-tactile-sm'
+                        : 'border-neutral-300 dark:border-neutral-700 bg-white/70 dark:bg-neutral-900/60 hover:bg-white dark:hover:bg-neutral-800'
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-xl overflow-hidden bg-neutral-200 border border-neutral-400 relative flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 rounded-xl overflow-hidden bg-neutral-200 dark:bg-neutral-700 border border-neutral-400 dark:border-neutral-600 relative flex items-center justify-center flex-shrink-0">
                         {cand.avatar_url ? (
                           <Image
                             src={cand.avatar_url}
@@ -158,15 +158,15 @@ export function MvpVotingSection({
                             sizes="32px"
                           />
                         ) : (
-                          <User className="w-4 h-4 text-neutral-600" />
+                          <User className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />
                         )}
                       </div>
 
                       <div className="min-w-0">
-                        <p className="font-display font-black text-sm text-neutral-950 uppercase truncate leading-tight">
+                        <p className="font-display font-black text-sm text-neutral-950 dark:text-white uppercase truncate leading-tight">
                           {cand.full_name}
                         </p>
-                        <p className="font-mono text-[10px] text-neutral-500 uppercase">
+                        <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase">
                           {cand.posicion || cand.sports_role}
                           {cand.numero_camiseta ? ` • #${cand.numero_camiseta}` : ''}
                         </p>
@@ -176,11 +176,11 @@ export function MvpVotingSection({
                     <div
                       className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center ${
                         isSelected
-                          ? 'border-neutral-900 bg-amber-500 text-neutral-950 shadow-tactile-sm'
-                          : 'border-neutral-400 bg-white'
+                          ? 'border-neutral-900 dark:border-neutral-700 bg-amber-500 text-neutral-950 shadow-tactile-sm'
+                          : 'border-neutral-400 dark:border-neutral-600 bg-white dark:bg-neutral-900'
                       }`}
                     >
-                      {isSelected && <span className="w-2 h-2 rounded-sm bg-neutral-950" />}
+                      {isSelected && <span className="w-2 h-2 rounded-sm bg-neutral-950 dark:bg-neutral-950" />}
                     </div>
                   </button>
                 )
@@ -191,7 +191,7 @@ export function MvpVotingSection({
               type="button"
               onClick={handleVote}
               disabled={loading || !selectedPlayerId}
-              className="btn-tactile w-full py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 font-display font-black text-xs uppercase tracking-wider text-neutral-950 border-2 border-neutral-900 shadow-tactile-sm transition disabled:opacity-50 flex items-center justify-center gap-2"
+              className="btn-tactile w-full py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 font-display font-black text-xs uppercase tracking-wider text-neutral-950 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm transition disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -207,12 +207,12 @@ export function MvpVotingSection({
 
         {/* State: User already voted */}
         {(hasVoted || successMsg) && (
-          <div className="p-4 rounded-2xl bg-white border-2 border-neutral-900 text-center space-y-1 shadow-tactile-sm">
+          <div className="p-4 rounded-2xl bg-white dark:bg-neutral-900 border-2 border-neutral-900 dark:border-neutral-700 text-center space-y-1 shadow-tactile-sm">
             <CheckCircle2 className="w-7 h-7 text-emerald-600 mx-auto" />
-            <p className="font-display font-black text-sm uppercase text-neutral-950">
+            <p className="font-display font-black text-sm uppercase text-neutral-950 dark:text-white">
               ¡Tu voto ha sido registrado!
             </p>
-            <p className="font-sans text-xs text-neutral-500">
+            <p className="font-sans text-xs text-neutral-500 dark:text-neutral-400">
               Voto anónimo computado. Los resultados se publicarán al finalizar el partido.
             </p>
           </div>
@@ -220,19 +220,19 @@ export function MvpVotingSection({
 
         {/* State: User did not attend */}
         {!isConfirmedAttendee && (
-          <div className="p-3.5 rounded-2xl bg-white/80 border border-amber-300 text-center font-mono text-xs text-neutral-600">
+          <div className="p-3.5 rounded-2xl bg-white/80 dark:bg-neutral-900/80 border border-amber-300 dark:border-amber-700 text-center font-mono text-xs text-neutral-600 dark:text-neutral-300">
             Solo los jugadores que confirmaron asistencia en este partido pueden emitir voto.
           </div>
         )}
 
         {/* Admin option to close voting early */}
         {isAdmin && (
-          <div className="pt-2 border-t-2 border-neutral-900/10">
+          <div className="pt-2 border-t-2 border-neutral-900/10 dark:border-neutral-800">
             <button
               type="button"
               onClick={handleCloseVoting}
               disabled={adminClosing}
-              className="btn-tactile w-full py-2.5 px-3 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-amber-400 font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 shadow-tactile-sm transition flex items-center justify-center gap-1.5 disabled:opacity-50"
+              className="btn-tactile w-full py-2.5 px-3 rounded-xl bg-neutral-950 dark:bg-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-800/80 text-amber-400 font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm transition flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
               {adminClosing ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />

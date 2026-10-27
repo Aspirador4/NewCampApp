@@ -180,26 +180,26 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
   return (
     <div className="flex-1 flex flex-col p-4 sm:p-5 pb-nav">
       {/* Top Header */}
-      <div className="flex items-center justify-between pt-2 pb-4 border-b-2 border-neutral-900/10">
+      <div className="flex items-center justify-between pt-2 pb-4 border-b-2 border-neutral-900/10 dark:border-white/10">
         <div className="flex items-center gap-2">
           <Link
             href="/"
-            className="p-2 -ml-1 rounded-xl text-neutral-800 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+            className="p-2 -ml-1 rounded-xl text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/10 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
             aria-label="Volver al inicio"
           >
             <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
           </Link>
           <div>
-            <h1 className="font-display font-black text-2xl text-neutral-950 uppercase tracking-tight leading-none">
+            <h1 className="font-display font-black text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
               Tercer Tiempo & Finanzas
             </h1>
-            <p className="font-mono text-[10px] text-neutral-500 uppercase tracking-wider mt-0.5">
+            <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mt-0.5">
               {club.name} • Tesorería Oficial
             </p>
           </div>
         </div>
 
-        <div className="w-10 h-10 rounded-xl bg-amber-400 text-neutral-950 flex items-center justify-center border-2 border-neutral-900 shadow-tactile-sm">
+        <div className="w-10 h-10 rounded-xl bg-amber-400 text-neutral-950 flex items-center justify-center border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm">
           <Wallet className="w-5 h-5 stroke-[2.5]" />
         </div>
       </div>
@@ -209,20 +209,20 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
         <div className="grid grid-cols-2 gap-2 my-3">
           <Link
             href="/finanzas?tab=socio"
-            className={`btn-tactile py-2.5 px-3 rounded-xl text-center flex items-center justify-center font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 ${
+            className={`btn-tactile py-2.5 px-3 rounded-xl text-center flex items-center justify-center font-display font-black text-xs uppercase tracking-wider border-2 ${
               activeView === 'socio'
-                ? 'bg-neutral-950 text-white shadow-tactile-sm'
-                : 'bg-white text-neutral-700 hover:bg-neutral-50'
+                ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
+                : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
             }`}
           >
             Mi Cuenta (Socio)
           </Link>
           <Link
             href="/finanzas?tab=admin"
-            className={`btn-tactile py-2.5 px-3 rounded-xl text-center flex items-center justify-center font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 ${
+            className={`btn-tactile py-2.5 px-3 rounded-xl text-center flex items-center justify-center font-display font-black text-xs uppercase tracking-wider border-2 ${
               activeView === 'admin'
-                ? 'bg-neutral-950 text-white shadow-tactile-sm'
-                : 'bg-white text-neutral-700 hover:bg-neutral-50'
+                ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
+                : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
             }`}
           >
             Tesorería General

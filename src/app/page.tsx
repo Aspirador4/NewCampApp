@@ -16,6 +16,7 @@ import { AppOnboardingModal } from "@/components/AppOnboardingModal";
 import { PendingApprovalScreen } from "@/components/PendingApprovalScreen";
 import { ClubSwitcher } from "@/components/ClubSwitcher";
 import { EmptyState } from "@/components/EmptyState";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { getActiveClub } from "@/utils/club";
 import { getClubTheme } from "@/utils/theme";
 
@@ -131,7 +132,7 @@ export default async function Home() {
   return (
     <div className="flex-1 flex flex-col p-4 sm:p-5 pb-nav">
       {/* Mobile Header with Club Switcher */}
-      <header className="pt-2 pb-4 border-b-2 border-neutral-900/10">
+      <header className="pt-2 pb-4 border-b-2 border-neutral-900/10 dark:border-white/10">
         <div className="flex items-center justify-between">
           <ClubSwitcher
             currentClub={club}
@@ -141,14 +142,17 @@ export default async function Home() {
             isAuthenticated={Boolean(user)}
           />
 
-          <Link
-            href="/club/nuevo"
-            className="w-11 h-11 rounded-2xl bg-white border-2 border-neutral-900 text-neutral-900 hover:bg-neutral-100 transition flex items-center justify-center shadow-tactile-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
-            title="Crear o unirme a otro club"
-            aria-label="Crear nuevo club"
-          >
-            <Plus className="w-5 h-5 stroke-[2.5]" />
-          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle variant="compact" />
+            <Link
+              href="/club/nuevo"
+              className="w-11 h-11 rounded-2xl bg-white dark:bg-neutral-900 border-2 border-neutral-900 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition flex items-center justify-center shadow-tactile-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none min-h-[44px] min-w-[44px]"
+              title="Crear o unirme a otro club"
+              aria-label="Crear nuevo club"
+            >
+              <Plus className="w-5 h-5 stroke-[2.5]" />
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -156,7 +160,7 @@ export default async function Home() {
       <div className="flex-1 py-4 flex flex-col gap-4">
         {/* HERO COMPONENT: Carnet Oficial de Socio (Logged In) OR Official Guest Pass (Logged Out) */}
         {user ? (
-          <div className="relative overflow-hidden rounded-3xl border-2 border-neutral-900 bg-neutral-950 text-white shadow-tactile p-4">
+          <div className="relative overflow-hidden rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 bg-neutral-950 text-white shadow-tactile p-4">
             {/* Athletic mesh texture overlay */}
             <div className="absolute inset-0 bg-mesh-pattern-white opacity-10 pointer-events-none" />
 
@@ -239,16 +243,16 @@ export default async function Home() {
               </span>
               <Link
                 href="/perfil"
-                className="btn-tactile bg-white text-neutral-950 font-display font-black text-xs uppercase tracking-wide px-3 py-1.5 rounded-xl border border-neutral-300 shadow-tactile-sm flex items-center gap-1 flex-shrink-0"
+                className="btn-tactile bg-white dark:bg-neutral-900 text-neutral-950 dark:text-white font-display font-black text-xs uppercase tracking-wide px-3 py-1.5 rounded-xl border border-neutral-300 dark:border-neutral-700 shadow-tactile-sm flex items-center gap-1 flex-shrink-0"
               >
                 <span>Ver Ficha</span>
-                <ArrowRight className="w-3.5 h-3.5 text-neutral-950" />
+                <ArrowRight className="w-3.5 h-3.5 text-neutral-950 dark:text-white" />
               </Link>
             </div>
           </div>
         ) : (
           <div
-            className="relative overflow-hidden rounded-3xl border-2 border-neutral-900 bg-neutral-950 text-white shadow-tactile p-5"
+            className="relative overflow-hidden rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 bg-neutral-950 text-white shadow-tactile p-5"
             style={{
               backgroundImage: `radial-gradient(circle at top right, ${theme.gradientFrom}33, transparent 70%)`,
             }}
@@ -272,7 +276,7 @@ export default async function Home() {
               </div>
               <Link
                 href="/login"
-                className="btn-tactile w-full py-3 px-4 rounded-xl bg-white text-neutral-950 font-display font-black text-sm uppercase tracking-wide border border-neutral-300 shadow-tactile-sm flex items-center justify-center gap-2"
+                className="btn-tactile w-full py-3 px-4 rounded-xl bg-white dark:bg-neutral-900 text-neutral-950 dark:text-white font-display font-black text-sm uppercase tracking-wide border border-neutral-300 dark:border-neutral-700 shadow-tactile-sm flex items-center justify-center gap-2"
               >
                 <UserCircle2 className="w-4 h-4" />
                 <span>Ingresar o Registrarme</span>
@@ -289,13 +293,13 @@ export default async function Home() {
 
         {/* HERO COMPONENT: Matchday Ticket Stub */}
         {nextEvent ? (
-          <div className="relative bg-white rounded-3xl border-2 border-neutral-900 shadow-tactile overflow-hidden">
+          <div className="relative bg-white dark:bg-neutral-900 rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile overflow-hidden">
             {/* Ticket Notches (muescas laterales de entrada física) */}
-            <div className="absolute -left-2.5 top-[60%] -translate-y-1/2 w-5 h-5 bg-neutral-50 rounded-full border-2 border-neutral-900 z-10" />
-            <div className="absolute -right-2.5 top-[60%] -translate-y-1/2 w-5 h-5 bg-neutral-50 rounded-full border-2 border-neutral-900 z-10" />
+            <div className="absolute -left-2.5 top-[60%] -translate-y-1/2 w-5 h-5 bg-neutral-50 dark:bg-[#0c0d12] rounded-full border-2 border-neutral-900 dark:border-neutral-700 z-10" />
+            <div className="absolute -right-2.5 top-[60%] -translate-y-1/2 w-5 h-5 bg-neutral-50 dark:bg-[#0c0d12] rounded-full border-2 border-neutral-900 dark:border-neutral-700 z-10" />
 
             {/* Ticket Top Header Bar */}
-            <div className="bg-neutral-900 text-white px-4 py-2.5 flex items-center justify-between border-b-2 border-neutral-900">
+            <div className="bg-neutral-900 dark:bg-neutral-950 text-white px-4 py-2.5 flex items-center justify-between border-b-2 border-neutral-900 dark:border-neutral-800">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span className="font-mono text-[10px] font-bold tracking-widest uppercase text-emerald-400">
@@ -315,11 +319,11 @@ export default async function Home() {
             {/* Ticket Body */}
             <div className="p-4 space-y-3.5">
               <div>
-                <div className="flex items-center gap-1.5 text-neutral-500 font-mono text-[11px] uppercase tracking-wider">
+                <div className="flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400 font-mono text-[11px] uppercase tracking-wider">
                   <MapPin className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
                   <span className="truncate">{nextEvent.location}</span>
                 </div>
-                <h3 className="font-display font-black text-2xl uppercase tracking-tight text-neutral-950 leading-tight mt-0.5">
+                <h3 className="font-display font-black text-2xl uppercase tracking-tight text-neutral-950 dark:text-white leading-tight mt-0.5">
                   {nextEvent.title}
                 </h3>
               </div>
@@ -328,24 +332,24 @@ export default async function Home() {
               {(() => {
                 const { weekday, day, month, time } = formatEventDate(nextEvent.start_time);
                 return (
-                  <div className="grid grid-cols-2 gap-2 bg-neutral-100 p-2.5 rounded-2xl border border-neutral-300">
+                  <div className="grid grid-cols-2 gap-2 bg-neutral-100 dark:bg-neutral-800/60 p-2.5 rounded-2xl border border-neutral-300 dark:border-neutral-700">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-white border border-neutral-300 flex items-center justify-center font-display font-black text-sm text-neutral-900 shadow-tactile-sm flex-shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 flex items-center justify-center font-display font-black text-sm text-neutral-900 dark:text-neutral-100 shadow-tactile-sm flex-shrink-0">
                         {day}
                       </div>
                       <div className="min-w-0">
-                        <span className="font-mono text-[9px] text-neutral-500 uppercase block leading-none">Fecha</span>
-                        <span className="font-display font-bold text-xs uppercase text-neutral-900 truncate block mt-0.5">{weekday} • {month}</span>
+                        <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase block leading-none">Fecha</span>
+                        <span className="font-display font-bold text-xs uppercase text-neutral-900 dark:text-neutral-100 truncate block mt-0.5">{weekday} • {month}</span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-white border border-neutral-300 flex items-center justify-center font-mono font-bold text-xs text-neutral-900 shadow-tactile-sm flex-shrink-0">
-                        <Clock className="w-4 h-4 text-emerald-600" />
+                      <div className="w-8 h-8 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 flex items-center justify-center font-mono font-bold text-xs text-neutral-900 dark:text-neutral-100 shadow-tactile-sm flex-shrink-0">
+                        <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                       </div>
                       <div className="min-w-0">
-                        <span className="font-mono text-[9px] text-neutral-500 uppercase block leading-none">Kickoff</span>
-                        <span className="font-mono font-extrabold text-xs text-neutral-900 truncate block mt-0.5">{time} HRS</span>
+                        <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase block leading-none">Kickoff</span>
+                        <span className="font-mono font-extrabold text-xs text-neutral-900 dark:text-neutral-100 truncate block mt-0.5">{time} HRS</span>
                       </div>
                     </div>
                   </div>
@@ -355,17 +359,17 @@ export default async function Home() {
               {/* Stadium Cupos & Progress Bar */}
               <div className="space-y-1.5 pt-0.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-mono text-[10px] uppercase font-bold text-neutral-500 flex items-center gap-1.5">
+                  <span className="font-mono text-[10px] uppercase font-bold text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
                     <Users className="w-3.5 h-3.5 text-neutral-400" />
                     <span>Convocatoria</span>
                   </span>
-                  <span className="font-mono text-xs font-black text-neutral-900">
+                  <span className="font-mono text-xs font-black text-neutral-900 dark:text-neutral-100">
                     {confirmedCount} {maxCap ? `/ ${maxCap}` : ''} Confirmados
                   </span>
                 </div>
 
                 {maxCap > 0 && (
-                  <div className="w-full bg-neutral-200 h-2.5 rounded-full overflow-hidden border border-neutral-300">
+                  <div className="w-full bg-neutral-200 dark:bg-neutral-800 h-2.5 rounded-full overflow-hidden border border-neutral-300 dark:border-neutral-700">
                     <div
                       className="h-full transition-all duration-300 rounded-full"
                       style={{
@@ -377,32 +381,32 @@ export default async function Home() {
                 )}
 
                 {isFull && (
-                  <p className="font-mono text-[10px] font-bold text-red-600 uppercase">
+                  <p className="font-mono text-[10px] font-bold text-red-600 dark:text-red-400 uppercase">
                     ⚠ Cupo completo • Lista de espera activa
                   </p>
                 )}
               </div>
 
               {/* Dashed Perforation Line */}
-              <div className="border-b-2 border-dashed border-neutral-300 -mx-4 my-2" />
+              <div className="border-b-2 border-dashed border-neutral-300 dark:border-neutral-700 -mx-4 my-2" />
 
               {/* Ticket Stub Action / Price */}
               <div className="flex items-center justify-between pt-1 gap-2">
                 <div>
-                  <span className="font-mono text-[9px] uppercase text-neutral-500 block">Cuota estimada</span>
-                  <span className="font-display font-black text-base text-neutral-950">
+                  <span className="font-mono text-[9px] uppercase text-neutral-500 dark:text-neutral-400 block">Cuota estimada</span>
+                  <span className="font-display font-black text-base text-neutral-950 dark:text-white">
                     {nextEvent.total_cost && nextEvent.total_cost > 0
                       ? `~$${Math.round(nextEvent.total_cost / (maxCap || 14)).toLocaleString('es-CL')}`
                       : nextEvent.cost_per_player && nextEvent.cost_per_player > 0
                       ? `$${nextEvent.cost_per_player.toLocaleString('es-CL')}`
                       : 'Gratis'}
-                    <span className="text-[10px] font-sans font-normal text-neutral-500 ml-1">p/jugador</span>
+                    <span className="text-[10px] font-sans font-normal text-neutral-500 dark:text-neutral-400 ml-1">p/jugador</span>
                   </span>
                 </div>
 
                 <Link
                   href={`/eventos/${nextEvent.id}`}
-                  className="btn-tactile bg-neutral-950 hover:bg-neutral-800 text-white font-display text-xs font-black uppercase tracking-wider px-3.5 py-2.5 rounded-xl border border-neutral-900 shadow-tactile-sm flex items-center gap-1.5 flex-shrink-0"
+                  className="btn-tactile bg-neutral-950 dark:bg-neutral-800 hover:bg-neutral-800 dark:hover:bg-neutral-700 text-white font-display text-xs font-black uppercase tracking-wider px-3.5 py-2.5 rounded-xl border border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex items-center gap-1.5 flex-shrink-0"
                 >
                   <span>Ver Ficha</span>
                   <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
@@ -426,11 +430,11 @@ export default async function Home() {
         {/* ATHLETIC LOCKER CONSOLE (Accesos Rápidos) */}
         <div className="space-y-2.5 pt-2">
           <div className="flex items-center justify-between px-1">
-            <h2 className="font-display text-sm font-black text-neutral-900 uppercase tracking-wider flex items-center gap-1.5">
+            <h2 className="font-display text-sm font-black text-neutral-900 dark:text-neutral-100 uppercase tracking-wider flex items-center gap-1.5">
               <span>El Vestuario</span>
-              <span className="text-neutral-400 font-sans font-normal text-xs">• Accesos del Club</span>
+              <span className="text-neutral-400 dark:text-neutral-500 font-sans font-normal text-xs">• Accesos del Club</span>
             </h2>
-            <span className="font-mono text-[10px] text-neutral-400 uppercase font-bold">
+            <span className="font-mono text-[10px] text-neutral-400 dark:text-neutral-500 uppercase font-bold">
               Consola
             </span>
           </div>
@@ -439,11 +443,11 @@ export default async function Home() {
             {/* Partidos & Fixture */}
             <Link
               href="/eventos"
-              className="btn-tactile bg-white p-3.5 rounded-2xl border-2 border-neutral-900 shadow-tactile flex flex-col justify-between gap-3 min-h-[105px]"
+              className="btn-tactile bg-white dark:bg-neutral-900 p-3.5 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile flex flex-col justify-between gap-3 min-h-[105px]"
             >
               <div className="flex items-center justify-between">
                 <div
-                  className="w-8 h-8 rounded-xl flex items-center justify-center border border-neutral-900 shadow-tactile-sm"
+                  className="w-8 h-8 rounded-xl flex items-center justify-center border border-neutral-900 dark:border-neutral-700 shadow-tactile-sm"
                   style={{
                     backgroundColor: 'var(--club-primary, #059669)',
                     color: '#ffffff',
@@ -451,15 +455,15 @@ export default async function Home() {
                 >
                   <Calendar className="w-4 h-4" />
                 </div>
-                <span className="font-mono text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700 border border-neutral-300">
+                <span className="font-mono text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border border-neutral-300 dark:border-neutral-700">
                   Fixture
                 </span>
               </div>
               <div>
-                <p className="font-display text-base font-black text-neutral-950 uppercase tracking-tight leading-none">
+                <p className="font-display text-base font-black text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
                   Partidos & Eventos
                 </p>
-                <p className="font-sans text-[10px] text-neutral-500 mt-1">
+                <p className="font-sans text-[10px] text-neutral-500 dark:text-neutral-400 mt-1">
                   Convocatorias y cupos
                 </p>
               </div>
@@ -468,27 +472,27 @@ export default async function Home() {
             {/* Finanzas & Tercer Tiempo */}
             <Link
               href="/finanzas"
-              className="btn-tactile bg-white p-3.5 rounded-2xl border-2 border-neutral-900 shadow-tactile flex flex-col justify-between gap-3 min-h-[105px]"
+              className="btn-tactile bg-white dark:bg-neutral-900 p-3.5 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile flex flex-col justify-between gap-3 min-h-[105px]"
             >
               <div className="flex items-center justify-between">
-                <div className="w-8 h-8 rounded-xl bg-amber-400 text-neutral-950 flex items-center justify-center border border-neutral-900 shadow-tactile-sm">
+                <div className="w-8 h-8 rounded-xl bg-amber-400 text-neutral-950 flex items-center justify-center border border-neutral-900 dark:border-neutral-700 shadow-tactile-sm">
                   <Wallet className="w-4 h-4" />
                 </div>
                 {pendingDebtsCount > 0 ? (
-                  <span className="font-mono text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">
+                  <span className="font-mono text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
                     {pendingDebtsCount} Pendiente{pendingDebtsCount > 1 ? 's' : ''}
                   </span>
                 ) : (
-                  <span className="font-mono text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300">
+                  <span className="font-mono text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
                     Al Día ✓
                   </span>
                 )}
               </div>
               <div>
-                <p className="font-display text-base font-black text-neutral-950 uppercase tracking-tight leading-none">
+                <p className="font-display text-base font-black text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
                   Finanzas & Cuotas
                 </p>
-                <p className="font-sans text-[10px] text-neutral-500 mt-1">
+                <p className="font-sans text-[10px] text-neutral-500 dark:text-neutral-400 mt-1">
                   Tesorero y estado de cuenta
                 </p>
               </div>
@@ -497,23 +501,23 @@ export default async function Home() {
             {/* Plantel del Club */}
             <Link
               href="/miembros"
-              className="btn-tactile bg-white p-3.5 rounded-2xl border-2 border-neutral-900 shadow-tactile flex flex-col justify-between gap-3 min-h-[105px]"
+              className="btn-tactile bg-white dark:bg-neutral-900 p-3.5 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile flex flex-col justify-between gap-3 min-h-[105px]"
             >
               <div className="flex items-center justify-between">
-                <div className="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center border border-neutral-900 shadow-tactile-sm">
+                <div className="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center border border-neutral-900 dark:border-neutral-700 shadow-tactile-sm">
                   <Users className="w-4 h-4" />
                 </div>
                 {clubMembersCount !== null && (
-                  <span className="font-mono text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700 border border-neutral-300">
+                  <span className="font-mono text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border border-neutral-300 dark:border-neutral-700">
                     {clubMembersCount} Socios
                   </span>
                 )}
               </div>
               <div>
-                <p className="font-display text-base font-black text-neutral-950 uppercase tracking-tight leading-none">
+                <p className="font-display text-base font-black text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
                   Plantel Oficial
                 </p>
-                <p className="font-sans text-[10px] text-neutral-500 mt-1">
+                <p className="font-sans text-[10px] text-neutral-500 dark:text-neutral-400 mt-1">
                   Directorio de jugadores
                 </p>
               </div>
@@ -522,21 +526,21 @@ export default async function Home() {
             {/* Salón de la Fama / Ranking MVP */}
             <Link
               href="/ranking"
-              className="btn-tactile bg-white p-3.5 rounded-2xl border-2 border-neutral-900 shadow-tactile flex flex-col justify-between gap-3 min-h-[105px]"
+              className="btn-tactile bg-white dark:bg-neutral-900 p-3.5 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile flex flex-col justify-between gap-3 min-h-[105px]"
             >
               <div className="flex items-center justify-between">
-                <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center border border-neutral-900 shadow-tactile-sm">
+                <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center border border-neutral-900 dark:border-neutral-700 shadow-tactile-sm">
                   <Trophy className="w-4 h-4" />
                 </div>
-                <span className="font-mono text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">
+                <span className="font-mono text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
                   Hall of Fame
                 </span>
               </div>
               <div>
-                <p className="font-display text-base font-black text-neutral-950 uppercase tracking-tight leading-none">
+                <p className="font-display text-base font-black text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
                   Ranking & MVPs
                 </p>
-                <p className="font-sans text-[10px] text-neutral-500 mt-1">
+                <p className="font-sans text-[10px] text-neutral-500 dark:text-neutral-400 mt-1">
                   Líderes y podio del club
                 </p>
               </div>
@@ -545,8 +549,8 @@ export default async function Home() {
         </div>
 
         {/* GitHub Collaboration Footer */}
-        <div className="mt-4 pt-4 border-t-2 border-neutral-900/10 text-center space-y-2">
-          <p className="font-mono text-[11px] text-neutral-500 uppercase tracking-wide">
+        <div className="mt-4 pt-4 border-t-2 border-neutral-900/10 dark:border-white/10 text-center space-y-2">
+          <p className="font-mono text-[11px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide">
             CampApp • Plataforma Oficial de Club Deportivo
           </p>
           <div>
@@ -554,7 +558,7 @@ export default async function Home() {
               href="https://github.com/Aspirador4/NewCampApp"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-tactile inline-flex items-center gap-2 py-2 px-4 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-bold transition shadow-tactile-sm border border-neutral-900 min-h-[40px]"
+              className="btn-tactile inline-flex items-center gap-2 py-2 px-4 rounded-xl bg-neutral-950 dark:bg-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-800/80 text-white text-xs font-bold transition shadow-tactile-sm border border-neutral-900 dark:border-neutral-700 min-h-[40px]"
             >
               <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                 <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />

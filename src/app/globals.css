@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #fbfbfb;
   --foreground: #121212;
+  --tactile-shadow-color: #171717;
 
   /* Default Club Theme Tokens (Verde Cancha) */
   --club-primary: #059669;
@@ -12,6 +15,16 @@
   --club-primary-text: #ffffff;
   --club-gradient-from: #059669;
   --club-gradient-to: #0f766e;
+}
+
+.dark {
+  --background: #090a0f;
+  --foreground: #f3f4f6;
+  --tactile-shadow-color: #000000;
+
+  /* Automatic dark tints for active club palettes */
+  --club-primary-light: color-mix(in srgb, var(--club-primary) 18%, #14161f);
+  --club-primary-border: color-mix(in srgb, var(--club-primary) 35%, #2a2e3d);
 }
 
 @theme inline {
@@ -31,10 +44,14 @@
   --color-club-to: var(--club-gradient-to);
 }
 
-/* Enforce pure light mode across all devices */
+/* Color scheme support */
 html {
   color-scheme: light;
   -webkit-tap-highlight-color: transparent;
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 body {
@@ -66,15 +83,15 @@ h1, h2, h3, h4, th {
 
 /* Tactile Athletic Shadows & Physical Buttons */
 .shadow-tactile-sm {
-  box-shadow: 2px 2px 0px 0px #171717;
+  box-shadow: 2px 2px 0px 0px var(--tactile-shadow-color, #171717);
 }
 
 .shadow-tactile {
-  box-shadow: 3.5px 3.5px 0px 0px #171717;
+  box-shadow: 3.5px 3.5px 0px 0px var(--tactile-shadow-color, #171717);
 }
 
 .shadow-tactile-lg {
-  box-shadow: 5px 5px 0px 0px #171717;
+  box-shadow: 5px 5px 0px 0px var(--tactile-shadow-color, #171717);
 }
 
 .shadow-tactile-club {
@@ -87,7 +104,7 @@ h1, h2, h3, h4, th {
 
 .btn-tactile:active {
   transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0px 0px #171717 !important;
+  box-shadow: 1px 1px 0px 0px var(--tactile-shadow-color, #171717) !important;
 }
 
 /* Tactile Input Style */
@@ -96,7 +113,7 @@ h1, h2, h3, h4, th {
   border-radius: 0.75rem;
   background-color: #ffffff;
   color: #171717;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
 .input-tactile:focus {
@@ -105,9 +122,26 @@ h1, h2, h3, h4, th {
   box-shadow: 2px 2px 0px 0px #171717;
 }
 
+.dark .input-tactile {
+  border-color: #374151;
+  background-color: #161822;
+  color: #f3f4f6;
+}
+
+.dark .input-tactile:focus {
+  border-color: var(--club-primary, #059669);
+  outline: none;
+  box-shadow: 2px 2px 0px 0px var(--club-primary, #059669);
+}
+
 /* Athletic Grid & Jersey Mesh Patterns */
 .bg-mesh-pattern {
   background-image: radial-gradient(rgba(0, 0, 0, 0.09) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+
+.dark .bg-mesh-pattern {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px);
   background-size: 8px 8px;
 }
 

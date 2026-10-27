@@ -53,7 +53,7 @@ export function EventAdminControls({ eventId, currentStatus, isAdmin, eventType 
   }
 
   return (
-    <div className="bg-neutral-950 text-white rounded-3xl p-5 border-2 border-neutral-900 shadow-tactile space-y-4">
+    <div className="bg-neutral-950 text-white rounded-3xl p-5 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile space-y-4">
       <div className="flex items-center gap-2">
         <Shield className="w-4 h-4 text-emerald-400 stroke-[2.5]" />
         <h3 className="font-display font-black text-xs uppercase tracking-wider text-neutral-100">

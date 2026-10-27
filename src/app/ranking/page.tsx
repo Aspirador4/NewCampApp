@@ -105,26 +105,26 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
   return (
     <div className="flex-1 flex flex-col p-4 sm:p-5 pb-nav">
       {/* Header */}
-      <div className="flex items-center justify-between pt-2 pb-4 border-b-2 border-neutral-900/10">
+      <div className="flex items-center justify-between pt-2 pb-4 border-b-2 border-neutral-900/10 dark:border-white/10">
         <div className="flex items-center gap-2">
           <Link
             href="/"
-            className="p-2 -ml-1 rounded-xl text-neutral-800 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+            className="p-2 -ml-1 rounded-xl text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/10 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
             aria-label="Volver al inicio"
           >
             <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
           </Link>
           <div>
-            <h1 className="font-display font-black text-2xl text-neutral-950 uppercase tracking-tight leading-none">
+            <h1 className="font-display font-black text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
               Ranking & MVPs
             </h1>
-            <p className="font-mono text-[10px] text-neutral-500 uppercase tracking-wider mt-0.5">
+            <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mt-0.5">
               {club.name} • Salón de la Fama
             </p>
           </div>
         </div>
 
-        <div className="w-10 h-10 rounded-xl bg-amber-500 text-neutral-950 flex items-center justify-center border-2 border-neutral-900 shadow-tactile-sm">
+        <div className="w-10 h-10 rounded-xl bg-amber-500 text-neutral-950 flex items-center justify-center border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm">
           <Trophy className="w-5 h-5 stroke-[2.5]" />
         </div>
       </div>
@@ -133,10 +133,10 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
       <div className="grid grid-cols-2 gap-2 my-4">
         <Link
           href="/ranking?tab=mvps"
-          className={`btn-tactile py-2.5 px-3 rounded-xl text-center flex items-center justify-center gap-1.5 font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 ${
+          className={`btn-tactile py-2.5 px-3 rounded-xl text-center flex items-center justify-center gap-1.5 font-display font-black text-xs uppercase tracking-wider border-2 ${
             tab === 'mvps'
-              ? 'bg-neutral-950 text-white shadow-tactile-sm'
-              : 'bg-white text-neutral-700 hover:bg-neutral-50'
+              ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
+              : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
           }`}
         >
           <Trophy className="w-4 h-4 text-amber-400" />
@@ -145,10 +145,10 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
 
         <Link
           href="/ranking?tab=presencias"
-          className={`btn-tactile py-2.5 px-3 rounded-xl text-center flex items-center justify-center gap-1.5 font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 ${
+          className={`btn-tactile py-2.5 px-3 rounded-xl text-center flex items-center justify-center gap-1.5 font-display font-black text-xs uppercase tracking-wider border-2 ${
             tab === 'presencias'
-              ? 'bg-neutral-950 text-white shadow-tactile-sm'
-              : 'bg-white text-neutral-700 hover:bg-neutral-50'
+              ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
+              : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
           }`}
         >
           <CalendarCheck className="w-4 h-4 text-emerald-400" />
@@ -158,7 +158,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
 
       {/* Mobile Podium Top 3 (Athletic Trading Cards) */}
       {sortedStats.length > 0 && (
-        <div className="my-2 bg-neutral-950 text-white rounded-3xl border-2 border-neutral-900 p-5 shadow-tactile relative overflow-hidden">
+        <div className="my-2 bg-neutral-950 text-white rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 p-5 shadow-tactile relative overflow-hidden">
           <div className="absolute inset-0 bg-mesh-pattern-white opacity-10 pointer-events-none" />
 
           <div className="relative flex items-center justify-between font-mono text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-4 border-b border-white/10 pb-2">
@@ -270,7 +270,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
       {/* Rest of Leaderboard Table */}
       <div className="mt-4 space-y-2.5">
         <div className="flex items-center justify-between px-1">
-          <h2 className="font-display font-black text-sm text-neutral-950 uppercase tracking-wider">
+          <h2 className="font-display font-black text-sm text-neutral-950 dark:text-white uppercase tracking-wider">
             Tabla General de Posiciones
           </h2>
           <span className="font-mono text-[10px] text-neutral-400 uppercase">
@@ -279,17 +279,17 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
         </div>
 
         {sortedStats.length === 0 ? (
-          <div className="bg-white rounded-3xl p-8 border-2 border-neutral-900 shadow-tactile text-center">
+          <div className="bg-white dark:bg-[#14161f] rounded-3xl p-8 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile text-center">
             <Trophy className="w-10 h-10 text-neutral-400 mx-auto mb-2" />
-            <p className="font-display font-black text-base uppercase text-neutral-950">
+            <p className="font-display font-black text-base uppercase text-neutral-950 dark:text-white">
               Sin estadísticas registradas aún
             </p>
-            <p className="font-sans text-xs text-neutral-500 mt-1">
+            <p className="font-sans text-xs text-neutral-500 dark:text-neutral-400 mt-1">
               Las estadísticas se actualizarán automáticamente al finalizar los partidos y computar las encuestas MVP.
             </p>
           </div>
         ) : (
-          <div className="divide-y-2 divide-neutral-100 bg-white rounded-3xl border-2 border-neutral-900 shadow-tactile overflow-hidden">
+          <div className="divide-y-2 divide-neutral-100 dark:divide-white/5 bg-white dark:bg-[#14161f] rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile overflow-hidden">
             {sortedStats.map((item, idx) => {
               const p = item.profiles
               const isCurrentUser = item.user_id === user.id
@@ -299,7 +299,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
                 <div
                   key={item.id}
                   className={`flex items-center justify-between p-3.5 transition ${
-                    isCurrentUser ? 'bg-amber-50/80' : 'hover:bg-neutral-50'
+                    isCurrentUser ? 'bg-amber-50/80 dark:bg-amber-950/40' : 'hover:bg-neutral-50 dark:hover:bg-white/5'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
@@ -308,16 +308,16 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
                         idx === 0
                           ? 'text-amber-500 text-sm'
                           : idx === 1
-                          ? 'text-neutral-500'
+                          ? 'text-neutral-500 dark:text-neutral-400'
                           : idx === 2
-                          ? 'text-amber-700'
-                          : 'text-neutral-400'
+                          ? 'text-amber-700 dark:text-amber-500'
+                          : 'text-neutral-400 dark:text-neutral-500'
                       }`}
                     >
                       #{idx + 1}
                     </span>
 
-                    <div className="w-10 h-10 rounded-xl overflow-hidden bg-neutral-200 relative flex items-center justify-center border-2 border-neutral-900 shadow-tactile-sm flex-shrink-0">
+                    <div className="w-10 h-10 rounded-xl overflow-hidden bg-neutral-200 dark:bg-neutral-800 relative flex items-center justify-center border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex-shrink-0">
                       {p?.avatar_url ? (
                         <Image
                           src={p.avatar_url}
@@ -327,7 +327,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
                           sizes="40px"
                         />
                       ) : (
-                        <span className="font-display font-black text-sm text-neutral-700">
+                        <span className="font-display font-black text-sm text-neutral-700 dark:text-neutral-300">
                           {p?.full_name?.charAt(0).toUpperCase() || 'J'}
                         </span>
                       )}
@@ -335,17 +335,17 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <p className="font-display font-black text-sm uppercase text-neutral-950 truncate leading-tight">
+                        <p className="font-display font-black text-sm uppercase text-neutral-950 dark:text-white truncate leading-tight">
                           {p?.full_name || 'Socio'}
                         </p>
                         {isCurrentUser && (
-                          <span className="font-mono text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-neutral-950 text-amber-400">
+                          <span className="font-mono text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-neutral-950 dark:bg-white text-amber-400 dark:text-amber-600">
                             Tú
                           </span>
                         )}
                       </div>
 
-                      <p className="font-mono text-[10px] text-neutral-500 uppercase truncate">
+                      <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase truncate">
                         {Array.isArray(custom.posicion)
                           ? (custom.posicion as string[]).join(', ')
                           : String(custom.posicion || p?.sports_role || 'Jugador')}
@@ -356,10 +356,10 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
 
                   {/* Main Metric */}
                   <div className="text-right flex-shrink-0 pl-2">
-                    <span className="font-display font-black text-xl text-neutral-950 block leading-tight">
+                    <span className="font-display font-black text-xl text-neutral-950 dark:text-white block leading-tight">
                       {tab === 'mvps' ? item.mvp_count : item.matches_played}
                     </span>
-                    <span className="font-mono text-[9px] text-neutral-500 uppercase block">
+                    <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase block">
                       {tab === 'mvps'
                         ? `${item.mvp_votes_received} votos • ${item.matches_played} PJ`
                         : `${item.mvp_count} MVPs`}
@@ -373,21 +373,21 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
       </div>
 
       {/* Global Club Counter */}
-      <div className="mt-5 bg-white rounded-3xl border-2 border-neutral-900 shadow-tactile p-4 grid grid-cols-2 gap-3 text-center">
+      <div className="mt-5 bg-white dark:bg-[#14161f] rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile p-4 grid grid-cols-2 gap-3 text-center">
         <div>
-          <span className="font-display font-black text-2xl text-neutral-950 block leading-tight">
+          <span className="font-display font-black text-2xl text-neutral-950 dark:text-white block leading-tight">
             {totalMvpsAwarded}
           </span>
-          <span className="font-mono text-[10px] uppercase text-neutral-500 font-bold">
+          <span className="font-mono text-[10px] uppercase text-neutral-500 dark:text-neutral-400 font-bold">
             Premios MVP Oficiales
           </span>
         </div>
 
-        <div className="border-l-2 border-neutral-200">
-          <span className="font-display font-black text-2xl text-neutral-950 block leading-tight">
+        <div className="border-l-2 border-neutral-200 dark:border-neutral-800">
+          <span className="font-display font-black text-2xl text-neutral-950 dark:text-white block leading-tight">
             {validStats.length}
           </span>
-          <span className="font-mono text-[10px] uppercase text-neutral-500 font-bold">
+          <span className="font-mono text-[10px] uppercase text-neutral-500 dark:text-neutral-400 font-bold">
             Jugadores Clasificados
           </span>
         </div>

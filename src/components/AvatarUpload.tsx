@@ -111,7 +111,7 @@ export function AvatarUpload({ currentUrl, fullName, editable = true }: AvatarUp
   return (
     <div className="flex flex-col items-center">
       <div className="relative group">
-        <div className="w-24 h-24 rounded-3xl overflow-hidden bg-neutral-100 border-2 border-neutral-900 shadow-tactile flex items-center justify-center relative">
+        <div className="w-24 h-24 rounded-3xl overflow-hidden bg-neutral-100 dark:bg-neutral-800 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile flex items-center justify-center relative">
           {avatarUrl ? (
             <Image
               src={avatarUrl}
@@ -122,7 +122,7 @@ export function AvatarUpload({ currentUrl, fullName, editable = true }: AvatarUp
               sizes="96px"
             />
           ) : (
-            <div className="flex flex-col items-center justify-center text-neutral-400">
+            <div className="flex flex-col items-center justify-center text-neutral-400 dark:text-neutral-500">
               <User className="w-10 h-10" />
             </div>
           )}
@@ -139,7 +139,7 @@ export function AvatarUpload({ currentUrl, fullName, editable = true }: AvatarUp
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="btn-tactile absolute -bottom-1 -right-1 p-2 rounded-xl border-2 border-neutral-900 bg-neutral-950 hover:bg-neutral-900 text-white shadow-tactile-sm transition active:scale-95 disabled:opacity-50 min-h-[36px] min-w-[36px] flex items-center justify-center"
+            className="btn-tactile absolute -bottom-1 -right-1 p-2 rounded-xl border-2 border-neutral-900 dark:border-white bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950 shadow-tactile-sm transition active:scale-95 disabled:opacity-50 min-h-[36px] min-w-[36px] flex items-center justify-center"
             title="Cambiar foto de perfil"
           >
             <Camera className="w-4 h-4 stroke-[2.5]" />

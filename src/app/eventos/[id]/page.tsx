@@ -307,10 +307,10 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       <EventRealtimeListener eventId={event.id} />
 
       {/* Top Header */}
-      <div className="flex items-center justify-between pt-2 pb-4 border-b-2 border-neutral-900/10">
+      <div className="flex items-center justify-between pt-2 pb-4 border-b-2 border-neutral-900/10 dark:border-white/10">
         <Link
           href="/eventos"
-          className="p-2 -ml-1 rounded-xl text-neutral-800 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+          className="p-2 -ml-1 rounded-xl text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
           aria-label="Volver al listado de eventos"
         >
           <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
@@ -343,11 +343,11 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
               />
             </>
           )}
-          <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-neutral-900 text-white">
+          <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-neutral-900 text-white border border-neutral-900 dark:border-neutral-700">
             {event.event_type}
           </span>
           {event.gender_category && (
-            <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded border border-neutral-300 bg-neutral-100 text-neutral-800">
+            <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200">
               {event.gender_category === 'femenino' ? 'Fem' : event.gender_category === 'masculino' ? 'Masc' : 'Mixto'}
             </span>
           )}
@@ -358,8 +358,8 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       <div className="py-4 space-y-3">
         {/* Creator Attribution */}
         {creator && (
-          <div className="flex items-center gap-2 text-xs text-neutral-600 bg-neutral-50 px-3 py-2 rounded-xl border border-neutral-200/70">
-            <div className="w-5 h-5 rounded-full overflow-hidden bg-neutral-200 relative flex items-center justify-center flex-shrink-0">
+          <div className="flex items-center gap-2 text-xs text-neutral-600 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-800/60 px-3 py-2 rounded-xl border border-neutral-200/70 dark:border-neutral-700">
+            <div className="w-5 h-5 rounded-full overflow-hidden bg-neutral-200 dark:bg-neutral-700 relative flex items-center justify-center flex-shrink-0">
               {creator.avatar_url ? (
                 <Image src={creator.avatar_url} alt={creator.full_name} fill className="object-cover" sizes="20px" />
               ) : (
@@ -367,9 +367,9 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
               )}
             </div>
             <span>
-              Convocado por <strong className="text-neutral-900 font-bold">{creator.full_name}</strong>
+              Convocado por <strong className="text-neutral-900 dark:text-white font-bold">{creator.full_name}</strong>
               {creator.system_role === 'admin' && (
-                <span className="ml-1 text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-neutral-900 text-emerald-400">
+                <span className="ml-1 text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-neutral-900 dark:bg-neutral-100 text-emerald-400 dark:text-emerald-950">
                   Admin
                 </span>
               )}
@@ -379,12 +379,12 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
         {/* Pending Approval Notice */}
         {event.status === 'pendiente_aprobacion' && (
-          <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 space-y-1">
+          <div className="p-3 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 rounded-xl text-xs text-amber-900 dark:text-amber-300 space-y-1">
             <p className="font-bold flex items-center gap-1.5">
               <Clock className="w-4 h-4 text-amber-600" />
               <span>Convocatoria Pendiente de Aprobación</span>
             </p>
-            <p className="text-[11px] text-amber-800 leading-normal">
+            <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-normal">
               {isAdmin
                 ? 'Como administrador del club, puedes aprobar o rechazar esta convocatoria en los controles de gestión abajo.'
                 : 'Esta convocatoria está siendo revisada por los administradores del club antes de admitir inscripciones.'}
@@ -393,41 +393,41 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         )}
 
         <div className="flex items-start justify-between gap-3">
-          <h1 className="font-display font-black text-3xl uppercase tracking-tight text-neutral-950 leading-tight">
+          <h1 className="font-display font-black text-3xl uppercase tracking-tight text-neutral-950 dark:text-white leading-tight">
             {event.title}
           </h1>
           <span
-            className={`font-mono text-[9px] font-black uppercase px-2.5 py-1 rounded-md border border-neutral-900 whitespace-nowrap shadow-tactile-sm ${
+            className={`font-mono text-[9px] font-black uppercase px-2.5 py-1 rounded-md border border-neutral-900 dark:border-neutral-700 whitespace-nowrap shadow-tactile-sm ${
               event.status === 'convocado'
                 ? 'bg-emerald-400 text-neutral-950'
                 : event.status === 'en_curso'
                 ? 'bg-blue-400 text-neutral-950 animate-pulse'
                 : event.status === 'pendiente_aprobacion'
                 ? 'bg-amber-400 text-neutral-950'
-                : 'bg-neutral-200 text-neutral-800'
+                : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200'
             }`}
           >
             {event.status === 'convocado' ? 'Abierto' : event.status === 'pendiente_aprobacion' ? 'Por Aprobar' : event.status}
           </span>
         </div>
 
-        <div className="space-y-2 text-xs text-neutral-600">
+        <div className="space-y-2 text-xs text-neutral-600 dark:text-neutral-400">
           <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-            <span className="font-semibold text-neutral-900 capitalize">
+            <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+            <span className="font-semibold text-neutral-900 dark:text-white capitalize">
               {formatEventDate(event.start_time)}
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-            <span className="font-medium text-neutral-800">{event.location}</span>
+            <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+            <span className="font-medium text-neutral-800 dark:text-neutral-200">{event.location}</span>
           </div>
 
           {maxCap && (
             <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-              <span className="font-medium">
+              <Users className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+              <span className="font-medium text-neutral-700 dark:text-neutral-300">
                 Cupo: {totalConfirmedCount} / {maxCap} jugadores
                 {waitlistAttendees.length > 0 && ` (${waitlistAttendees.length} en espera)`}
               </span>
@@ -648,8 +648,8 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
       {/* Confirmed Players List (Includes Socios and Approved Guests) */}
       <div className="mt-5 space-y-3">
-        <div className="flex items-center justify-between border-b-2 border-neutral-900/10 pb-2">
-          <h2 className="font-display font-black text-lg text-neutral-950 uppercase tracking-tight flex items-center gap-2">
+        <div className="flex items-center justify-between border-b-2 border-neutral-900/10 dark:border-neutral-800 pb-2">
+          <h2 className="font-display font-black text-lg text-neutral-950 dark:text-white uppercase tracking-tight flex items-center gap-2">
             <span>Plantel Confirmado</span>
             <span className="font-mono text-xs px-2 py-0.5 rounded-md bg-emerald-400 text-neutral-950 border border-neutral-900 font-black">
               {totalConfirmedCount}{maxCap ? `/${maxCap}` : ''}
@@ -665,7 +665,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             Aún no hay jugadores confirmados. ¡Sé el primero en anotarte!
           </p>
         ) : (
-          <div className="divide-y-2 divide-neutral-100 bg-white rounded-3xl border-2 border-neutral-900 shadow-tactile overflow-hidden">
+          <div className="divide-y-2 divide-neutral-100 dark:divide-neutral-800 bg-white dark:bg-neutral-900 rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile overflow-hidden">
             {/* Confirmed Socios */}
             {confirmedAttendees.map((attendee, index) => {
               const p = attendee.profiles
@@ -676,7 +676,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                 <div
                   key={attendee.id}
                   className={`flex items-center justify-between p-3 transition ${
-                    isCurrentUser ? 'bg-emerald-50/70' : 'hover:bg-neutral-50'
+                    isCurrentUser ? 'bg-emerald-50/70 dark:bg-emerald-950/30' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -684,7 +684,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                       #{index + 1}
                     </span>
 
-                    <div className="w-9 h-9 rounded-full overflow-hidden bg-neutral-200 relative flex items-center justify-center border border-neutral-200">
+                    <div className="w-9 h-9 rounded-full overflow-hidden bg-neutral-200 dark:bg-neutral-700 relative flex items-center justify-center border border-neutral-200 dark:border-neutral-700">
                       {p?.avatar_url ? (
                         <Image
                           src={p.avatar_url}
@@ -700,7 +700,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <p className="text-xs font-bold text-neutral-900">
+                        <p className="text-xs font-bold text-neutral-900 dark:text-white">
                           {p?.full_name || 'Socio'}
                         </p>
                         {isCurrentUser && (
@@ -710,14 +710,14 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                         )}
                       </div>
 
-                      <div className="flex items-center gap-2 text-[10px] text-neutral-500 capitalize">
+                      <div className="flex items-center gap-2 text-[10px] text-neutral-500 dark:text-neutral-400 capitalize">
                         <span>
                           {Array.isArray(custom.posicion)
                             ? (custom.posicion as string[]).join(', ')
                             : String(custom.posicion || p?.sports_role || 'Jugador')}
                         </span>
                         {custom.numero_camiseta && (
-                          <span className="font-mono font-bold text-emerald-700">
+                          <span className="font-mono font-bold text-emerald-700 dark:text-emerald-400">
                             #{String(custom.numero_camiseta)}
                           </span>
                         )}
@@ -727,7 +727,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
                   <div className="flex items-center gap-2">
                     {event.financial_closed && (
-                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                         {(() => {
                           const attDebt = eventDebts.find((d) => d.user_id === attendee.user_id && d.debt_type === 'partido_propio')
                           return attDebt ? `$${attDebt.amount.toLocaleString('es-CL')}` : '$0'
@@ -749,35 +749,35 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             {approvedGuests.map((guest, index) => (
               <div
                 key={guest.id}
-                className="flex items-center justify-between p-3 bg-neutral-50/70"
+                className="flex items-center justify-between p-3 bg-neutral-50/70 dark:bg-neutral-800/40"
               >
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold text-neutral-400 w-5 text-center">
                     #{confirmedAttendees.length + index + 1}
                   </span>
 
-                  <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs border border-emerald-200">
+                  <div className="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold text-xs border border-emerald-200 dark:border-emerald-800">
                     <UserCheck className="w-4 h-4" />
                   </div>
 
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <p className="text-xs font-bold text-neutral-900">
+                      <p className="text-xs font-bold text-neutral-900 dark:text-white">
                         {guest.guest_name}
                       </p>
-                      <span className="text-[9px] font-semibold uppercase px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800">
+                      <span className="text-[9px] font-semibold uppercase px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
                         Invitado
                       </span>
                     </div>
-                    <p className="text-[10px] text-neutral-500">
-                      Invitado por: <span className="font-medium text-neutral-700">{guest.inviter?.full_name || 'Socio'}</span>
+                    <p className="text-[10px] text-neutral-500 dark:text-neutral-400">
+                      Invitado por: <span className="font-medium text-neutral-700 dark:text-neutral-300">{guest.inviter?.full_name || 'Socio'}</span>
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                   {event.financial_closed && (
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                       {(() => {
                         const gDebt = eventDebts.find((d) => d.guest_id === guest.id)
                         return gDebt ? `$${gDebt.amount.toLocaleString('es-CL')}` : '$0'
@@ -809,8 +809,8 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       {/* Waitlist Section */}
       {waitlistAttendees.length > 0 && (
         <div className="mt-6 space-y-3">
-          <div className="flex items-center justify-between border-b-2 border-neutral-900/10 pb-2">
-            <h2 className="font-display font-black text-lg text-neutral-950 uppercase tracking-tight flex items-center gap-2">
+          <div className="flex items-center justify-between border-b-2 border-neutral-900/10 dark:border-neutral-800 pb-2">
+            <h2 className="font-display font-black text-lg text-neutral-950 dark:text-white uppercase tracking-tight flex items-center gap-2">
               <Clock className="w-5 h-5 text-amber-500 stroke-[2.5]" />
               <span>Lista de Espera Oficial</span>
               <span className="font-mono text-xs px-2 py-0.5 rounded-md bg-amber-400 text-neutral-950 border border-neutral-900 font-black">
@@ -822,7 +822,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             </span>
           </div>
 
-          <div className="divide-y-2 divide-neutral-100 bg-white rounded-3xl border-2 border-neutral-900 shadow-tactile overflow-hidden">
+          <div className="divide-y-2 divide-neutral-100 dark:divide-neutral-800 bg-white dark:bg-neutral-900 rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile overflow-hidden">
             {waitlistAttendees.map((attendee, index) => {
               const p = attendee.profiles
               const isCurrentUser = attendee.user_id === user.id
@@ -831,7 +831,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                 <div
                   key={attendee.id}
                   className={`flex items-center justify-between p-3 ${
-                    isCurrentUser ? 'bg-amber-50/70' : 'hover:bg-neutral-50'
+                    isCurrentUser ? 'bg-amber-50/70 dark:bg-amber-950/30' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -839,7 +839,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                       #{index + 1}
                     </span>
 
-                    <div className="w-8 h-8 rounded-full overflow-hidden bg-neutral-200 relative flex items-center justify-center border border-neutral-200">
+                    <div className="w-8 h-8 rounded-full overflow-hidden bg-neutral-200 dark:bg-neutral-700 relative flex items-center justify-center border border-neutral-200 dark:border-neutral-700">
                       {p?.avatar_url ? (
                         <Image
                           src={p.avatar_url}
@@ -855,7 +855,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <p className="text-xs font-bold text-neutral-900">
+                        <p className="text-xs font-bold text-neutral-900 dark:text-white">
                           {p?.full_name || 'Socio'}
                         </p>
                         {isCurrentUser && (
@@ -864,7 +864,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                           </span>
                         )}
                       </div>
-                      <p className="text-[10px] text-neutral-500">
+                      <p className="text-[10px] text-neutral-500 dark:text-neutral-400">
                         Entró a espera {new Date(attendee.registered_at).toLocaleTimeString('es-AR', {
                           hour: '2-digit',
                           minute: '2-digit',
@@ -881,9 +881,9 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
       {/* Live Audit Log Section */}
       <div className="mt-6 space-y-2.5">
-        <div className="flex items-center gap-2 border-b border-neutral-200 pb-2">
-          <History className="w-4 h-4 text-neutral-500" />
-          <h2 className="text-xs font-bold text-neutral-700 uppercase tracking-wider">
+        <div className="flex items-center gap-2 border-b border-neutral-200 dark:border-neutral-800 pb-2">
+          <History className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
+          <h2 className="text-xs font-bold text-neutral-700 dark:text-neutral-300 uppercase tracking-wider">
             Auditoría de Asistencias (Logs)
           </h2>
         </div>
@@ -893,7 +893,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             Sin movimientos registrados aún en este evento.
           </p>
         ) : (
-          <div className="bg-neutral-100 rounded-xl p-3 space-y-2">
+          <div className="bg-neutral-100 dark:bg-neutral-800/60 rounded-xl p-3 space-y-2">
             {logs.map((log) => {
               const userName = log.profiles?.full_name || 'Un socio'
               const dateStr = new Date(log.created_at).toLocaleTimeString('es-AR', {
@@ -902,12 +902,12 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
               })
 
               return (
-                <div key={log.id} className="text-[11px] text-neutral-600 flex items-start justify-between gap-2">
+                <div key={log.id} className="text-[11px] text-neutral-600 dark:text-neutral-300 flex items-start justify-between gap-2">
                   <div>
-                    <span className="font-bold text-neutral-900">{userName}</span>{' '}
+                    <span className="font-bold text-neutral-900 dark:text-white">{userName}</span>{' '}
                     <span>{formatLogAction(log.action)}</span>
                     {log.reason && (
-                      <span className="text-neutral-500 italic ml-1">({log.reason})</span>
+                      <span className="text-neutral-500 dark:text-neutral-400 italic ml-1">({log.reason})</span>
                     )}
                   </div>
                   <span className="text-neutral-400 text-[10px] whitespace-nowrap">{dateStr}</span>

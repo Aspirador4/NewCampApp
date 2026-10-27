@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Rich Turf Green Gradient -->
+    <linearGradient id="turfBg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="60%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+
+    <!-- Athletic Texture Stripes -->
+    <pattern id="diagonalStripes2" width="24" height="24" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="0" y2="24" stroke="#ffffff" stroke-width="3" stroke-opacity="0.06"/>
+    </pattern>
+
+    <filter id="tactileShadow2" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="6" dy="10" stdDeviation="0" flood-color="#022c22" flood-opacity="0.8"/>
+    </filter>
+  </defs>
+
+  <!-- PWA Squircle Background -->
+  <rect width="512" height="512" rx="116" fill="url(#turfBg2)"/>
+  <rect width="512" height="512" rx="116" fill="url(#diagonalStripes2)"/>
+  
+  <!-- Subtle Inner Border -->
+  <rect x="16" y="16" width="480" height="480" rx="100" fill="none" stroke="#6ee7b7" stroke-width="3" stroke-opacity="0.4"/>
+
+  <!-- Main Composition: Athletic Monogram 'C' shaped like an Arena + Center Clubhouse Portal -->
+  <g filter="url(#tactileShadow2)">
+    <!-- Heavy 'C' Track Silhouette -->
+    <!-- Outer arc from top-right around to bottom-right -->
+    <path d="M 350 144
+             C 320 120 280 108 240 108
+             C 156 108 96 172 96 256
+             C 96 340 156 404 240 404
+             C 284 404 324 390 354 366
+             L 314 316
+             C 292 334 268 344 240 344
+             C 188 344 156 304 156 256
+             C 156 208 188 168 240 168
+             C 266 168 288 178 308 194
+             Z"
+          fill="#064e3b"
+          stroke="#022c22"
+          stroke-width="6"
+          stroke-linejoin="round"/>
+
+    <!-- Inner Highlight of the 'C' -->
+    <path d="M 338 154
+             C 312 134 278 124 240 124
+             C 166 124 112 180 112 256
+             C 112 332 166 388 240 388
+             C 278 388 314 376 342 354
+             L 322 328
+             C 298 344 272 354 240 354
+             C 182 354 144 310 144 256
+             C 144 202 182 158 240 158
+             C 270 158 294 168 316 184
+             Z"
+          fill="#ffffff"
+          stroke="#022c22"
+          stroke-width="4"/>
+
+    <!-- Clubhouse Portal / Roof Sanctuary Nestled Inside the C -->
+    <g transform="translate(230, 186)">
+      <!-- Clubhouse Roofline -->
+      <polygon points="100,0 20,68 44,68 44,140 156,140 156,68 180,68" 
+               fill="#FBBF24" 
+               stroke="#022c22" 
+               stroke-width="5" 
+               stroke-linejoin="round"/>
+      
+      <!-- Door / Gateway -->
+      <path d="M 82 140 L 82 92 C 82 82 118 82 118 92 L 118 140 Z" 
+            fill="#064e3b" 
+            stroke="#022c22" 
+            stroke-width="4"/>
+      
+      <!-- Window / Light -->
+      <circle cx="100" cy="52" r="14" fill="#ffffff" stroke="#022c22" stroke-width="4"/>
+    </g>
+  </g>
+
+  <!-- Pitch markings / Sport Accent Dots -->
+  <circle cx="240" cy="256" r="8" fill="#10B981" stroke="#022c22" stroke-width="3"/>
+  <circle cx="410" cy="136" r="10" fill="#FBBF24" stroke="#022c22" stroke-width="3"/>
+</svg>

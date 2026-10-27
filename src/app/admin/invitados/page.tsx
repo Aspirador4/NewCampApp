@@ -86,25 +86,25 @@ export default async function AdminInvitadosPage() {
   return (
     <div className="flex-1 flex flex-col p-4 sm:p-5 pb-nav">
       {/* Header */}
-      <div className="flex items-center justify-between pt-2 pb-4 border-b-2 border-neutral-900/10">
+      <div className="flex items-center justify-between pt-2 pb-4 border-b-2 border-neutral-900/10 dark:border-white/10">
         <div className="flex items-center gap-2">
           <Link
             href="/eventos"
-            className="p-2 -ml-1 rounded-xl text-neutral-800 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+            className="p-2 -ml-1 rounded-xl text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/10 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
             aria-label="Volver al listado de eventos"
           >
             <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
           </Link>
           <div>
-            <h1 className="font-display font-black text-2xl uppercase tracking-tight text-neutral-950 leading-none">
+            <h1 className="font-display font-black text-2xl uppercase tracking-tight text-neutral-950 dark:text-white leading-none">
               Moderación de Invitados
             </h1>
-            <p className="font-mono text-[10px] text-neutral-500 uppercase tracking-wider mt-0.5">
+            <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mt-0.5">
               {club.name} • Panel de Administración
             </p>
           </div>
         </div>
-        <span className="font-mono text-[9px] font-black uppercase px-2.5 py-1 rounded-md bg-amber-400 text-neutral-950 border border-neutral-900 shadow-tactile-sm">
+        <span className="font-mono text-[9px] font-black uppercase px-2.5 py-1 rounded-md bg-amber-400 text-neutral-950 border border-neutral-900 dark:border-neutral-700 shadow-tactile-sm">
           {pendingList.length} pendientes
         </span>
       </div>
@@ -112,15 +112,15 @@ export default async function AdminInvitadosPage() {
       {/* Main Content */}
       <div className="mt-4 space-y-6">
         {eventsMap.size === 0 ? (
-          <div className="bg-white rounded-3xl p-8 border-2 border-neutral-900 shadow-tactile text-center space-y-3">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-100 border-2 border-neutral-900 shadow-tactile-sm text-emerald-950 flex items-center justify-center mx-auto">
+          <div className="bg-white dark:bg-[#14161f] rounded-3xl p-8 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile text-center space-y-3">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-emerald-950 dark:text-emerald-400 flex items-center justify-center mx-auto">
               <ShieldCheck className="w-7 h-7 stroke-[2.5]" />
             </div>
             <div>
-              <h3 className="font-display font-black text-lg uppercase tracking-tight text-neutral-950">
+              <h3 className="font-display font-black text-lg uppercase tracking-tight text-neutral-950 dark:text-white">
                 ¡Al día! No hay invitados pendientes
               </h3>
-              <p className="text-xs text-neutral-500 mt-1 font-sans">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 font-sans">
                 Todas las postulaciones de invitados externos han sido procesadas por el tribunal del club.
               </p>
             </div>
@@ -129,18 +129,18 @@ export default async function AdminInvitadosPage() {
           Array.from(eventsMap.values()).map(({ event, guests }) => (
             <div
               key={event.id}
-              className="bg-white rounded-3xl p-5 border-2 border-neutral-900 shadow-tactile space-y-4"
+              className="bg-white dark:bg-[#14161f] rounded-3xl p-5 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile space-y-4"
             >
-              <div className="border-b-2 border-neutral-900/10 pb-3">
+              <div className="border-b-2 border-neutral-900/10 dark:border-white/10 pb-3">
                 <Link
                   href={`/eventos/${event.id}`}
-                  className="font-display font-black text-lg uppercase tracking-tight text-neutral-950 hover:underline transition"
+                  className="font-display font-black text-lg uppercase tracking-tight text-neutral-950 dark:text-white hover:underline transition"
                 >
                   {event.title}
                 </Link>
-                <div className="flex items-center gap-3 mt-1.5 font-mono text-[10px] text-neutral-500">
+                <div className="flex items-center gap-3 mt-1.5 font-mono text-[10px] text-neutral-500 dark:text-neutral-400">
                   <div className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-neutral-400 stroke-[2.5]" />
+                    <Calendar className="w-3.5 h-3.5 text-neutral-400 dark:text-neutral-500 stroke-[2.5]" />
                     <span>
                       {new Date(event.start_time).toLocaleDateString('es-CL', {
                         day: 'numeric',
@@ -151,7 +151,7 @@ export default async function AdminInvitadosPage() {
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-neutral-400 stroke-[2.5]" />
+                    <MapPin className="w-3.5 h-3.5 text-neutral-400 dark:text-neutral-500 stroke-[2.5]" />
                     <span className="truncate">{event.location}</span>
                   </div>
                 </div>

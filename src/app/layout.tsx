@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Barlow_Condensed, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { cookies } from "next/headers";
 import "./globals.css";
 import { BottomNav } from "@/components/BottomNav";
 import { NavigationProgressBar } from "@/components/NavigationProgressBar";
+import { ThemeProvider, Theme } from "@/components/ThemeProvider";
 import { createClient } from "@/utils/supabase/server";
 import { getActiveClub } from "@/utils/club";
 import { getClubTheme, getClubThemeCssVariables } from "@/utils/theme";
@@ -67,24 +69,41 @@ export default async function RootLayout({
   const palette = getClubTheme(activeClub);
   const themeVars = getClubThemeCssVariables(palette);
 
+  // Read theme from cookies to prevent SSR flash
+  const cookieStore = await cookies();
+  const savedTheme = (cookieStore.get("campapp_theme")?.value as Theme) || "system";
+  const isDarkInitial = savedTheme === "dark";
+
   return (
-    <html lang="es" className="h-full">
+    <html
+      lang="es"
+      className={`h-full ${isDarkInitial ? "dark" : ""}`}
+      suppressHydrationWarning
+    >
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        {/* Anti-flash inline script */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('campapp_theme')||'${savedTheme}';var d=t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}}catch(e){}})()`,
+          }}
+        />
       </head>
       <body
-        className={`${plusJakartaSans.variable} ${barlowCondensed.variable} ${jetbrainsMono.variable} font-sans antialiased min-h-screen bg-neutral-950 text-neutral-900 flex justify-center selection:bg-club-primary selection:text-white`}
+        className={`${plusJakartaSans.variable} ${barlowCondensed.variable} ${jetbrainsMono.variable} font-sans antialiased min-h-screen bg-neutral-950 text-neutral-900 dark:text-neutral-100 flex justify-center selection:bg-club-primary selection:text-white`}
       >
-        <div
-          className="w-full max-w-md min-h-screen bg-neutral-50 flex flex-col shadow-2xl relative"
-          style={themeVars as React.CSSProperties}
-        >
-          <NavigationProgressBar />
-          {children}
-          {(!user || isApproved) && (
-            <BottomNav isAuthenticated={Boolean(user)} />
-          )}
-        </div>
+        <ThemeProvider initialTheme={savedTheme}>
+          <div
+            className="w-full max-w-md min-h-screen bg-neutral-50 dark:bg-[#0c0d12] text-neutral-900 dark:text-neutral-100 flex flex-col shadow-2xl relative transition-colors duration-150"
+            style={themeVars as React.CSSProperties}
+          >
+            <NavigationProgressBar />
+            {children}
+            {(!user || isApproved) && (
+              <BottomNav isAuthenticated={Boolean(user)} />
+            )}
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -122,20 +122,20 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
   return (
     <div className="flex-1 flex flex-col p-4 sm:p-5 pb-nav">
       {/* Top Header */}
-      <div className="flex items-center justify-between pt-2 pb-4 border-b-2 border-neutral-900/10">
+      <div className="flex items-center justify-between pt-2 pb-4 border-b-2 border-neutral-900/10 dark:border-white/10">
         <div className="flex items-center gap-2">
           <Link
             href="/"
-            className="p-2 -ml-1 rounded-xl text-neutral-800 hover:bg-neutral-100 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
+            className="p-2 -ml-1 rounded-xl text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95"
             aria-label="Volver al inicio"
           >
             <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
           </Link>
           <div>
-            <h1 className="font-display font-black text-2xl text-neutral-950 uppercase tracking-tight leading-none">
+            <h1 className="font-display font-black text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
               Partidos & Eventos
             </h1>
-            <p className="font-mono text-[10px] text-neutral-500 uppercase tracking-wider mt-0.5">
+            <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mt-0.5">
               {club.name} • Fixture Oficial
             </p>
           </div>
@@ -143,7 +143,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
 
         <Link
           href="/eventos/nuevo"
-          className="btn-tactile min-h-[42px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-white font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 shadow-tactile-sm"
+          className="btn-tactile min-h-[42px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-white font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm"
           style={{ backgroundColor: 'var(--club-primary, #059669)' }}
         >
           <Plus className="w-4 h-4 stroke-[3]" />
@@ -155,20 +155,20 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
       <div className="flex gap-2 my-3 overflow-x-auto pb-1 text-xs no-scrollbar">
         <Link
           href={`/eventos?filtro=proximos${tipo ? `&tipo=${tipo}` : ''}`}
-          className={`btn-tactile min-h-[38px] px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 ${
+          className={`btn-tactile min-h-[38px] px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 dark:border-neutral-700 ${
             filtro === 'proximos'
-              ? 'bg-neutral-950 text-white shadow-tactile-sm'
-              : 'bg-white text-neutral-700 hover:bg-neutral-50'
+              ? 'bg-neutral-950 dark:bg-neutral-100 text-white dark:text-neutral-950 shadow-tactile-sm'
+              : 'bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800'
           }`}
         >
           Próximos
         </Link>
         <Link
           href={`/eventos?filtro=finalizados${tipo ? `&tipo=${tipo}` : ''}`}
-          className={`btn-tactile min-h-[38px] px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 ${
+          className={`btn-tactile min-h-[38px] px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 dark:border-neutral-700 ${
             filtro === 'finalizados'
-              ? 'bg-neutral-950 text-white shadow-tactile-sm'
-              : 'bg-white text-neutral-700 hover:bg-neutral-50'
+              ? 'bg-neutral-950 dark:bg-neutral-100 text-white dark:text-neutral-950 shadow-tactile-sm'
+              : 'bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800'
           }`}
         >
           Historial Finalizados
@@ -176,10 +176,10 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         {isAdmin && pendingClosureCount && pendingClosureCount > 0 && (
           <Link
             href={`/eventos?filtro=pendientes_cierre${tipo ? `&tipo=${tipo}` : ''}`}
-            className={`btn-tactile min-h-[38px] px-3.5 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 ${
+            className={`btn-tactile min-h-[38px] px-3.5 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 dark:border-neutral-700 ${
               filtro === 'pendientes_cierre'
                 ? 'bg-amber-400 text-neutral-950 shadow-tactile-sm'
-                : 'bg-amber-100 text-amber-950 hover:bg-amber-200'
+                : 'bg-amber-100 dark:bg-amber-950/60 text-amber-950 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60'
             }`}
           >
             <span>⚠️ Liquidar ({pendingClosureCount})</span>
@@ -188,10 +188,10 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         {isAdmin && (
           <Link
             href={`/eventos?filtro=pendientes${tipo ? `&tipo=${tipo}` : ''}`}
-            className={`btn-tactile min-h-[38px] px-3.5 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 ${
+            className={`btn-tactile min-h-[38px] px-3.5 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 dark:border-neutral-700 ${
               filtro === 'pendientes'
                 ? 'bg-amber-400 text-neutral-950 shadow-tactile-sm'
-                : 'bg-white text-amber-900 hover:bg-amber-50'
+                : 'bg-white dark:bg-neutral-900 text-amber-900 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-neutral-800'
             }`}
           >
             <span>Por Aprobar</span>
@@ -212,10 +212,10 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
             <Link
               key={item.key}
               href={`/eventos?filtro=${filtro}&tipo=${item.key}`}
-              className={`btn-tactile min-h-[32px] px-3 py-1 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 ${
+              className={`btn-tactile min-h-[32px] px-3 py-1 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 ${
                 isActive
-                  ? 'bg-neutral-950 text-white shadow-tactile-sm'
-                  : 'bg-white text-neutral-800 hover:bg-neutral-100'
+                  ? 'bg-neutral-950 dark:bg-neutral-100 text-white dark:text-neutral-950 shadow-tactile-sm'
+                  : 'bg-white dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800'
               }`}
             >
               {item.label}
@@ -265,14 +265,14 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
               <Link
                 key={event.id}
                 href={`/eventos/${event.id}`}
-                className="btn-tactile block bg-white rounded-3xl border-2 border-neutral-900 shadow-tactile overflow-hidden relative"
+                className="btn-tactile block bg-white dark:bg-neutral-900 rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile overflow-hidden relative"
               >
                 {/* Perforated notches on sides */}
-                <div className="absolute -left-2.5 top-[60%] -translate-y-1/2 w-5 h-5 bg-neutral-50 rounded-full border-2 border-neutral-900 z-10" />
-                <div className="absolute -right-2.5 top-[60%] -translate-y-1/2 w-5 h-5 bg-neutral-50 rounded-full border-2 border-neutral-900 z-10" />
+                <div className="absolute -left-2.5 top-[60%] -translate-y-1/2 w-5 h-5 bg-neutral-50 dark:bg-[#0c0d12] rounded-full border-2 border-neutral-900 dark:border-neutral-700 z-10" />
+                <div className="absolute -right-2.5 top-[60%] -translate-y-1/2 w-5 h-5 bg-neutral-50 dark:bg-[#0c0d12] rounded-full border-2 border-neutral-900 dark:border-neutral-700 z-10" />
 
                 {/* Ticket Top Header Bar */}
-                <div className="bg-neutral-900 text-white px-4 py-2 flex items-center justify-between border-b-2 border-neutral-900">
+                <div className="bg-neutral-900 dark:bg-neutral-950 text-white px-4 py-2 flex items-center justify-between border-b-2 border-neutral-900 dark:border-neutral-800">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="font-mono text-[9px] font-bold tracking-widest uppercase text-emerald-400">
                       {event.status === 'convocado'
@@ -311,34 +311,34 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                 {/* Ticket Body */}
                 <div className="p-4 space-y-3">
                   <div>
-                    <div className="flex items-center gap-1.5 text-neutral-500 font-mono text-[11px] uppercase tracking-wider">
+                    <div className="flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400 font-mono text-[11px] uppercase tracking-wider">
                       <MapPin className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
                       <span className="truncate">{event.location}</span>
                     </div>
-                    <h2 className="font-display font-black text-2xl uppercase tracking-tight text-neutral-950 leading-tight mt-0.5">
+                    <h2 className="font-display font-black text-2xl uppercase tracking-tight text-neutral-950 dark:text-white leading-tight mt-0.5">
                       {event.title}
                     </h2>
                   </div>
 
                   {/* Kickoff and Date Box */}
-                  <div className="grid grid-cols-2 gap-2 bg-neutral-100 p-2.5 rounded-2xl border border-neutral-300">
+                  <div className="grid grid-cols-2 gap-2 bg-neutral-100 dark:bg-neutral-800/60 p-2.5 rounded-2xl border border-neutral-300 dark:border-neutral-700">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-white border border-neutral-300 flex items-center justify-center font-display font-black text-sm text-neutral-900 shadow-tactile-sm flex-shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 flex items-center justify-center font-display font-black text-sm text-neutral-900 dark:text-neutral-100 shadow-tactile-sm flex-shrink-0">
                         {day}
                       </div>
                       <div className="min-w-0">
-                        <span className="font-mono text-[9px] text-neutral-500 uppercase block leading-none">Fecha</span>
-                        <span className="font-display font-bold text-xs uppercase text-neutral-900 truncate block mt-0.5">{weekday} • {month}</span>
+                        <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase block leading-none">Fecha</span>
+                        <span className="font-display font-bold text-xs uppercase text-neutral-900 dark:text-neutral-100 truncate block mt-0.5">{weekday} • {month}</span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-white border border-neutral-300 flex items-center justify-center font-mono font-bold text-xs text-neutral-900 shadow-tactile-sm flex-shrink-0">
-                        <Clock className="w-4 h-4 text-emerald-600" />
+                      <div className="w-8 h-8 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 flex items-center justify-center font-mono font-bold text-xs text-neutral-900 dark:text-neutral-100 shadow-tactile-sm flex-shrink-0">
+                        <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                       </div>
                       <div className="min-w-0">
-                        <span className="font-mono text-[9px] text-neutral-500 uppercase block leading-none">Kickoff</span>
-                        <span className="font-mono font-extrabold text-xs text-neutral-900 truncate block mt-0.5">{time} HRS</span>
+                        <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase block leading-none">Kickoff</span>
+                        <span className="font-mono font-extrabold text-xs text-neutral-900 dark:text-neutral-100 truncate block mt-0.5">{time} HRS</span>
                       </div>
                     </div>
                   </div>
@@ -346,20 +346,20 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                   {/* Cupos Bar */}
                   <div className="space-y-1.5 pt-0.5">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-mono text-[10px] uppercase font-bold text-neutral-500 flex items-center gap-1.5">
+                      <span className="font-mono text-[10px] uppercase font-bold text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
                         <Users className="w-3.5 h-3.5 text-neutral-400" />
                         <span>Cupos</span>
                       </span>
-                      <span className="font-mono text-xs font-black text-neutral-900">
+                      <span className="font-mono text-xs font-black text-neutral-900 dark:text-neutral-100">
                         {totalConfirmed} {maxCap ? `/ ${maxCap}` : ''}
                         {waitlistCount > 0 && (
-                          <span className="ml-1 text-amber-700 font-bold">(+{waitlistCount} espera)</span>
+                          <span className="ml-1 text-amber-700 dark:text-amber-400 font-bold">(+{waitlistCount} espera)</span>
                         )}
                       </span>
                     </div>
 
                     {maxCap && (
-                      <div className="w-full bg-neutral-200 h-2 rounded-full overflow-hidden border border-neutral-300">
+                      <div className="w-full bg-neutral-200 dark:bg-neutral-800 h-2 rounded-full overflow-hidden border border-neutral-300 dark:border-neutral-700">
                         <div
                           className="h-full rounded-full transition-all duration-300"
                           style={{
@@ -372,23 +372,23 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                   </div>
 
                   {/* Perforation Line */}
-                  <div className="border-b-2 border-dashed border-neutral-300 -mx-4 my-2" />
+                  <div className="border-b-2 border-dashed border-neutral-300 dark:border-neutral-700 -mx-4 my-2" />
 
                   {/* Action Strip */}
                   <div className="flex items-center justify-between pt-1">
                     <div>
-                      <span className="font-mono text-[9px] uppercase text-neutral-500 block">Cuota Cancha</span>
-                      <span className="font-display font-black text-base text-neutral-950">
+                      <span className="font-mono text-[9px] uppercase text-neutral-500 dark:text-neutral-400 block">Cuota Cancha</span>
+                      <span className="font-display font-black text-base text-neutral-950 dark:text-white">
                         {event.total_cost && event.total_cost > 0
                           ? `~$${Math.round(event.total_cost / (maxCap || 14)).toLocaleString('es-CL')}`
                           : event.cost_per_player && event.cost_per_player > 0
                           ? `$${event.cost_per_player.toLocaleString('es-CL')}`
                           : 'Gratis'}
-                        <span className="text-[10px] font-sans font-normal text-neutral-500 ml-1">p/jugador</span>
+                        <span className="text-[10px] font-sans font-normal text-neutral-500 dark:text-neutral-400 ml-1">p/jugador</span>
                       </span>
                     </div>
 
-                    <div className="btn-tactile bg-neutral-950 text-white font-display text-xs font-black uppercase tracking-wider px-3.5 py-2 rounded-xl border border-neutral-900 shadow-tactile-sm flex items-center gap-1">
+                    <div className="btn-tactile bg-neutral-950 dark:bg-neutral-800 text-white font-display text-xs font-black uppercase tracking-wider px-3.5 py-2 rounded-xl border border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex items-center gap-1">
                       <span>Ver Ficha</span>
                       <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
                     </div>

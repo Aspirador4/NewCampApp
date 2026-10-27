@@ -58,7 +58,7 @@ Email: ${bankDetails.email}`
     <div className="space-y-4">
       {/* Debt Status Card */}
       {pending.length === 0 ? (
-        <div className="relative overflow-hidden rounded-3xl border-2 border-neutral-900 bg-neutral-950 text-white shadow-tactile p-5">
+        <div className="relative overflow-hidden rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 bg-neutral-950 text-white shadow-tactile p-5">
           <div className="absolute inset-0 bg-mesh-pattern-white opacity-10 pointer-events-none" />
           <div className="relative space-y-2">
             <div className="flex items-center justify-between">
@@ -79,7 +79,7 @@ Email: ${bankDetails.email}`
           </div>
         </div>
       ) : (
-        <div className="relative overflow-hidden rounded-3xl border-2 border-neutral-900 bg-amber-500 text-neutral-950 shadow-tactile p-5 space-y-3">
+        <div className="relative overflow-hidden rounded-3xl border-2 border-neutral-900 dark:border-amber-600 bg-amber-500 text-neutral-950 shadow-tactile p-5 space-y-3">
           <div className="flex items-center justify-between">
             <span className="font-mono text-[10px] font-black uppercase tracking-widest text-neutral-950">
               SALDO PENDIENTE POR LIQUIDAR
@@ -109,50 +109,50 @@ Email: ${bankDetails.email}`
       )}
 
       {/* Bank Account Transfer Voucher with 1-Click Copy */}
-      <div className="bg-white rounded-3xl p-5 border-2 border-neutral-900 shadow-tactile space-y-3.5">
-        <div className="flex items-center justify-between border-b-2 border-neutral-900/10 pb-2.5">
-          <h3 className="font-display font-black text-base text-neutral-950 uppercase tracking-tight leading-none">
+      <div className="bg-white dark:bg-[#14161f] rounded-3xl p-5 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile space-y-3.5">
+        <div className="flex items-center justify-between border-b-2 border-neutral-900/10 dark:border-white/10 pb-2.5">
+          <h3 className="font-display font-black text-base text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
             Datos Oficiales de Transferencia
           </h3>
-          <span className="font-mono text-[10px] text-neutral-500 uppercase font-bold">
+          <span className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase font-bold">
             Tesorería
           </span>
         </div>
 
         {bankDetails.numero_cuenta ? (
-          <div className="space-y-2.5 font-mono text-xs bg-neutral-50 p-3.5 rounded-2xl border-2 border-neutral-300">
+          <div className="space-y-2.5 font-mono text-xs bg-neutral-50 dark:bg-[#1a1d28] p-3.5 rounded-2xl border-2 border-neutral-300 dark:border-neutral-700">
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <span className="text-[9px] text-neutral-400 uppercase block leading-none">Banco</span>
-                <span className="font-bold text-neutral-900 text-xs mt-0.5 block">{bankDetails.banco || '-'}</span>
+                <span className="font-bold text-neutral-900 dark:text-neutral-200 text-xs mt-0.5 block">{bankDetails.banco || '-'}</span>
               </div>
               <div>
                 <span className="text-[9px] text-neutral-400 uppercase block leading-none">Tipo Cuenta</span>
-                <span className="font-bold text-neutral-900 text-xs mt-0.5 block">{bankDetails.tipo_cuenta || '-'}</span>
+                <span className="font-bold text-neutral-900 dark:text-neutral-200 text-xs mt-0.5 block">{bankDetails.tipo_cuenta || '-'}</span>
               </div>
               <div>
                 <span className="text-[9px] text-neutral-400 uppercase block leading-none">Nº de Cuenta</span>
-                <span className="font-black text-neutral-950 text-sm mt-0.5 block">{bankDetails.numero_cuenta}</span>
+                <span className="font-black text-neutral-950 dark:text-white text-sm mt-0.5 block">{bankDetails.numero_cuenta}</span>
               </div>
               <div>
                 <span className="text-[9px] text-neutral-400 uppercase block leading-none">RUT</span>
-                <span className="font-black text-neutral-950 text-sm mt-0.5 block">{bankDetails.rut || '-'}</span>
+                <span className="font-black text-neutral-950 dark:text-white text-sm mt-0.5 block">{bankDetails.rut || '-'}</span>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-neutral-200">
+            <div className="pt-2 border-t border-neutral-200 dark:border-neutral-700">
               <span className="text-[9px] text-neutral-400 uppercase block leading-none">Titular</span>
-              <span className="font-bold text-neutral-900 text-xs mt-0.5 block">{bankDetails.titular || '-'}</span>
+              <span className="font-bold text-neutral-900 dark:text-neutral-200 text-xs mt-0.5 block">{bankDetails.titular || '-'}</span>
             </div>
             {bankDetails.email && (
               <div>
                 <span className="text-[9px] text-neutral-400 uppercase block leading-none">Email para Comprobante</span>
-                <span className="font-medium text-neutral-700 text-xs mt-0.5 block">{bankDetails.email}</span>
+                <span className="font-medium text-neutral-700 dark:text-neutral-300 text-xs mt-0.5 block">{bankDetails.email}</span>
               </div>
             )}
           </div>
         ) : (
-          <div className="p-3.5 bg-neutral-50 rounded-2xl border-2 border-neutral-200 text-xs text-neutral-500 text-center font-mono">
+          <div className="p-3.5 bg-neutral-50 dark:bg-[#1a1d28] rounded-2xl border-2 border-neutral-200 dark:border-neutral-700 text-xs text-neutral-500 dark:text-neutral-400 text-center font-mono">
             El administrador aún no ha configurado los datos bancarios oficiales.
           </div>
         )}
@@ -161,10 +161,10 @@ Email: ${bankDetails.email}`
           <button
             type="button"
             onClick={handleCopyTransfer}
-            className={`btn-tactile w-full min-h-[44px] py-2.5 px-3 rounded-xl font-display font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 border-2 border-neutral-900 shadow-tactile-sm transition ${
+            className={`btn-tactile w-full min-h-[44px] py-2.5 px-3 rounded-xl font-display font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm transition ${
               copied
-                ? 'bg-neutral-950 text-emerald-400'
-                : 'bg-white hover:bg-neutral-100 text-neutral-950'
+                ? 'bg-neutral-950 dark:bg-emerald-950 text-emerald-400'
+                : 'bg-white dark:bg-[#1c1f2e] hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-950 dark:text-white'
             }`}
           >
             {copied ? (
@@ -187,10 +187,10 @@ Email: ${bankDetails.email}`
         <button
           type="button"
           onClick={() => setActiveTab('pendientes')}
-          className={`btn-tactile min-h-[40px] py-2 rounded-xl transition text-center flex items-center justify-center gap-1.5 font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 ${
+          className={`btn-tactile min-h-[40px] py-2 rounded-xl transition text-center flex items-center justify-center gap-1.5 font-display font-black text-xs uppercase tracking-wider border-2 ${
             activeTab === 'pendientes'
-              ? 'bg-neutral-950 text-white shadow-tactile-sm'
-              : 'bg-white text-neutral-700 hover:bg-neutral-50'
+              ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
+              : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
           }`}
         >
           <span>Pendientes</span>
@@ -204,15 +204,15 @@ Email: ${bankDetails.email}`
         <button
           type="button"
           onClick={() => setActiveTab('pagados')}
-          className={`btn-tactile min-h-[40px] py-2 rounded-xl transition text-center flex items-center justify-center gap-1.5 font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 ${
+          className={`btn-tactile min-h-[40px] py-2 rounded-xl transition text-center flex items-center justify-center gap-1.5 font-display font-black text-xs uppercase tracking-wider border-2 ${
             activeTab === 'pagados'
-              ? 'bg-neutral-950 text-white shadow-tactile-sm'
-              : 'bg-white text-neutral-700 hover:bg-neutral-50'
+              ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
+              : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
           }`}
         >
           <span>Historial Pagados</span>
           {paid.length > 0 && (
-            <span className="px-1.5 py-0.2 rounded-md text-[10px] bg-neutral-200 text-neutral-800 font-bold">
+            <span className="px-1.5 py-0.2 rounded-md text-[10px] bg-neutral-200 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-bold">
               {paid.length}
             </span>
           )}
@@ -232,15 +232,15 @@ Email: ${bankDetails.email}`
             pending.map((item) => (
               <div
                 key={item.id}
-                className="btn-tactile bg-white rounded-3xl p-4 border-2 border-neutral-900 shadow-tactile flex items-center justify-between gap-3"
+                className="btn-tactile bg-white dark:bg-[#14161f] rounded-3xl p-4 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile flex items-center justify-between gap-3"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 mb-1">
                     <span
-                      className={`font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded border border-neutral-900 ${
+                      className={`font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded border border-neutral-900 dark:border-neutral-700 ${
                         item.debt_type === 'invitado'
-                          ? 'bg-purple-100 text-purple-900'
-                          : 'bg-amber-100 text-amber-900'
+                          ? 'bg-purple-100 dark:bg-purple-950/60 text-purple-900 dark:text-purple-300'
+                          : 'bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300'
                       }`}
                     >
                       {item.debt_type === 'invitado' ? 'Invitado' : 'Partido Propio'}
@@ -253,21 +253,21 @@ Email: ${bankDetails.email}`
                     </span>
                   </div>
 
-                  <h4 className="font-display font-black text-base uppercase text-neutral-950 leading-tight">
+                  <h4 className="font-display font-black text-base uppercase text-neutral-950 dark:text-white leading-tight">
                     {item.events?.title || item.description}
                   </h4>
                   {item.events && (
-                    <p className="font-sans text-[11px] text-neutral-500 mt-0.5">
+                    <p className="font-sans text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">
                       {item.description}
                     </p>
                   )}
                 </div>
 
                 <div className="text-right flex-shrink-0 pl-2">
-                  <span className="font-display font-black text-2xl text-neutral-950 block leading-tight">
+                  <span className="font-display font-black text-2xl text-neutral-950 dark:text-white block leading-tight">
                     ${item.amount.toLocaleString('es-CL')}
                   </span>
-                  <span className="font-mono text-[9px] font-black uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-300 inline-block mt-0.5">
+                  <span className="font-mono text-[9px] font-black uppercase text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded border border-amber-300 dark:border-amber-800/70 inline-block mt-0.5">
                     Pendiente
                   </span>
                 </div>
@@ -284,11 +284,11 @@ Email: ${bankDetails.email}`
           paid.map((item) => (
             <div
               key={item.id}
-              className="bg-white rounded-3xl p-4 border-2 border-neutral-300 shadow-tactile-sm flex items-center justify-between gap-3 opacity-90"
+              className="bg-white dark:bg-[#14161f] rounded-3xl p-4 border-2 border-neutral-300 dark:border-neutral-800 shadow-tactile-sm flex items-center justify-between gap-3 opacity-90"
             >
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 mb-1">
-                  <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-neutral-100 text-neutral-700 border border-neutral-300">
+                  <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border border-neutral-300 dark:border-neutral-700">
                     {item.debt_type === 'invitado' ? 'Invitado' : 'Partido Propio'}
                   </span>
                   {item.paid_at && (
@@ -301,16 +301,16 @@ Email: ${bankDetails.email}`
                   )}
                 </div>
 
-                <h4 className="font-display font-black text-base uppercase text-neutral-950 leading-tight">
+                <h4 className="font-display font-black text-base uppercase text-neutral-950 dark:text-white leading-tight">
                   {item.events?.title || item.description}
                 </h4>
               </div>
 
               <div className="text-right flex-shrink-0 pl-2">
-                <span className="font-display font-black text-xl text-neutral-900 block leading-tight">
+                <span className="font-display font-black text-xl text-neutral-900 dark:text-neutral-200 block leading-tight">
                   ${item.amount.toLocaleString('es-CL')}
                 </span>
-                <span className="font-mono text-[9px] font-bold uppercase text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300 inline-block mt-0.5">
+                <span className="font-mono text-[9px] font-bold uppercase text-emerald-800 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded border border-emerald-300 dark:border-emerald-800/70 inline-block mt-0.5">
                   ✓ Liquidado
                 </span>
               </div>

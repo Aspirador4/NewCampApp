@@ -24,14 +24,14 @@ export function PalettePicker({ selectedId, onSelect, disabled = false }: Palett
               onClick={() => onSelect(palette.id)}
               className={`p-2.5 rounded-2xl border-2 text-left transition-all duration-150 flex flex-col gap-2 min-h-[76px] relative active:scale-95 ${
                 isSelected
-                  ? 'border-neutral-900 bg-white shadow-tactile-sm'
-                  : 'border-neutral-200 bg-white hover:border-neutral-400'
+                  ? 'border-neutral-900 dark:border-white bg-white dark:bg-[#1c1f2e] shadow-tactile-sm'
+                  : 'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#14161f] hover:border-neutral-400 dark:hover:border-neutral-600'
               } disabled:opacity-50`}
             >
               {/* Color swatch row */}
               <div className="flex items-center justify-between w-full">
                 <div
-                  className="w-7 h-7 rounded-xl border border-neutral-900 shadow-xs flex items-center justify-center text-white"
+                  className="w-7 h-7 rounded-xl border border-neutral-900 dark:border-neutral-700 shadow-xs flex items-center justify-center text-white"
                   style={{
                     background: `linear-gradient(135deg, ${palette.gradientFrom}, ${palette.gradientTo})`,
                   }}
@@ -40,16 +40,16 @@ export function PalettePicker({ selectedId, onSelect, disabled = false }: Palett
                 </div>
 
                 <div
-                  className="w-3.5 h-3.5 rounded-full border border-neutral-900"
+                  className="w-3.5 h-3.5 rounded-full border border-neutral-900 dark:border-neutral-700"
                   style={{ backgroundColor: palette.primaryLight }}
                 />
               </div>
 
               <div>
-                <p className="font-display font-black text-xs uppercase tracking-tight text-neutral-950 leading-tight">
+                <p className="font-display font-black text-xs uppercase tracking-tight text-neutral-950 dark:text-white leading-tight">
                   {palette.name}
                 </p>
-                <p className="font-mono text-[9px] text-neutral-500 truncate mt-0.5">
+                <p className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 truncate mt-0.5">
                   {palette.description.split(',')[0]}
                 </p>
               </div>

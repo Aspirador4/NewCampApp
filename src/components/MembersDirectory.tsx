@@ -165,14 +165,14 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
     <div className="space-y-4">
       {/* Messages */}
       {errorMsg && (
-        <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 text-red-700 text-xs border border-red-200">
+        <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 text-xs border border-red-200 dark:border-red-800">
           <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="flex items-start gap-2 p-3 rounded-xl bg-emerald-50 text-emerald-800 text-xs border border-emerald-200">
+        <div className="flex items-start gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-xs border border-emerald-200 dark:border-emerald-800">
           <Check className="w-4 h-4 mt-0.5 text-emerald-600 flex-shrink-0" />
           <span>{successMsg}</span>
         </div>
@@ -180,35 +180,35 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
       {/* Admin Section: Solicitudes de Admisión Pendientes */}
       {isAdmin && pendingMembers.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-3">
+        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <UserCheck className="w-4 h-4 text-amber-700" />
-              <h3 className="text-xs font-black uppercase tracking-wider text-amber-900">
+              <UserCheck className="w-4 h-4 text-amber-700 dark:text-amber-400" />
+              <h3 className="text-xs font-black uppercase tracking-wider text-amber-900 dark:text-amber-200">
                 Solicitudes de Admisión ({pendingMembers.length})
               </h3>
             </div>
-            <span className="text-[10px] font-bold bg-amber-200/80 text-amber-900 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-bold bg-amber-200/80 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 px-2 py-0.5 rounded-full">
               Por Aprobar
             </span>
           </div>
 
-          <div className="divide-y divide-amber-200/60 bg-white rounded-xl border border-amber-200/80 overflow-hidden">
+          <div className="divide-y divide-amber-200/60 dark:divide-amber-800/60 bg-white dark:bg-[#14161f] rounded-xl border border-amber-200/80 dark:border-amber-800/80 overflow-hidden">
             {pendingMembers.map((pm) => (
               <div key={pm.id} className="p-3 flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-bold text-neutral-900 truncate">{pm.full_name}</p>
-                  <p className="text-[11px] text-neutral-500 truncate">{pm.email}</p>
+                  <p className="text-xs font-bold text-neutral-900 dark:text-white truncate">{pm.full_name}</p>
+                  <p className="text-[11px] text-neutral-500 dark:text-neutral-400 truncate">{pm.email}</p>
                   {pm.motivation ? (
-                    <div className="mt-1.5 p-2 rounded-lg bg-amber-50 border border-amber-200/80 text-[11px] text-amber-900 flex items-start gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div className="mt-1.5 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-200/80 dark:border-amber-800/80 text-[11px] text-amber-900 dark:text-amber-200 flex items-start gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
                       <div>
-                        <span className="font-semibold block text-[10px] uppercase text-amber-800">Motivación:</span>
+                        <span className="font-semibold block text-[10px] uppercase text-amber-800 dark:text-amber-300">Motivación:</span>
                         <span className="italic">&ldquo;{pm.motivation}&rdquo;</span>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-[10px] text-neutral-400 italic mt-0.5">Sin carta de motivación</p>
+                    <p className="text-[10px] text-neutral-400 dark:text-neutral-500 italic mt-0.5">Sin carta de motivación</p>
                   )}
                 </div>
                 <div className="flex items-center gap-1.5 flex-shrink-0 mt-0.5">
@@ -225,7 +225,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                     type="button"
                     onClick={() => handleReject(pm.id)}
                     disabled={actionLoading === pm.id}
-                    className="min-h-[38px] px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs transition active:scale-95 disabled:opacity-50"
+                    className="min-h-[38px] px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 font-bold text-xs transition active:scale-95 disabled:opacity-50"
                   >
                     Rechazar
                   </button>
@@ -238,32 +238,32 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
       {/* Admin Section: Postulaciones Rechazadas */}
       {isAdmin && rejectedMembers.length > 0 && (
-        <div className="bg-rose-50/60 border border-rose-200/80 rounded-2xl p-4 space-y-3">
+        <div className="bg-rose-50/60 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800/60 rounded-2xl p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <UserX className="w-4 h-4 text-rose-700" />
-              <h3 className="text-xs font-black uppercase tracking-wider text-rose-900">
+              <UserX className="w-4 h-4 text-rose-700 dark:text-rose-400" />
+              <h3 className="text-xs font-black uppercase tracking-wider text-rose-900 dark:text-rose-200">
                 Postulaciones Rechazadas ({rejectedMembers.length})
               </h3>
             </div>
             <button
               type="button"
               onClick={() => setShowRejected(!showRejected)}
-              className="text-[11px] font-bold text-rose-800 hover:text-rose-950 underline cursor-pointer p-1"
+              className="text-[11px] font-bold text-rose-800 dark:text-rose-300 hover:text-rose-950 dark:hover:text-rose-100 underline cursor-pointer p-1"
             >
               {showRejected ? 'Ocultar' : 'Ver lista'}
             </button>
           </div>
 
           {showRejected && (
-            <div className="divide-y divide-rose-200/60 bg-white rounded-xl border border-rose-200/80 overflow-hidden">
+            <div className="divide-y divide-rose-200/60 dark:divide-rose-800/60 bg-white dark:bg-[#14161f] rounded-xl border border-rose-200/80 dark:border-rose-800/60 overflow-hidden">
               {rejectedMembers.map((rm) => (
                 <div key={rm.id} className="p-3 flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold text-neutral-900 truncate">{rm.full_name}</p>
-                    <p className="text-[11px] text-neutral-500 truncate">{rm.email}</p>
+                    <p className="text-xs font-bold text-neutral-900 dark:text-white truncate">{rm.full_name}</p>
+                    <p className="text-[11px] text-neutral-500 dark:text-neutral-400 truncate">{rm.email}</p>
                     {rm.motivation && (
-                      <p className="text-[11px] text-neutral-600 italic mt-0.5">&ldquo;{rm.motivation}&rdquo;</p>
+                      <p className="text-[11px] text-neutral-600 dark:text-neutral-300 italic mt-0.5">&ldquo;{rm.motivation}&rdquo;</p>
                     )}
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0 mt-0.5">
@@ -289,7 +289,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                       type="button"
                       onClick={() => handleDelete(rm.id, rm.full_name)}
                       disabled={actionLoading === rm.id}
-                      className="min-h-[36px] min-w-[36px] p-2 rounded-xl bg-neutral-100 hover:bg-red-50 text-neutral-500 hover:text-red-600 transition flex items-center justify-center active:scale-95"
+                      className="min-h-[36px] min-w-[36px] p-2 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-red-50 dark:hover:bg-red-950/50 text-neutral-500 dark:text-neutral-400 hover:text-red-600 dark:hover:text-red-400 transition flex items-center justify-center active:scale-95"
                       title="Eliminar registro"
                       aria-label="Eliminar registro"
                     >
@@ -313,7 +313,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar jugador por nombre o correo..."
-          className="w-full pl-10 pr-3.5 py-3 rounded-2xl border-2 border-neutral-900 text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900 text-neutral-900 shadow-tactile-sm"
+          className="w-full pl-10 pr-3.5 py-3 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 text-base sm:text-sm bg-white dark:bg-[#14161f] focus:outline-none focus:ring-2 focus:ring-neutral-900 dark:focus:ring-white text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-tactile-sm"
         />
       </div>
 
@@ -326,10 +326,10 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
               key={pos}
               type="button"
               onClick={() => setSelectedPosition(pos)}
-              className={`min-h-[36px] px-3.5 py-1.5 rounded-xl whitespace-nowrap transition active:scale-95 font-bold uppercase text-[11px] border-2 border-neutral-900 ${
+              className={`min-h-[36px] px-3.5 py-1.5 rounded-xl whitespace-nowrap transition active:scale-95 font-bold uppercase text-[11px] border-2 ${
                 isActive
-                  ? 'bg-neutral-950 text-white shadow-tactile-sm'
-                  : 'bg-white text-neutral-700 hover:bg-neutral-100'
+                  ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
+                  : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/10 border-neutral-900 dark:border-neutral-700'
               }`}
             >
               {pos === 'todos' ? 'Todos los roles' : pos}
@@ -339,7 +339,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
       </div>
 
       {/* Members Count */}
-      <div className="flex items-center justify-between text-xs font-mono text-neutral-500 px-1 uppercase">
+      <div className="flex items-center justify-between text-xs font-mono text-neutral-500 dark:text-neutral-400 px-1 uppercase">
         <span>{filteredMembers.length} socio(s) en plantel</span>
       </div>
 
@@ -369,10 +369,10 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
               <div
                 key={member.id}
                 onClick={() => setActiveMember(member)}
-                className="btn-tactile bg-white border-2 border-neutral-900 rounded-3xl p-3.5 shadow-tactile hover:border-neutral-950 transition cursor-pointer flex items-center justify-between gap-3 min-h-[68px]"
+                className="btn-tactile bg-white dark:bg-[#14161f] border-2 border-neutral-900 dark:border-neutral-700 rounded-3xl p-3.5 shadow-tactile hover:border-neutral-950 dark:hover:border-neutral-500 transition cursor-pointer flex items-center justify-between gap-3 min-h-[68px]"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-12 h-12 rounded-2xl overflow-hidden bg-neutral-900 border-2 border-neutral-900 shadow-tactile-sm flex items-center justify-center relative flex-shrink-0 text-white">
+                  <div className="w-12 h-12 rounded-2xl overflow-hidden bg-neutral-900 dark:bg-neutral-800 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex items-center justify-center relative flex-shrink-0 text-white">
                     {member.avatar_url ? (
                       <Image
                         src={member.avatar_url}
@@ -390,11 +390,11 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <h3 className="font-display font-black text-base uppercase text-neutral-950 truncate leading-tight">
+                      <h3 className="font-display font-black text-base uppercase text-neutral-950 dark:text-white truncate leading-tight">
                         {member.full_name}
                       </h3>
                       {member.system_role === 'admin' && (
-                        <span className="font-mono text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-neutral-950 text-white">
+                        <span className="font-mono text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-neutral-950 dark:bg-white text-white dark:text-neutral-950">
                           Admin
                         </span>
                       )}
@@ -405,19 +405,19 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                         positionsArr.map((p) => (
                           <span
                             key={p}
-                            className="font-mono text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border border-neutral-300 bg-neutral-100 text-neutral-700"
+                            className="font-mono text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300"
                           >
                             {p}
                           </span>
                         ))
                       ) : (
-                        <span className="font-mono text-[10px] text-neutral-500 uppercase">
+                        <span className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase">
                           {member.sports_role}
                         </span>
                       )}
 
                       {Boolean(member.custom_attributes?.numero_camiseta) && (
-                        <span className="font-display font-black text-xs text-neutral-900 bg-neutral-100 px-1.5 py-0.2 rounded border border-neutral-300">
+                        <span className="font-display font-black text-xs text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.2 rounded border border-neutral-300 dark:border-neutral-700">
                           #{String(member.custom_attributes.numero_camiseta)}
                         </span>
                       )}
@@ -427,19 +427,19 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
                 {/* Stats badges */}
                 <div className="flex items-center gap-2 text-right flex-shrink-0 pl-1">
-                  <div className="bg-amber-50 border-2 border-neutral-900 px-2 py-1 rounded-xl text-center min-w-[44px] shadow-tactile-sm">
-                    <div className="flex items-center justify-center gap-0.5 text-amber-700 font-display font-black text-sm leading-none">
+                  <div className="bg-amber-50 dark:bg-amber-950/40 border-2 border-neutral-900 dark:border-neutral-700 px-2 py-1 rounded-xl text-center min-w-[44px] shadow-tactile-sm">
+                    <div className="flex items-center justify-center gap-0.5 text-amber-700 dark:text-amber-400 font-display font-black text-sm leading-none">
                       <Trophy className="w-3 h-3 stroke-[2.5]" />
                       <span>{stats.mvp_count}</span>
                     </div>
-                    <span className="font-mono text-[8px] font-black text-amber-800 uppercase block mt-0.5">MVP</span>
+                    <span className="font-mono text-[8px] font-black text-amber-800 dark:text-amber-300 uppercase block mt-0.5">MVP</span>
                   </div>
 
-                  <div className="bg-neutral-100 border-2 border-neutral-900 px-2 py-1 rounded-xl text-center min-w-[44px] shadow-tactile-sm">
-                    <span className="font-display font-black text-sm text-neutral-900 block leading-none">
+                  <div className="bg-neutral-100 dark:bg-neutral-800 border-2 border-neutral-900 dark:border-neutral-700 px-2 py-1 rounded-xl text-center min-w-[44px] shadow-tactile-sm">
+                    <span className="font-display font-black text-sm text-neutral-900 dark:text-white block leading-none">
                       {stats.matches_played}
                     </span>
-                    <span className="font-mono text-[8px] font-bold text-neutral-500 uppercase block mt-0.5">PJ</span>
+                    <span className="font-mono text-[8px] font-bold text-neutral-500 dark:text-neutral-400 uppercase block mt-0.5">PJ</span>
                   </div>
                 </div>
               </div>
@@ -451,12 +451,12 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
       {/* Modal / Member Dossier */}
       {activeMember && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-neutral-950/70 backdrop-blur-xs p-0 sm:p-4">
-          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl border-2 border-neutral-900 shadow-tactile p-6 space-y-4 max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200 relative">
+          <div className="bg-white dark:bg-[#14161f] w-full max-w-md rounded-t-3xl sm:rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile p-6 space-y-4 max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200 relative">
             {/* Close Button */}
             <button
               type="button"
               onClick={() => setActiveMember(null)}
-              className="btn-tactile absolute top-4 right-4 w-9 h-9 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-900 border-2 border-neutral-900 shadow-tactile-sm transition flex items-center justify-center"
+              className="btn-tactile absolute top-4 right-4 w-9 h-9 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-900 dark:text-white border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm transition flex items-center justify-center"
               aria-label="Cerrar ficha de socio"
             >
               <X className="w-5 h-5 stroke-[2.5]" />
@@ -465,7 +465,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
             {/* Profile Header */}
             <div className="flex items-center gap-4 pt-1">
               <div
-                className="w-20 h-20 rounded-2xl overflow-hidden bg-neutral-900 border-2 border-neutral-900 shadow-tactile flex items-center justify-center relative flex-shrink-0 text-white"
+                className="w-20 h-20 rounded-2xl overflow-hidden bg-neutral-900 dark:bg-neutral-800 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile flex items-center justify-center relative flex-shrink-0 text-white"
               >
                 {activeMember.avatar_url ? (
                   <Image
@@ -483,15 +483,15 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
               </div>
 
               <div>
-                <h2 className="font-display font-black text-xl uppercase text-neutral-950 leading-tight">
+                <h2 className="font-display font-black text-xl uppercase text-neutral-950 dark:text-white leading-tight">
                   {activeMember.full_name}
                 </h2>
                 <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                  <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded border border-neutral-300 bg-neutral-100 text-neutral-700">
+                  <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300">
                     {activeMember.sports_role}
                   </span>
                   {activeMember.system_role === 'admin' && (
-                    <span className="font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded bg-neutral-950 text-white">
+                    <span className="font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded bg-neutral-950 dark:bg-white text-white dark:text-neutral-950">
                       Administrador
                     </span>
                   )}
@@ -501,49 +501,49 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
             {/* Stats Row */}
             <div className="grid grid-cols-4 gap-2 pt-2">
-              <div className="p-2.5 rounded-2xl bg-amber-50 border-2 border-neutral-900 shadow-tactile-sm text-center">
-                <Trophy className="w-4 h-4 text-amber-600 mx-auto mb-0.5 stroke-[2.5]" />
-                <span className="font-display font-black text-lg text-neutral-950 block leading-tight">
+              <div className="p-2.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-center">
+                <Trophy className="w-4 h-4 text-amber-600 dark:text-amber-400 mx-auto mb-0.5 stroke-[2.5]" />
+                <span className="font-display font-black text-lg text-neutral-950 dark:text-white block leading-tight">
                   {activeMember.stats?.mvp_count || 0}
                 </span>
-                <span className="font-mono text-[8px] font-black uppercase text-amber-800">MVPs</span>
+                <span className="font-mono text-[8px] font-black uppercase text-amber-800 dark:text-amber-300">MVPs</span>
               </div>
 
-              <div className="p-2.5 rounded-2xl bg-neutral-100 border-2 border-neutral-900 shadow-tactile-sm text-center">
-                <Calendar className="w-4 h-4 text-neutral-700 mx-auto mb-0.5 stroke-[2.5]" />
-                <span className="font-display font-black text-lg text-neutral-950 block leading-tight">
+              <div className="p-2.5 rounded-2xl bg-neutral-100 dark:bg-neutral-800 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-center">
+                <Calendar className="w-4 h-4 text-neutral-700 dark:text-neutral-300 mx-auto mb-0.5 stroke-[2.5]" />
+                <span className="font-display font-black text-lg text-neutral-950 dark:text-white block leading-tight">
                   {activeMember.stats?.matches_played || 0}
                 </span>
-                <span className="font-mono text-[8px] font-black uppercase text-neutral-600">Partidos</span>
+                <span className="font-mono text-[8px] font-black uppercase text-neutral-600 dark:text-neutral-400">Partidos</span>
               </div>
 
-              <div className="p-2.5 rounded-2xl bg-blue-50 border-2 border-neutral-900 shadow-tactile-sm text-center">
-                <Sparkles className="w-4 h-4 text-blue-600 mx-auto mb-0.5 stroke-[2.5]" />
-                <span className="font-display font-black text-lg text-neutral-950 block leading-tight">
+              <div className="p-2.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-center">
+                <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 mx-auto mb-0.5 stroke-[2.5]" />
+                <span className="font-display font-black text-lg text-neutral-950 dark:text-white block leading-tight">
                   {activeMember.stats?.mvp_votes_received || 0}
                 </span>
-                <span className="font-mono text-[8px] font-black uppercase text-blue-800">Votos</span>
+                <span className="font-mono text-[8px] font-black uppercase text-blue-800 dark:text-blue-300">Votos</span>
               </div>
 
-              <div className="p-2.5 rounded-2xl bg-purple-50 border-2 border-neutral-900 shadow-tactile-sm text-center">
-                <User className="w-4 h-4 text-purple-600 mx-auto mb-0.5 stroke-[2.5]" />
-                <span className="font-display font-black text-lg text-neutral-950 block leading-tight">
+              <div className="p-2.5 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-center">
+                <User className="w-4 h-4 text-purple-600 dark:text-purple-400 mx-auto mb-0.5 stroke-[2.5]" />
+                <span className="font-display font-black text-lg text-neutral-950 dark:text-white block leading-tight">
                   {activeMember.stats?.social_events_attended || 0}
                 </span>
-                <span className="font-mono text-[8px] font-black uppercase text-purple-800">Social</span>
+                <span className="font-mono text-[8px] font-black uppercase text-purple-800 dark:text-purple-300">Social</span>
               </div>
             </div>
 
             {/* Custom Attributes & Profile Info */}
-            <div className="space-y-2 pt-2 border-t-2 border-neutral-900/10 text-xs">
-              <h4 className="font-display font-black uppercase tracking-wider text-xs text-neutral-500">
+            <div className="space-y-2 pt-2 border-t-2 border-neutral-900/10 dark:border-white/10 text-xs">
+              <h4 className="font-display font-black uppercase tracking-wider text-xs text-neutral-500 dark:text-neutral-400">
                 Ficha Deportiva & Datos
               </h4>
 
               {/* Posiciones */}
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border-2 border-neutral-200">
-                <span className="text-neutral-500 font-medium">Posición(es):</span>
-                <span className="font-display font-black text-sm uppercase text-neutral-950 text-right">
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700">
+                <span className="text-neutral-500 dark:text-neutral-400 font-medium">Posición(es):</span>
+                <span className="font-display font-black text-sm uppercase text-neutral-950 dark:text-white text-right">
                   {activeMember.custom_attributes?.posicion
                     ? Array.isArray(activeMember.custom_attributes.posicion)
                       ? (activeMember.custom_attributes.posicion as string[])?.join(', ')
@@ -554,9 +554,9 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
               {/* Camiseta */}
               {Boolean(activeMember.custom_attributes?.numero_camiseta) && (
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border-2 border-neutral-200">
-                  <span className="text-neutral-500 font-medium">Dorsal preferido:</span>
-                  <span className="font-display font-black text-base text-neutral-950">
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700">
+                  <span className="text-neutral-500 dark:text-neutral-400 font-medium">Dorsal preferido:</span>
+                  <span className="font-display font-black text-base text-neutral-950 dark:text-white">
                     #{String(activeMember.custom_attributes.numero_camiseta)}
                   </span>
                 </div>
@@ -564,9 +564,9 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
               {/* Pie hábil */}
               {Boolean(activeMember.custom_attributes?.pie_habil) && (
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border-2 border-neutral-200">
-                  <span className="text-neutral-500 font-medium">Pie hábil:</span>
-                  <span className="font-display font-black text-sm uppercase text-neutral-950">
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700">
+                  <span className="text-neutral-500 dark:text-neutral-400 font-medium">Pie hábil:</span>
+                  <span className="font-display font-black text-sm uppercase text-neutral-950 dark:text-white">
                     {String(activeMember.custom_attributes.pie_habil)}
                   </span>
                 </div>
@@ -574,9 +574,9 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
               {/* Fecha de nacimiento & Edad */}
               {activeMember.birth_date && (
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border-2 border-neutral-200">
-                  <span className="text-neutral-500 font-medium">Edad / Nacimiento:</span>
-                  <span className="font-mono text-xs font-bold text-neutral-900">
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700">
+                  <span className="text-neutral-500 dark:text-neutral-400 font-medium">Edad / Nacimiento:</span>
+                  <span className="font-mono text-xs font-bold text-neutral-900 dark:text-neutral-100">
                     {getAgeString(activeMember.birth_date)}
                   </span>
                 </div>
@@ -584,9 +584,9 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
               {/* Género */}
               {activeMember.gender && (
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border-2 border-neutral-200">
-                  <span className="text-neutral-500 font-medium">Categoría:</span>
-                  <span className="font-display font-black text-xs uppercase text-neutral-950">
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700">
+                  <span className="text-neutral-500 dark:text-neutral-400 font-medium">Categoría:</span>
+                  <span className="font-display font-black text-xs uppercase text-neutral-950 dark:text-white">
                     {activeMember.gender}
                   </span>
                 </div>
@@ -595,20 +595,20 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
             {/* Admin Management Section */}
             {isAdmin && (
-              <div className="pt-3 border-t-2 border-neutral-900/10 space-y-2">
-                <h4 className="font-display font-black uppercase tracking-wider text-xs text-neutral-500 flex items-center gap-1.5">
-                  <Shield className="w-3.5 h-3.5 text-neutral-700 stroke-[2.5]" />
+              <div className="pt-3 border-t-2 border-neutral-900/10 dark:border-white/10 space-y-2">
+                <h4 className="font-display font-black uppercase tracking-wider text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5 text-neutral-700 dark:text-neutral-300 stroke-[2.5]" />
                   <span>Gestión de Miembro (Admin)</span>
                 </h4>
 
                 <div className="flex flex-col gap-2">
                   {/* Assign / Remove Admin Role */}
-                  <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border-2 border-neutral-200">
+                  <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700">
                     <div>
-                      <p className="font-display font-black text-xs uppercase text-neutral-950">
+                      <p className="font-display font-black text-xs uppercase text-neutral-950 dark:text-white">
                         Rol: <span>{activeMember.system_role === 'admin' ? 'Administrador' : 'Socio'}</span>
                       </p>
-                      <p className="font-mono text-[9px] text-neutral-500">
+                      <p className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400">
                         {activeMember.system_role === 'admin'
                           ? 'Acceso total de administración'
                           : 'Acceso estándar de socio'}
@@ -618,10 +618,10 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                       type="button"
                       onClick={() => handleRoleChange(activeMember.id, activeMember.system_role === 'admin' ? 'member' : 'admin')}
                       disabled={actionLoading === activeMember.id}
-                      className={`btn-tactile min-h-[40px] py-1.5 px-3.5 rounded-xl border-2 border-neutral-900 font-display font-black text-xs uppercase tracking-wider transition active:scale-95 flex items-center gap-1.5 shadow-tactile-sm ${
+                      className={`btn-tactile min-h-[40px] py-1.5 px-3.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 font-display font-black text-xs uppercase tracking-wider transition active:scale-95 flex items-center gap-1.5 shadow-tactile-sm ${
                         activeMember.system_role === 'admin'
-                          ? 'bg-neutral-200 hover:bg-neutral-300 text-neutral-950'
-                          : 'bg-neutral-950 hover:bg-neutral-900 text-white'
+                          ? 'bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-950 dark:text-white'
+                          : 'bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950'
                       }`}
                     >
                       {actionLoading === activeMember.id ? (
@@ -639,7 +639,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                       type="button"
                       onClick={() => handleDelete(activeMember.id, activeMember.full_name)}
                       disabled={actionLoading === activeMember.id}
-                      className="btn-tactile w-full min-h-[44px] py-2 px-3 rounded-xl border-2 border-neutral-900 bg-rose-50 hover:bg-rose-100 text-rose-800 font-display font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition active:scale-98 disabled:opacity-50 shadow-tactile-sm"
+                      className="btn-tactile w-full min-h-[44px] py-2 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-800 dark:text-rose-300 font-display font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition active:scale-98 disabled:opacity-50 shadow-tactile-sm"
                     >
                       {actionLoading === activeMember.id ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -656,7 +656,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
             <button
               type="button"
               onClick={() => setActiveMember(null)}
-              className="btn-tactile w-full min-h-[44px] py-2.5 rounded-xl border-2 border-neutral-900 bg-neutral-950 hover:bg-neutral-900 text-white font-display font-black text-xs uppercase tracking-wider transition active:scale-98 shadow-tactile-sm"
+              className="btn-tactile w-full min-h-[44px] py-2.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950 font-display font-black text-xs uppercase tracking-wider transition active:scale-98 shadow-tactile-sm"
             >
               Cerrar Ficha
             </button>

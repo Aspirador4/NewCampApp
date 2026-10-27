@@ -79,11 +79,11 @@ export function AddToCalendarButton({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="btn-tactile inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-neutral-100 text-neutral-950 border-2 border-neutral-900 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition active:scale-95"
+        className="btn-tactile inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-[#14161f] hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-950 dark:text-white border-2 border-neutral-900 dark:border-neutral-700 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition active:scale-95"
       >
-        <CalendarPlus className="w-3.5 h-3.5 text-neutral-900 stroke-[2.5]" />
+        <CalendarPlus className="w-3.5 h-3.5 text-neutral-900 dark:text-white stroke-[2.5]" />
         <span>Calendario</span>
-        <ChevronDown className="w-3 h-3 text-neutral-500 stroke-[2.5]" />
+        <ChevronDown className="w-3 h-3 text-neutral-500 dark:text-neutral-400 stroke-[2.5]" />
       </button>
 
       {isOpen && (
@@ -92,34 +92,34 @@ export function AddToCalendarButton({
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white border-2 border-neutral-900 shadow-tactile z-50 p-2 text-xs animate-in fade-in zoom-in-95 duration-100">
+          <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-[#14161f] border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile z-50 p-2 text-xs animate-in fade-in zoom-in-95 duration-100">
             <a
               href={googleCalUrl}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsOpen(false)}
-              className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 text-neutral-950 font-display font-black uppercase tracking-wider transition"
+              className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-950 dark:text-white font-display font-black uppercase tracking-wider transition"
             >
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 border border-neutral-900" />
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 border border-neutral-900 dark:border-neutral-700" />
                 <span>Google Calendar</span>
               </div>
-              <ExternalLink className="w-3.5 h-3.5 text-neutral-400" />
+              <ExternalLink className="w-3.5 h-3.5 text-neutral-400 dark:text-neutral-500" />
             </a>
 
             <button
               type="button"
               onClick={handleDownloadIcs}
-              className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 text-neutral-950 font-display font-black uppercase tracking-wider transition text-left"
+              className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-950 dark:text-white font-display font-black uppercase tracking-wider transition text-left"
             >
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-neutral-900" />
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-neutral-900 dark:border-neutral-700" />
                 <span>Apple / Outlook (.ics)</span>
               </div>
               {downloaded ? (
-                <Check className="w-4 h-4 text-emerald-600 stroke-[3]" />
+                <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 stroke-[3]" />
               ) : (
-                <Download className="w-3.5 h-3.5 text-neutral-400" />
+                <Download className="w-3.5 h-3.5 text-neutral-400 dark:text-neutral-500" />
               )}
             </button>
           </div>

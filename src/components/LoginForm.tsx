@@ -34,7 +34,7 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
   return (
     <div className="w-full space-y-4">
       {error && (
-        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-red-50 text-red-700 text-xs border border-red-200">
+        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 text-xs border border-red-200 dark:border-red-800">
           <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
           <span>{error}</span>
         </div>
@@ -45,7 +45,7 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
         type="button"
         onClick={handleGoogleLogin}
         disabled={googleLoading}
-        className="btn-tactile w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-xl border-2 border-neutral-900 bg-white hover:bg-neutral-100 text-neutral-950 font-display font-black text-sm uppercase tracking-wider shadow-tactile-sm transition disabled:opacity-50"
+        className="btn-tactile w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-[#1a1d28] hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-950 dark:text-white font-display font-black text-sm uppercase tracking-wider shadow-tactile-sm transition disabled:opacity-50"
       >
         {googleLoading ? (
           <Loader2 className="w-5 h-5 animate-spin text-neutral-500" />

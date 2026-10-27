@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Solid Warm Cream Background for High Contrast Neobrutalism -->
+    <filter id="tactileOffset3" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="8" dy="10" stdDeviation="0" flood-color="#121212" flood-opacity="1"/>
+    </filter>
+  </defs>
+
+  <!-- PWA Squircle Background - Obsidian Charcoal with subtle stadium glow -->
+  <rect width="512" height="512" rx="116" fill="#121212"/>
+  
+  <!-- Tactile Inner Frame -->
+  <rect x="20" y="20" width="472" height="472" rx="96" fill="#18181b" stroke="#27272a" stroke-width="2"/>
+
+  <!-- Main Shield Group with Tactile Offset Shadow -->
+  <g filter="url(#tactileOffset3)">
+    <!-- Base Shield -->
+    <path d="M 256 64
+             L 390 128
+             L 390 270
+             C 390 360 256 424 256 424
+             C 256 424 122 360 122 270
+             L 122 128 Z"
+          fill="#059669"
+          stroke="#ffffff"
+          stroke-width="8"
+          stroke-linejoin="round"/>
+
+    <!-- Left Halved Contrast (Deeper Green / Pitch Shadow) -->
+    <path d="M 256 64
+             L 122 128
+             L 122 270
+             C 122 360 256 424 256 424
+             Z"
+          fill="#047857"
+          opacity="0.95"/>
+
+    <!-- Inner Shield Border -->
+    <path d="M 256 86
+             L 368 140
+             L 368 262
+             C 368 338 256 394 256 394
+             C 256 394 144 338 144 262
+             L 144 140 Z"
+          fill="none"
+          stroke="#ffffff"
+          stroke-width="3"
+          stroke-dasharray="8 6"
+          opacity="0.8"/>
+
+    <!-- The "Clubhouse" Geometric House Icon at the Center -->
+    <!-- Gable Roof -->
+    <polygon points="256,150 178,212 196,212 196,280 316,280 316,212 334,212"
+             fill="#ffffff"
+             stroke="#121212"
+             stroke-width="6"
+             stroke-linejoin="round"/>
+
+    <!-- Center Pitch Arch / Doorway inside the house -->
+    <path d="M 232 280 L 232 228 C 232 214 280 214 280 228 L 280 280 Z"
+          fill="#10B981"
+          stroke="#121212"
+          stroke-width="5"/>
+
+    <!-- Midfield Ball / MVP Golden Beacon -->
+    <circle cx="256" cy="198" r="14" fill="#F59E0B" stroke="#121212" stroke-width="4"/>
+
+    <!-- Tactile Lower Chevrons / Athletic Stripes (Squad & Concurrency) -->
+    <g transform="translate(256, 335)">
+      <!-- Chevron 1 -->
+      <path d="M -50 -16 L 0 6 L 50 -16" fill="none" stroke="#FBBF24" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Chevron 2 -->
+      <path d="M -36 8 L 0 24 L 36 8" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+
+  <!-- Corner Tactile Rivets / Bolts (Athletic Industrial Feel) -->
+  <circle cx="56" cy="56" r="6" fill="#3f3f46"/>
+  <circle cx="456" cy="56" r="6" fill="#3f3f46"/>
+  <circle cx="56" cy="456" r="6" fill="#3f3f46"/>
+  <circle cx="456" cy="456" r="6" fill="#3f3f46"/>
+</svg>
