@@ -47,12 +47,30 @@ export default async function MiembrosPage() {
   // Fetch stats for members in this club
   const { data: statsRaw } = await supabase
     .from('user_stats')
-    .select('user_id, matches_played, mvp_count, mvp_votes_received, social_events_attended')
+    .select('user_id, matches_played, mvp_count, mvp_votes_received, social_events_attended, average_rating, last_match_rating, ratings_count')
     .eq('club_id', club.id)
 
-  const statsMap = new Map<string, { matches_played: number; mvp_count: number; mvp_votes_received: number; social_events_attended: number }>()
+  interface MemberStatsItem {
+    matches_played: number
+    mvp_count: number
+    mvp_votes_received: number
+    social_events_attended: number
+    average_rating: number | null
+    last_match_rating: number | null
+    ratings_count: number
+  }
+
+  const statsMap = new Map<string, MemberStatsItem>()
   for (const s of statsRaw || []) {
-    statsMap.set(s.user_id, s)
+    statsMap.set(s.user_id, {
+      matches_played: s.matches_played || 0,
+      mvp_count: s.mvp_count || 0,
+      mvp_votes_received: s.mvp_votes_received || 0,
+      social_events_attended: s.social_events_attended || 0,
+      average_rating: s.average_rating ? Number(s.average_rating) : null,
+      last_match_rating: s.last_match_rating ? Number(s.last_match_rating) : null,
+      ratings_count: s.ratings_count || 0,
+    })
   }
 
   interface RawClubMemberWithProfile {

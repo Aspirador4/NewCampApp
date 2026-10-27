@@ -350,3 +350,150 @@ export async function submitMotivationAction(motivationText: string, targetClubI
   revalidatePath('/miembros')
   return { success: true }
 }
+
+export async function adminEvaluatePlayerAction(
+  targetUserId: string,
+  rating: number,
+  comment?: string,
+  targetClubId?: string
+) {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: 'No autorizado' }
+  }
+
+  const { club, isAdmin: isClubAdminActive } = await getActiveClub(supabase)
+  const clubId = targetClubId || club.id
+
+  let isAdmin = isClubAdminActive && clubId === club.id
+  if (!isAdmin) {
+    const { data: callerMember } = await supabase
+      .from('club_members')
+      .select('system_role, approval_status')
+      .eq('club_id', clubId)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    isAdmin = callerMember?.system_role === 'admin' && callerMember?.approval_status === 'aprobado'
+  }
+
+  if (!isAdmin) {
+    return { error: 'Solo los administradores del club pueden registrar evaluaciones de jugadores' }
+  }
+
+  if (user.id === targetUserId) {
+    return { error: 'No puedes autoevaluarte. La evaluación debe ser registrada por otro capitán o compañero.' }
+  }
+
+  const numericRating = Number(rating)
+  if (isNaN(numericRating) || numericRating < 1.0 || numericRating > 10.0) {
+    return { error: 'La nota debe estar entre 1.0 y 10.0' }
+  }
+
+  // Check if admin already registered a direct evaluation for this player in this club
+  const { data: existingRating } = await supabase
+    .from('match_player_ratings')
+    .select('id')
+    .eq('club_id', clubId)
+    .eq('evaluator_id', user.id)
+    .eq('evaluated_player_id', targetUserId)
+    .is('event_id', null)
+    .maybeSingle()
+
+  if (existingRating) {
+    const { error: updateErr } = await supabase
+      .from('match_player_ratings')
+      .update({
+        rating: numericRating,
+        comment: comment?.trim() || null,
+        created_at: new Date().toISOString(),
+      })
+      .eq('id', existingRating.id)
+
+    if (updateErr) {
+      return { error: `Error actualizando evaluación: ${updateErr.message}` }
+    }
+  } else {
+    const { error: insertErr } = await supabase
+      .from('match_player_ratings')
+      .insert({
+        event_id: null,
+        club_id: clubId,
+        evaluator_id: user.id,
+        evaluated_player_id: targetUserId,
+        rating: numericRating,
+        comment: comment?.trim() || null,
+      })
+
+    if (insertErr) {
+      return { error: `Error registrando evaluación: ${insertErr.message}` }
+    }
+  }
+
+  // Recalculate average rating for target player across all club ratings
+  const { data: allRatings } = await supabase
+    .from('match_player_ratings')
+    .select('rating')
+    .eq('club_id', clubId)
+    .eq('evaluated_player_id', targetUserId)
+
+  const totalCount = allRatings?.length || 0
+  const sum = allRatings?.reduce((acc, r) => acc + Number(r.rating), 0) || 0
+  const newAverage = totalCount > 0 ? Number((sum / totalCount).toFixed(1)) : numericRating
+
+  // Get current user_stats
+  const { data: currentStats } = await supabase
+    .from('user_stats')
+    .select('average_rating, match_history_ratings')
+    .eq('user_id', targetUserId)
+    .eq('club_id', clubId)
+    .maybeSingle()
+
+  const prevAvg = currentStats?.average_rating ?? null
+
+  interface RatingHistoryItem {
+    event_id?: string
+    date: string
+    rating: number
+    source?: string
+    [key: string]: string | number | undefined
+  }
+
+  const history = (currentStats?.match_history_ratings as unknown as RatingHistoryItem[]) || []
+  const historyItem: RatingHistoryItem = {
+    date: new Date().toISOString(),
+    rating: numericRating,
+    source: 'admin_eval',
+  }
+  const updatedHistory = [...history, historyItem]
+
+  await supabase
+    .from('user_stats')
+    .upsert({
+      user_id: targetUserId,
+      club_id: clubId,
+      average_rating: newAverage,
+      last_match_rating: numericRating,
+      previous_average_rating: prevAvg,
+      ratings_count: totalCount,
+      match_history_ratings: updatedHistory.slice(-10),
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id,club_id' })
+
+  // Send push notification to evaluated member
+  try {
+    await sendPushToUser(targetUserId, {
+      title: `[${club.name}] Evaluación de Jugador 📋`,
+      body: `La capitanía ha registrado una nueva evaluación de desempeño. Revisa tu ficha confidencial en tu perfil.`,
+      url: '/perfil',
+      type: 'admin',
+      clubId,
+    })
+  } catch {}
+
+  revalidatePath('/miembros')
+  revalidatePath('/perfil')
+  revalidatePath('/ranking')
+  return { success: true, newAverage, totalCount }
+}

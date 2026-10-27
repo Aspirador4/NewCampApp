@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Search, Trophy, Calendar, User, Flame, Filter, ChevronDown, X, Sparkles, Shield, UserCheck, UserX, Trash2, Check, AlertCircle, Loader2 } from 'lucide-react'
-import { approveMemberAction, rejectMemberAction, reconsiderMemberAction, deleteMemberAction, updateMemberRoleAction } from '@/app/miembros/actions'
+import { Search, Trophy, Calendar, User, Flame, Filter, ChevronDown, X, Sparkles, Shield, UserCheck, UserX, Trash2, Check, AlertCircle, Loader2, Star, Lock, Plus, Minus } from 'lucide-react'
+import { approveMemberAction, rejectMemberAction, reconsiderMemberAction, deleteMemberAction, updateMemberRoleAction, adminEvaluatePlayerAction } from '@/app/miembros/actions'
 import { SystemRole } from '@/types/database.types'
 import { EmptyState } from '@/components/EmptyState'
 import { formatBirthDate, calculateAge } from '@/utils/date'
@@ -25,6 +25,9 @@ export interface MemberItem {
     mvp_count: number
     mvp_votes_received: number
     social_events_attended: number
+    average_rating: number | null
+    last_match_rating: number | null
+    ratings_count: number
   } | null
 }
 
@@ -35,6 +38,11 @@ interface MembersDirectoryProps {
 }
 
 export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDirectoryProps) {
+  const [localMembers, setLocalMembers] = useState<MemberItem[]>(members)
+  useEffect(() => {
+    setLocalMembers(members)
+  }, [members])
+
   const [search, setSearch] = useState('')
   const [selectedPosition, setSelectedPosition] = useState<string>('todos')
   const [activeMember, setActiveMember] = useState<MemberItem | null>(null)
@@ -42,11 +50,95 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
+  // Admin player evaluation modal
+  const [evaluatingMember, setEvaluatingMember] = useState<MemberItem | null>(null)
+  const [evalRating, setEvalRating] = useState<number>(7.0)
+  const [evalComment, setEvalComment] = useState<string>('')
+  const [evalLoading, setEvalLoading] = useState(false)
+  const [evalError, setEvalError] = useState<string | null>(null)
+
+  const getRatingLabel = (r: number) => {
+    if (r >= 9.0) return 'Clase Mundial / Élite 🌟'
+    if (r >= 8.0) return 'Muy Destacado 🔥'
+    if (r >= 7.0) return 'Rendimiento Sólido ⚽'
+    if (r >= 6.0) return 'Nivel Competitivo 👍'
+    if (r >= 5.0) return 'En Desarrollo 🏃'
+    return 'Calibración Inicial 📋'
+  }
+
+  const handleSaveEvaluation = async () => {
+    if (!evaluatingMember) return
+    setEvalLoading(true)
+    setEvalError(null)
+
+    const res = await adminEvaluatePlayerAction(
+      evaluatingMember.id,
+      evalRating,
+      evalComment
+    )
+    setEvalLoading(false)
+
+    if (res?.error) {
+      setEvalError(res.error)
+    } else {
+      const newAvg = res.newAverage ?? evalRating
+      const newCount = res.totalCount ?? ((evaluatingMember.stats?.ratings_count || 0) + 1)
+
+      setLocalMembers((prev) =>
+        prev.map((m) =>
+          m.id === evaluatingMember.id
+            ? {
+                ...m,
+                stats: m.stats
+                  ? {
+                      ...m.stats,
+                      average_rating: newAvg,
+                      last_match_rating: evalRating,
+                      ratings_count: newCount,
+                    }
+                  : {
+                      matches_played: 0,
+                      mvp_count: 0,
+                      mvp_votes_received: 0,
+                      social_events_attended: 0,
+                      average_rating: newAvg,
+                      last_match_rating: evalRating,
+                      ratings_count: newCount,
+                    },
+              }
+            : m
+        )
+      )
+
+      if (activeMember?.id === evaluatingMember.id) {
+        setActiveMember((prev) =>
+          prev
+            ? {
+                ...prev,
+                stats: prev.stats
+                  ? {
+                      ...prev.stats,
+                      average_rating: newAvg,
+                      last_match_rating: evalRating,
+                      ratings_count: newCount,
+                    }
+                  : null,
+              }
+            : null
+        )
+      }
+
+      setSuccessMsg(`Evaluación de ${evaluatingMember.full_name} guardada (${newAvg}/10).`)
+      setEvaluatingMember(null)
+      setTimeout(() => setSuccessMsg(null), 4000)
+    }
+  }
+
   const positions = ['todos', 'Arquero', 'Defensor', 'Mediocampista', 'Delantero']
 
-  const pendingMembers = members.filter((m) => m.approval_status === 'pendiente')
-  const approvedMembers = members.filter((m) => m.approval_status === 'aprobado')
-  const rejectedMembers = members.filter((m) => m.approval_status === 'rechazado')
+  const pendingMembers = localMembers.filter((m) => m.approval_status === 'pendiente')
+  const approvedMembers = localMembers.filter((m) => m.approval_status === 'aprobado')
+  const rejectedMembers = localMembers.filter((m) => m.approval_status === 'rechazado')
   const [showRejected, setShowRejected] = useState(false)
 
   const displayedList = approvedMembers
@@ -356,6 +448,9 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
               mvp_count: 0,
               mvp_votes_received: 0,
               social_events_attended: 0,
+              average_rating: null,
+              last_match_rating: null,
+              ratings_count: 0,
             }
             const positionsArr = Array.isArray(member.custom_attributes?.posicion)
               ? (member.custom_attributes.posicion as string[])
@@ -424,8 +519,32 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                 </div>
 
                 {/* Stats badges */}
-                <div className="flex items-center gap-2 text-right flex-shrink-0 pl-1">
-                  <div className="bg-amber-50 dark:bg-amber-950/40 border-2 border-neutral-900 dark:border-neutral-700 px-2 py-1 rounded-xl text-center min-w-[44px] shadow-tactile-sm">
+                <div className="flex items-center gap-1.5 text-right flex-shrink-0 pl-1">
+                  {/* Rating badge */}
+                  <div
+                    onClick={(e) => {
+                      if (isAdmin && member.id !== currentUserId) {
+                        e.stopPropagation()
+                        setEvalRating(stats.average_rating ? Number(stats.average_rating) : 7.0)
+                        setEvalComment('')
+                        setEvalError(null)
+                        setEvaluatingMember(member)
+                      }
+                    }}
+                    className={`border-2 border-neutral-900 dark:border-neutral-700 px-2 py-1 rounded-xl text-center min-w-[42px] shadow-tactile-sm transition ${
+                      isAdmin && member.id !== currentUserId
+                        ? 'hover:scale-105 cursor-pointer bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/60'
+                        : 'bg-purple-50 dark:bg-purple-950/40'
+                    }`}
+                    title={isAdmin && member.id !== currentUserId ? 'Click para evaluar nota de jugador' : 'Nota de rendimiento'}
+                  >
+                    <span className="font-display font-bold text-sm text-purple-900 dark:text-purple-300 block leading-none">
+                      {stats.average_rating ? Number(stats.average_rating).toFixed(1) : '—'}
+                    </span>
+                    <span className="font-mono text-[8px] font-bold text-purple-800 dark:text-purple-400 uppercase block mt-0.5">Nota</span>
+                  </div>
+
+                  <div className="bg-amber-50 dark:bg-amber-950/40 border-2 border-neutral-900 dark:border-neutral-700 px-2 py-1 rounded-xl text-center min-w-[42px] shadow-tactile-sm">
                     <div className="flex items-center justify-center gap-0.5 text-amber-700 dark:text-amber-400 font-display font-bold text-sm leading-none">
                       <Trophy className="w-3 h-3 stroke-[2.5]" />
                       <span>{stats.mvp_count}</span>
@@ -433,7 +552,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                     <span className="font-mono text-[8px] font-bold text-amber-800 dark:text-amber-300 uppercase block mt-0.5">MVP</span>
                   </div>
 
-                  <div className="bg-neutral-100 dark:bg-neutral-800 border-2 border-neutral-900 dark:border-neutral-700 px-2 py-1 rounded-xl text-center min-w-[44px] shadow-tactile-sm">
+                  <div className="bg-neutral-100 dark:bg-neutral-800 border-2 border-neutral-900 dark:border-neutral-700 px-2 py-1 rounded-xl text-center min-w-[42px] shadow-tactile-sm">
                     <span className="font-display font-bold text-sm text-neutral-900 dark:text-white block leading-none">
                       {stats.matches_played}
                     </span>
@@ -534,6 +653,51 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                   {activeMember.stats?.social_events_attended || 0}
                 </span>
                 <span className="font-mono text-[10px] font-semibold tracking-wider uppercase text-purple-800 dark:text-purple-300">Juntadas</span>
+              </div>
+            </div>
+
+            {/* Athletic Rating & Admin Evaluation Card */}
+            <div className="pt-2 border-t-2 border-neutral-900/10 dark:border-white/10 space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="font-display font-bold uppercase tracking-wider text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
+                  <Star className="w-3.5 h-3.5 text-amber-500 fill-current" />
+                  <span>Rendimiento Deportivo</span>
+                </h4>
+                <span className="flex items-center gap-1 text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border border-neutral-300 dark:border-neutral-700">
+                  <Lock className="w-2.5 h-2.5 stroke-[2.5]" />
+                  <span>CONFIDENCIAL</span>
+                </span>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700 flex items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="font-display font-black text-2xl text-neutral-950 dark:text-white">
+                      {activeMember.stats?.average_rating ? Number(activeMember.stats.average_rating).toFixed(1) : '—'}
+                    </span>
+                    <span className="font-mono text-xs text-neutral-400">/ 10</span>
+                  </div>
+                  <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 mt-0.5">
+                    {activeMember.stats?.ratings_count || 0} {(activeMember.stats?.ratings_count || 0) === 1 ? 'evaluación registrada' : 'evaluaciones registradas'}
+                    {activeMember.stats?.last_match_rating ? ` • Última: ${Number(activeMember.stats.last_match_rating).toFixed(1)}` : ''}
+                  </p>
+                </div>
+
+                {isAdmin && activeMember.id !== currentUserId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEvalRating(activeMember.stats?.average_rating ? Number(activeMember.stats.average_rating) : 7.0)
+                      setEvalComment('')
+                      setEvalError(null)
+                      setEvaluatingMember(activeMember)
+                    }}
+                    className="btn-tactile min-h-[38px] px-3.5 py-1.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-amber-400 hover:bg-amber-300 text-neutral-950 font-display font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-tactile-sm transition active:scale-95"
+                  >
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                    <span>{activeMember.stats?.average_rating ? 'Editar Nota' : 'Calificar'}</span>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -663,6 +827,167 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
             >
               Cerrar Ficha
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Admin Player Evaluation Modal */}
+      {evaluatingMember && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950/80 backdrop-blur-xs p-4">
+          <div className="bg-white dark:bg-[#14161f] w-full max-w-sm rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile p-5 space-y-4 animate-in zoom-in-95 duration-150 relative">
+            <button
+              type="button"
+              onClick={() => setEvaluatingMember(null)}
+              className="btn-tactile absolute top-4 right-4 w-8 h-8 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex items-center justify-center"
+              aria-label="Cerrar modal de evaluación"
+            >
+              <X className="w-4 h-4 stroke-[2.5]" />
+            </button>
+
+            {/* Header */}
+            <div className="flex items-center gap-3 pt-1">
+              <div className="w-12 h-12 rounded-xl overflow-hidden bg-neutral-900 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex items-center justify-center relative flex-shrink-0 text-white">
+                {evaluatingMember.avatar_url ? (
+                  <Image
+                    src={evaluatingMember.avatar_url}
+                    alt={evaluatingMember.full_name}
+                    fill
+                    className="object-cover"
+                    sizes="48px"
+                  />
+                ) : (
+                  <span className="font-display font-bold text-lg text-white">
+                    {evaluatingMember.full_name.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div className="min-w-0 pr-8">
+                <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block">
+                  Evaluación de Capitanía
+                </span>
+                <h3 className="font-display font-bold text-base uppercase text-neutral-950 dark:text-white truncate leading-tight">
+                  {evaluatingMember.full_name}
+                </h3>
+              </div>
+            </div>
+
+            {/* Big Grade Dial & Steppers */}
+            <div className="p-4 rounded-2xl bg-neutral-100 dark:bg-[#1a1d28] border-2 border-neutral-900 dark:border-neutral-700 text-center">
+              <span className="font-mono text-[10px] uppercase font-bold text-neutral-500 dark:text-neutral-400 block">
+                Nota de Desempeño (1 - 10)
+              </span>
+
+              <div className="flex items-center justify-center gap-4 my-2">
+                <button
+                  type="button"
+                  onClick={() => setEvalRating((prev) => Math.max(1.0, Number((prev - 0.5).toFixed(1))))}
+                  className="w-10 h-10 rounded-xl bg-white dark:bg-neutral-800 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm font-display font-black text-lg text-neutral-950 dark:text-white flex items-center justify-center active:scale-90 transition"
+                  title="Restar 0.5"
+                >
+                  <Minus className="w-4 h-4 stroke-[3]" />
+                </button>
+
+                <div className="flex items-baseline gap-1">
+                  <span className="font-display font-black text-4xl text-neutral-950 dark:text-white">
+                    {evalRating.toFixed(1)}
+                  </span>
+                  <span className="font-mono text-sm text-neutral-400">/10</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setEvalRating((prev) => Math.min(10.0, Number((prev + 0.5).toFixed(1))))}
+                  className="w-10 h-10 rounded-xl bg-white dark:bg-neutral-800 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm font-display font-black text-lg text-neutral-950 dark:text-white flex items-center justify-center active:scale-90 transition"
+                  title="Sumar 0.5"
+                >
+                  <Plus className="w-4 h-4 stroke-[3]" />
+                </button>
+              </div>
+
+              {/* Tier Label */}
+              <span className="font-mono text-[11px] font-bold text-amber-700 dark:text-amber-400 block">
+                {getRatingLabel(evalRating)}
+              </span>
+
+              {/* Slider for smooth dragging */}
+              <input
+                type="range"
+                min="1.0"
+                max="10.0"
+                step="0.5"
+                value={evalRating}
+                onChange={(e) => setEvalRating(Number(e.target.value))}
+                className="w-full mt-3 accent-amber-500 cursor-pointer"
+              />
+
+              {/* Quick Presets */}
+              <div className="flex items-center justify-between gap-1 mt-2.5">
+                {[5.0, 6.0, 7.0, 8.0, 9.0, 10.0].map((val) => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => setEvalRating(val)}
+                    className={`flex-1 py-1 rounded-lg text-[10px] font-mono font-bold transition ${
+                      evalRating === val
+                        ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950'
+                        : 'bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border border-neutral-300 dark:border-neutral-700'
+                    }`}
+                  >
+                    {val.toFixed(0)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Optional Comment Input */}
+            <div className="space-y-1">
+              <label className="font-mono text-[10px] uppercase font-bold text-neutral-600 dark:text-neutral-400 block">
+                Observación de Capitanía (Opcional)
+              </label>
+              <textarea
+                value={evalComment}
+                onChange={(e) => setEvalComment(e.target.value)}
+                placeholder="Ej: Buena visión, marca sólida, ágil con los pies..."
+                rows={2}
+                maxLength={200}
+                className="w-full p-2.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-950 dark:text-white text-xs font-sans focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
+              />
+            </div>
+
+            {/* Confidentiality Callout */}
+            <p className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 leading-tight">
+              🔒 Visible solo para el socio y capitanes. El algoritmo usará esta nota para auto-equilibrar los equipos 1-3-2-1.
+            </p>
+
+            {evalError && (
+              <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 text-xs text-rose-800 dark:text-rose-300 flex items-center gap-1.5">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <span>{evalError}</span>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setEvaluatingMember(null)}
+                className="btn-tactile flex-1 py-2 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 text-neutral-800 dark:text-neutral-200 font-display font-bold text-xs uppercase tracking-wider"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveEvaluation}
+                disabled={evalLoading}
+                className="btn-tactile flex-1 py-2 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-amber-400 hover:bg-amber-300 text-neutral-950 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
+              >
+                {evalLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Check className="w-4 h-4 stroke-[3]" />
+                )}
+                <span>Guardar Nota</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

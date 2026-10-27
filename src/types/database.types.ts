@@ -901,29 +901,32 @@ export interface Database {
       match_player_ratings: {
         Row: {
           id: string
-          event_id: string
+          event_id: string | null
           club_id: string
           evaluator_id: string
           evaluated_player_id: string
           rating: number
+          comment: string | null
           created_at: string
         }
         Insert: {
           id?: string
-          event_id: string
+          event_id?: string | null
           club_id: string
           evaluator_id: string
           evaluated_player_id: string
           rating: number
+          comment?: string | null
           created_at?: string
         }
         Update: {
           id?: string
-          event_id?: string
+          event_id?: string | null
           club_id?: string
           evaluator_id?: string
           evaluated_player_id?: string
           rating?: number
+          comment?: string | null
           created_at?: string
         }
         Relationships: [
