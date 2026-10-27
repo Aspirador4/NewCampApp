@@ -45,3 +45,38 @@ La pantalla móvil de ranking expone dos vistas clave:
 - **Ranking MVP**: Clasificación ordenada por `mvp_count DESC`, desempate por `mvp_votes_received DESC`, y luego por `matches_played DESC`.
 - **Más Presencias**: Reconocimiento a los socios con mayor compromiso de asistencia (`matches_played DESC`).
 - **Podio Mobile**: Diseño con los puestos #1 (Oro), #2 (Plata) y #3 (Bronce).
+
+---
+
+## 3. Planillero en Vivo, Marcador Realtime y Gráficas de Redes
+
+A partir de la versión v2.5+, se incorporó el ecosistema integral de seguimiento de partidos a pie de cancha inspirado en la dinámica de fútbol amateur:
+
+### A. Consola "Planillero en Vivo" (`LiveMatchTrackerModal.tsx`)
+* **Control de Acceso Estricto**: Únicamente accesible por administradores de club aprobados o por el creador del evento (`canManageEvent = isAdmin || isCreator`).
+* **Cronómetro Persistente con Delta Real**: Almacena el timestamp de inicio (`startedAt`) y tiempo acumulado en `localStorage`. Si el celular del planillero se bloquea o apaga la pantalla, el tiempo transcurrido no se desajusta ni se reinicia. Incluye controles de inicio/pausa, reinicio y salto rápido de **+1 minuto**.
+* **Marcaje Táctil de Acciones**:
+  * Botones rápidos (+ / −) por cada jugador para **Goles (⚽)**, **Asistencias (🎯)** y **Atajadas (🧤)** (con resalte en los arqueros).
+  * Al marcar un gol, el marcador del equipo se actualiza inmediatamente en pantalla y emite vibración háptica en smartphones compatibles.
+* **Línea de Tiempo y Botón Deshacer (Undo)**:
+  * Bitácora cronológica con minuto y descripción (ej. `14:20 ⚽ Gol de Chochi (Equipo Blanco)`).
+  * Botón **"↩ Deshacer"** que revierte el último evento, restando la métrica y reajustando el marcador al instante.
+* **Sincronización en Vivo y Resumen WhatsApp**:
+  * **"Sincronizar en Vivo"**: Persiste los goles en `event_teams` y dispara el evento de transmisión en tiempo real.
+  * **"Copiar para WhatsApp"**: Genera el reporte formateado con emojis listo para enviar al grupo de chat del club.
+  * **"Finalizar Partido"**: Guarda el marcador oficial, computa las estadísticas de jugadores en `user_stats`, marca el estado del partido como `finalizado` y activa la votación del MVP.
+
+### B. Marcador en Vivo para Miembros (Supabase Realtime)
+* Configurado a través de `EventRealtimeListener.tsx` y `MatchTeamsView.tsx`.
+* Cualquier miembro o espectador que consulte `/eventos/[id]` mientras el partido está en juego observará una insignia pulsante **`🔴 EN VIVO`** y verá cómo los números del marcador cambian automáticamente en tiempo real sin necesidad de refrescar la página.
+
+### C. Generador de Gráficas para Redes (`MatchGraphicModal.tsx`)
+* Motor de renderizado en **Canvas HTML5** accesible para todos los socios del club:
+  * **Modo Nómina (Pre-partido)**: Alineación visual de ambas escuadras con nombres, dorsales, posiciones, fecha y cancha.
+  * **Modo Resultado (Post-partido)**: Marcador final destacado, escudos y listado detallado de goleadores.
+* **Formatos Nativos**:
+  * **Historia de Instagram**: 1080 × 1920 px (9:16 vertical).
+  * **Post / Feed**: 1080 × 1080 px (1:1 cuadrado).
+* **Exportación**:
+  * Descarga directa en archivo **PNG**.
+  * Botón **Compartir** que activa el diálogo nativo del sistema operativo móvil (`navigator.share`) para subir directamente a Instagram Stories o WhatsApp.

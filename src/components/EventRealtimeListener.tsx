@@ -53,6 +53,33 @@ export function EventRealtimeListener({ eventId }: EventRealtimeListenerProps) {
           router.refresh()
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'event_teams',
+          filter: `event_id=eq.${eventId}`,
+        },
+        () => {
+          router.refresh()
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'event_team_players',
+          filter: `event_id=eq.${eventId}`,
+        },
+        () => {
+          router.refresh()
+        }
+      )
+      .on('broadcast', { event: 'score-update' }, () => {
+        router.refresh()
+      })
       .subscribe()
 
     return () => {

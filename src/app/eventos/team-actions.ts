@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
 import { sendPushToUser } from '@/app/api/push/actions'
 import { closeMvpVoting } from '@/app/eventos/mvp-actions'
+import { EventStatus } from '@/types/database.types'
 
 export interface TeamDraftPayload {
   name: string
@@ -137,6 +138,103 @@ export interface PlayerStatPayload {
   assists: number
   saves: number
   ownGoals: number
+}
+
+/**
+ * Updates match score and live status in real time (for the live match console).
+ * Only admins or event creators can execute this.
+ */
+export async function updateLiveScoreAction(
+  eventId: string,
+  teamScores: { teamId: string; score: number }[],
+  playerStats?: PlayerStatPayload[],
+  isMatchLive: boolean = true
+) {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: 'Debes iniciar sesión' }
+  }
+
+  const { data: event, error: eventErr } = await supabase
+    .from('events')
+    .select('id, club_id, created_by, status')
+    .eq('id', eventId)
+    .single()
+
+  if (eventErr || !event) {
+    return { error: 'Evento no encontrado' }
+  }
+
+  const { data: member } = await supabase
+    .from('club_members')
+    .select('system_role, approval_status')
+    .eq('club_id', event.club_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  const isAdmin = member?.system_role === 'admin' && member?.approval_status === 'aprobado'
+  const isCreator = event.created_by === user.id
+
+  if (!isAdmin && !isCreator) {
+    return { error: 'Solo el creador o un administrador pueden actualizar el marcador' }
+  }
+
+  // 1. Update scores on event_teams
+  for (const ts of teamScores) {
+    await supabase
+      .from('event_teams')
+      .update({ score: ts.score })
+      .eq('id', ts.teamId)
+  }
+
+  // 2. Optionally update player stats if provided
+  if (playerStats && playerStats.length > 0) {
+    for (const ps of playerStats) {
+      const isGuest = ps.userId.startsWith('guest_')
+      if (isGuest) {
+        const guestId = ps.userId.replace('guest_', '')
+        await supabase
+          .from('event_team_players')
+          .update({
+            goals: ps.goals || 0,
+            assists: ps.assists || 0,
+            saves: ps.saves || 0,
+            own_goals: ps.ownGoals || 0,
+          })
+          .eq('event_id', eventId)
+          .eq('guest_id', guestId)
+      } else {
+        await supabase
+          .from('event_team_players')
+          .update({
+            goals: ps.goals || 0,
+            assists: ps.assists || 0,
+            saves: ps.saves || 0,
+            own_goals: ps.ownGoals || 0,
+          })
+          .eq('event_id', eventId)
+          .eq('user_id', ps.userId)
+      }
+    }
+  }
+
+  // 3. Mark event status as 'en_curso' if it's currently 'convocado'
+  const updateFields: { updated_at: string; status?: EventStatus } = {
+    updated_at: new Date().toISOString(),
+  }
+  if (isMatchLive && event.status === 'convocado') {
+    updateFields.status = 'en_curso'
+  }
+
+  await supabase
+    .from('events')
+    .update(updateFields)
+    .eq('id', eventId)
+
+  revalidatePath(`/eventos/${eventId}`)
+  return { success: true }
 }
 
 /**

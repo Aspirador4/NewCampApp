@@ -107,7 +107,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
   // Fetch club settings (for timezone, etc.)
   const { data: eventClub } = await supabase
     .from('clubs')
-    .select('settings')
+    .select('id, name, logo_url, settings')
     .eq('id', event.club_id)
     .maybeSingle()
 
@@ -876,6 +876,11 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             candidates={teamCandidates}
             eventStatus={event.status}
             resultRecorded={Boolean(event.result_recorded)}
+            eventTitle={event.title}
+            eventDate={formatEventDate(event.start_time)}
+            eventLocation={event.location}
+            clubName={eventClub?.name || "CAMPANARIO'S OLD BOYS"}
+            clubLogo={eventClub?.logo_url || null}
           />
         </div>
       )}

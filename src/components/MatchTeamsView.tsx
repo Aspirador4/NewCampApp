@@ -1,10 +1,21 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
-import { User, Users, Edit3, Trophy } from 'lucide-react'
+import {
+  User,
+  Users,
+  Edit3,
+  Trophy,
+  Clock,
+  Radio,
+  Sparkles,
+} from 'lucide-react'
 import { TeamBuilderModal, TeamCandidatePlayer } from '@/components/TeamBuilderModal'
 import { MatchResultModal } from '@/components/MatchResultModal'
+import { LiveMatchTrackerModal, LiveMatchTeam } from '@/components/LiveMatchTrackerModal'
+import { MatchGraphicModal } from '@/components/MatchGraphicModal'
+import { createClient } from '@/utils/supabase/client'
 
 export interface TeamPlayerView {
   userId: string
@@ -33,6 +44,11 @@ interface MatchTeamsViewProps {
   candidates: TeamCandidatePlayer[]
   eventStatus?: string
   resultRecorded?: boolean
+  eventTitle?: string
+  eventDate?: string
+  eventLocation?: string
+  clubName?: string
+  clubLogo?: string | null
 }
 
 export function MatchTeamsView({
@@ -43,9 +59,58 @@ export function MatchTeamsView({
   candidates,
   eventStatus = 'convocado',
   resultRecorded = false,
+  eventTitle = 'Partido Oficial',
+  eventDate,
+  eventLocation,
+  clubName = "CAMPANARIO'S OLD BOYS",
+  clubLogo,
 }: MatchTeamsViewProps) {
   const [isBuilderOpen, setIsBuilderOpen] = useState(false)
   const [isResultOpen, setIsResultOpen] = useState(false)
+  const [isTrackerOpen, setIsTrackerOpen] = useState(false)
+  const [isGraphicOpen, setIsGraphicOpen] = useState(false)
+
+  // Real-time optimistic score state
+  const [liveScores, setLiveScores] = useState<Record<string, number>>(() => {
+    const map: Record<string, number> = {}
+    teams?.forEach((t) => {
+      map[t.id] = t.score ?? 0
+    })
+    return map
+  })
+
+  // Sync state if teams prop updates from server
+  useEffect(() => {
+    const map: Record<string, number> = {}
+    teams?.forEach((t) => {
+      map[t.id] = t.score ?? 0
+    })
+    setLiveScores(map)
+  }, [teams])
+
+  // Listen for broadcast score updates in real-time
+  const supabase = useMemo(() => createClient(), [])
+  useEffect(() => {
+    const channel = supabase
+      .channel(`event-realtime-${eventId}`)
+      .on(
+        'broadcast',
+        { event: 'score-update' },
+        (payload: { payload?: { scores?: Record<string, number> } }) => {
+          if (payload?.payload?.scores) {
+            setLiveScores((prev) => ({
+              ...prev,
+              ...payload.payload?.scores,
+            }))
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [eventId, supabase])
 
   if (!teams || teams.length === 0) {
     if (!canManage) return null
@@ -94,11 +159,11 @@ export function MatchTeamsView({
     players: t.players.map((p) => ({ userId: p.userId, position: p.position })),
   }))
 
-  const teamsWithPlayers = teams.map((t) => ({
+  const teamsWithPlayers: LiveMatchTeam[] = teams.map((t) => ({
     id: t.id,
     name: t.name,
     color: t.color,
-    score: t.score,
+    score: liveScores[t.id] ?? t.score,
     players: t.players.map((p) => ({
       userId: p.userId,
       fullName: p.fullName,
@@ -110,6 +175,14 @@ export function MatchTeamsView({
       ownGoals: p.ownGoals,
     })),
   }))
+
+  const hasRecordedScore =
+    (team1?.score !== null && team2?.score !== null && team1?.score !== undefined && team2?.score !== undefined) ||
+    eventStatus === 'en_curso' ||
+    resultRecorded
+
+  const score1 = liveScores[team1?.id || ''] ?? team1?.score ?? 0
+  const score2 = liveScores[team2?.id || ''] ?? team2?.score ?? 0
 
   return (
     <div className="bg-neutral-950 text-white rounded-3xl p-4 sm:p-5 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile space-y-4">
@@ -129,6 +202,12 @@ export function MatchTeamsView({
                   Borrador Admin
                 </span>
               )}
+              {eventStatus === 'en_curso' && (
+                <span className="flex items-center gap-1 font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse">
+                  <Radio className="w-2.5 h-2.5" />
+                  En Vivo
+                </span>
+              )}
               {resultRecorded && (
                 <span className="font-mono text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                   Resultado Oficial ✓
@@ -141,51 +220,98 @@ export function MatchTeamsView({
           </div>
         </div>
 
-        {canManage && (
-          <div className="flex items-center gap-2">
-            {(eventStatus === 'finalizado' || eventStatus === 'en_curso') && (
+        {/* Action Controls */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Social Graphic Generator (Available to all) */}
+          <button
+            type="button"
+            onClick={() => setIsGraphicOpen(true)}
+            className="py-1.5 px-3 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 font-display font-bold text-xs uppercase flex items-center gap-1.5 transition active:scale-95 shadow-tactile-sm"
+            title="Generar placa para Instagram"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <span>Gráfica Redes</span>
+          </button>
+
+          {canManage && (
+            <>
+              {/* Live Match Tracker (Only for Admin / Creator) */}
               <button
                 type="button"
-                onClick={() => setIsResultOpen(true)}
-                className="btn-tactile py-1.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-neutral-950 font-display font-bold text-xs uppercase flex items-center gap-1.5 shadow-tactile-sm"
+                onClick={() => setIsTrackerOpen(true)}
+                className={`btn-tactile py-1.5 px-3 rounded-xl font-display font-bold text-xs uppercase flex items-center gap-1.5 shadow-tactile-sm transition active:scale-95 ${
+                  eventStatus === 'en_curso'
+                    ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse'
+                    : 'bg-amber-500 hover:bg-amber-600 text-neutral-950'
+                }`}
+                title="Abrir cronómetro y registro en vivo"
               >
-                <Trophy className="w-3.5 h-3.5" />
-                <span>{resultRecorded ? 'Editar Resultado' : 'Cargar Resultado'}</span>
+                <Clock className="w-3.5 h-3.5" />
+                <span>{eventStatus === 'en_curso' ? 'Planillero Activo' : 'Planillero en Vivo'}</span>
               </button>
-            )}
 
-            <button
-              type="button"
-              onClick={() => setIsBuilderOpen(true)}
-              className="btn-tactile py-1.5 px-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white font-display font-bold text-xs uppercase flex items-center gap-1.5 border border-neutral-700 shadow-tactile-sm"
-            >
-              <Edit3 className="w-3.5 h-3.5" />
-              <span>Editar Equipos</span>
-            </button>
-          </div>
-        )}
+              {/* Edit Result manual modal (when match finished) */}
+              {(eventStatus === 'finalizado' || resultRecorded) && (
+                <button
+                  type="button"
+                  onClick={() => setIsResultOpen(true)}
+                  className="py-1.5 px-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-display font-bold text-xs uppercase flex items-center gap-1.5 border border-neutral-700 shadow-tactile-sm transition active:scale-95"
+                >
+                  <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Editar Ficha</span>
+                </button>
+              )}
+
+              {/* Edit Teams builder */}
+              {!resultRecorded && (
+                <button
+                  type="button"
+                  onClick={() => setIsBuilderOpen(true)}
+                  className="py-1.5 px-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white font-display font-bold text-xs uppercase flex items-center gap-1.5 border border-neutral-700 shadow-tactile-sm transition active:scale-95"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>Editar Equipos</span>
+                </button>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Match Scoreboard header if scores recorded */}
-      {(team1?.score !== null && team2?.score !== null && team1?.score !== undefined && team2?.score !== undefined) && (
-        <div className="bg-neutral-900 p-3 rounded-2xl border border-neutral-800 flex items-center justify-center gap-6 text-center">
+      {/* Match Scoreboard banner */}
+      {hasRecordedScore && (
+        <div className="bg-neutral-900/95 p-3.5 rounded-2xl border border-neutral-800 flex items-center justify-center gap-6 text-center relative overflow-hidden">
+          {eventStatus === 'en_curso' && (
+            <div className="absolute top-2 right-3 flex items-center gap-1 text-[9px] font-mono text-red-400 font-bold uppercase">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+              Directo
+            </div>
+          )}
+
           <div className="min-w-0">
-            <span className="font-display font-bold text-xs uppercase text-neutral-300 block truncate">
-              {team1.name}
+            <span className="font-display font-bold text-xs uppercase text-neutral-300 block truncate max-w-[130px]">
+              {team1?.name}
             </span>
-            <span className="font-display font-bold text-3xl text-white">
-              {team1.score}
+            <span className="font-display font-extrabold text-3xl sm:text-4xl text-white">
+              {score1}
             </span>
           </div>
 
-          <span className="font-mono text-xs text-neutral-500 font-bold">VS</span>
+          <div className="flex flex-col items-center">
+            <span className="font-mono text-xs text-neutral-500 font-bold">VS</span>
+            {eventStatus === 'en_curso' && (
+              <span className="font-mono text-[9px] text-amber-400 uppercase font-bold">
+                EN JUEGO
+              </span>
+            )}
+          </div>
 
           <div className="min-w-0">
-            <span className="font-display font-bold text-xs uppercase text-neutral-300 block truncate">
-              {team2.name}
+            <span className="font-display font-bold text-xs uppercase text-neutral-300 block truncate max-w-[130px]">
+              {team2?.name}
             </span>
-            <span className="font-display font-bold text-3xl text-white">
-              {team2.score}
+            <span className="font-display font-extrabold text-3xl sm:text-4xl text-white">
+              {score2}
             </span>
           </div>
         </div>
@@ -254,6 +380,7 @@ export function MatchTeamsView({
         ))}
       </div>
 
+      {/* Team Builder Modal */}
       <TeamBuilderModal
         eventId={eventId}
         isOpen={isBuilderOpen}
@@ -263,11 +390,36 @@ export function MatchTeamsView({
         isPublished={isPublished}
       />
 
+      {/* Manual Match Result Modal */}
       <MatchResultModal
         eventId={eventId}
         isOpen={isResultOpen}
         onClose={() => setIsResultOpen(false)}
         teams={teamsWithPlayers}
+      />
+
+      {/* Live Match Planillero Modal */}
+      <LiveMatchTrackerModal
+        eventId={eventId}
+        eventTitle={eventTitle}
+        eventDate={eventDate}
+        eventLocation={eventLocation}
+        isOpen={isTrackerOpen}
+        onClose={() => setIsTrackerOpen(false)}
+        teams={teamsWithPlayers}
+      />
+
+      {/* Canvas Social Graphic Modal */}
+      <MatchGraphicModal
+        isOpen={isGraphicOpen}
+        onClose={() => setIsGraphicOpen(false)}
+        eventTitle={eventTitle}
+        eventDate={eventDate}
+        eventLocation={eventLocation}
+        clubName={clubName}
+        clubLogo={clubLogo}
+        teams={teamsWithPlayers}
+        resultRecorded={resultRecorded}
       />
     </div>
   )
