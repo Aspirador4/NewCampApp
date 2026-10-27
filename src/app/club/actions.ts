@@ -305,3 +305,47 @@ export async function switchClubAction(clubId: string) {
   revalidatePath('/', 'layout')
   return { success: true }
 }
+
+export async function uploadClubLogoAction(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: 'Debes iniciar sesión para subir una imagen' }
+  }
+
+  const file = formData.get('logo') as File
+  if (!file || file.size === 0) {
+    return { error: 'No se seleccionó ningún archivo' }
+  }
+
+  // 5MB limit
+  if (file.size > 5 * 1024 * 1024) {
+    return { error: 'La imagen no debe superar los 5MB' }
+  }
+
+  const fileExt = file.name.split('.').pop()?.toLowerCase() || 'png'
+  const allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'svg']
+  if (!allowedExts.includes(fileExt)) {
+    return { error: 'Formato no soportado. Usa JPG, PNG, WebP o SVG.' }
+  }
+
+  const filePath = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('club-logos')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: true,
+    })
+
+  if (uploadError) {
+    return { error: `Error al subir la imagen: ${uploadError.message}` }
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('club-logos')
+    .getPublicUrl(filePath)
+
+  return { success: true, logoUrl: publicUrl }
+}

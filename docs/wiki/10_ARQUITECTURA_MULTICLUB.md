@@ -67,6 +67,11 @@ CREATE TABLE public.club_members (
 - **Navegación**:
   - Selector accesible en la cabecera móvil (`ClubSwitcher`).
   - Creación de nuevo club en `/club/nuevo`. El creador pasa a ser el primer `admin` de forma automática.
+  - **Carga de Escudo / Emblema**:
+    - Admite subida directa de archivos (PNG, JPG, WebP, SVG hasta 5MB) alojados en el bucket público `club-logos` en Supabase Storage.
+    - Compresión optimizada en el cliente antes de la subida para ahorrar ancho de banda.
+    - Soporte híbrido para enlazar una URL web externa si el escudo ya se encuentra alojado online.
+    - Tarjeta táctil de vista previa en tiempo real con las iniciales o el logo sobre el degradado de la paleta seleccionada.
   - Exploración y admisión en `/club/unirse` y `/club/unirse/[slug]`.
 
 ---
