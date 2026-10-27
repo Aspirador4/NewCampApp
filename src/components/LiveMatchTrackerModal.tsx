@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import Image from 'next/image'
 import {
   X,
@@ -123,6 +123,16 @@ export function LiveMatchTrackerModal({
 
   // Supabase client for realtime broadcast
   const supabase = useMemo(() => createClient(), [])
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
+
+  useEffect(() => {
+    const ch = supabase.channel(`match-broadcast-${eventId}`)
+    ch.subscribe()
+    channelRef.current = ch
+    return () => {
+      supabase.removeChannel(ch)
+    }
+  }, [eventId, supabase])
 
   const showToast = useCallback((msg: string) => {
     setToastMessage(msg)
@@ -130,6 +140,41 @@ export function LiveMatchTrackerModal({
       setToastMessage((cur) => (cur === msg ? null : cur))
     }, 2200)
   }, [])
+
+  // Auto-sync helper to write live score & set teams_published + en_curso in Supabase
+  const autoSyncDatabase = useCallback(
+    async (
+      currentScores: Record<string, number>,
+      currentStats: Record<string, { goals: number; assists: number; saves: number; ownGoals: number }>
+    ) => {
+      try {
+        const teamScoresPayload = teams.map((t) => ({
+          teamId: t.id,
+          score: currentScores[t.id] ?? 0,
+        }))
+
+        const playerStatsPayload: PlayerStatPayload[] = []
+        teams.forEach((t) => {
+          t.players.forEach((p) => {
+            const st = currentStats[p.userId] || { goals: 0, assists: 0, saves: 0, ownGoals: 0 }
+            playerStatsPayload.push({
+              userId: p.userId,
+              teamId: t.id,
+              goals: st.goals,
+              assists: st.assists,
+              saves: st.saves,
+              ownGoals: st.ownGoals,
+            })
+          })
+        })
+
+        await updateLiveScoreAction(eventId, teamScoresPayload, playerStatsPayload, true)
+      } catch (err) {
+        console.warn('Auto-sync live match error:', err)
+      }
+    },
+    [eventId, teams]
+  )
 
   // 1. Load from localStorage when opened
   useEffect(() => {
@@ -209,6 +254,8 @@ export function LiveMatchTrackerModal({
       setStartedAt(Date.now())
       setIsRunning(true)
       showToast('▶ Cronómetro en marcha')
+      autoSyncDatabase(scores, stats)
+      broadcastScore(scores)
     }
   }
 
@@ -244,19 +291,23 @@ export function LiveMatchTrackerModal({
   }
 
   // Realtime Broadcast helper
-  const broadcastScore = (currentScores: Record<string, number>) => {
-    try {
-      const channel = supabase.channel(`event-realtime-${eventId}`)
-      channel.send({
-        type: 'broadcast',
-        event: 'score-update',
-        payload: {
-          scores: currentScores,
-          updatedAt: new Date().toISOString(),
-        },
-      })
-    } catch {}
-  }
+  const broadcastScore = useCallback(
+    (currentScores: Record<string, number>) => {
+      try {
+        if (channelRef.current) {
+          channelRef.current.send({
+            type: 'broadcast',
+            event: 'score-update',
+            payload: {
+              scores: currentScores,
+              updatedAt: new Date().toISOString(),
+            },
+          })
+        }
+      } catch {}
+    },
+    []
+  )
 
   // Quick Stat handler
   const handleStatChange = (
@@ -271,13 +322,14 @@ export function LiveMatchTrackerModal({
     if (diff === 0) return
 
     // 1. Update Player Stats
-    setStats((prev) => ({
-      ...prev,
+    const updatedStats = {
+      ...stats,
       [player.userId]: {
-        ...(prev[player.userId] || { goals: 0, assists: 0, saves: 0, ownGoals: 0 }),
+        ...(stats[player.userId] || { goals: 0, assists: 0, saves: 0, ownGoals: 0 }),
         [stat]: nextVal,
       },
-    }))
+    }
+    setStats(updatedStats)
 
     // 2. If Goal, update Score and Broadcast
     let updatedScores = { ...scores }
@@ -293,6 +345,9 @@ export function LiveMatchTrackerModal({
         navigator.vibrate?.([60, 40, 60])
       }
     }
+
+    // Auto-sync immediately to database so any spectator sees it
+    autoSyncDatabase(updatedScores, updatedStats)
 
     // 3. Add to event log
     const logId = 'log_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5)
@@ -357,28 +412,28 @@ export function LiveMatchTrackerModal({
     const isMinus = lastEvent.type.endsWith('_minus')
     const revertDelta = isMinus ? 1 : -1
 
-    setStats((prev) => {
-      const curVal = prev[lastEvent.playerId]?.[statKey] || 0
-      return {
-        ...prev,
-        [lastEvent.playerId]: {
-          ...(prev[lastEvent.playerId] || { goals: 0, assists: 0, saves: 0, ownGoals: 0 }),
-          [statKey]: Math.max(0, curVal + revertDelta),
-        },
-      }
-    })
-
-    if (statKey === 'goals') {
-      setScores((prev) => {
-        const curScore = prev[lastEvent.teamId] || 0
-        const updated = {
-          ...prev,
-          [lastEvent.teamId]: Math.max(0, curScore + revertDelta),
-        }
-        broadcastScore(updated)
-        return updated
-      })
+    const curVal = stats[lastEvent.playerId]?.[statKey] || 0
+    const updatedStats = {
+      ...stats,
+      [lastEvent.playerId]: {
+        ...(stats[lastEvent.playerId] || { goals: 0, assists: 0, saves: 0, ownGoals: 0 }),
+        [statKey]: Math.max(0, curVal + revertDelta),
+      },
     }
+    setStats(updatedStats)
+
+    let updatedScores = { ...scores }
+    if (statKey === 'goals') {
+      const curScore = scores[lastEvent.teamId] || 0
+      updatedScores = {
+        ...scores,
+        [lastEvent.teamId]: Math.max(0, curScore + revertDelta),
+      }
+      setScores(updatedScores)
+      broadcastScore(updatedScores)
+    }
+
+    autoSyncDatabase(updatedScores, updatedStats)
 
     showToast(`↩ Deshecho: ${lastEvent.desc}`)
   }

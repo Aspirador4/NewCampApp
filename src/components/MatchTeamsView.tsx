@@ -92,7 +92,7 @@ export function MatchTeamsView({
   const supabase = useMemo(() => createClient(), [])
   useEffect(() => {
     const channel = supabase
-      .channel(`event-realtime-${eventId}`)
+      .channel(`match-broadcast-${eventId}`)
       .on(
         'broadcast',
         { event: 'score-update' },
@@ -147,8 +147,13 @@ export function MatchTeamsView({
     )
   }
 
-  // If teams exist but not published yet and user is not admin, hide
-  if (!isPublished && !canManage) return null
+  // If teams exist but not published yet and match is not live/completed and user is not admin, hide
+  const isMatchLiveOrFinal =
+    eventStatus === 'en_curso' ||
+    eventStatus === 'finalizado' ||
+    resultRecorded ||
+    (teams[0]?.score !== null && teams[0]?.score !== undefined)
+  if (!isPublished && !canManage && !isMatchLiveOrFinal) return null
 
   const team1 = teams[0]
   const team2 = teams[1]

@@ -220,11 +220,12 @@ export async function updateLiveScoreAction(
     }
   }
 
-  // 3. Mark event status as 'en_curso' if it's currently 'convocado'
-  const updateFields: { updated_at: string; status?: EventStatus } = {
+  // 3. Mark event status as 'en_curso' and ensure teams_published = true
+  const updateFields: { updated_at: string; status?: EventStatus; teams_published?: boolean } = {
     updated_at: new Date().toISOString(),
+    teams_published: true,
   }
-  if (isMatchLive && event.status === 'convocado') {
+  if (isMatchLive && event.status !== 'finalizado') {
     updateFields.status = 'en_curso'
   }
 
@@ -234,6 +235,8 @@ export async function updateLiveScoreAction(
     .eq('id', eventId)
 
   revalidatePath(`/eventos/${eventId}`)
+  revalidatePath('/eventos')
+  revalidatePath('/')
   return { success: true }
 }
 
