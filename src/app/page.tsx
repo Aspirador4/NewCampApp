@@ -197,7 +197,7 @@ export default async function Home() {
                       sizes="48px"
                     />
                   ) : (
-                    <span className="font-display font-black text-xl text-white">
+                    <span className="font-display font-bold text-xl text-white">
                       {profile?.full_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
                     </span>
                   )}
@@ -206,7 +206,7 @@ export default async function Home() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span
-                      className="font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded border tracking-wider"
+                      className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded border tracking-wider"
                       style={{
                         backgroundColor: 'var(--club-primary-light, #ecfdf5)',
                         borderColor: 'var(--club-primary-border, #a7f3d0)',
@@ -219,7 +219,7 @@ export default async function Home() {
                       {playerPosition}
                     </span>
                   </div>
-                  <p className="font-display text-xl font-black uppercase text-white truncate leading-tight mt-0.5 tracking-tight">
+                  <p className="font-display text-xl font-bold uppercase text-white truncate leading-tight mt-0.5 tracking-tight">
                     {profile?.full_name || user.email?.split('@')[0]}
                   </p>
                 </div>
@@ -230,7 +230,7 @@ export default async function Home() {
                 <span className="font-mono text-[9px] text-neutral-400 uppercase block tracking-wider leading-none">
                   {jerseyNumber ? 'Dorsal' : 'Ficha'}
                 </span>
-                <span className="font-display font-black text-2xl text-white/90 leading-none mt-1">
+                <span className="font-display font-bold text-2xl text-white/90 leading-none mt-1">
                   {jerseyNumber ? `#${jerseyNumber}` : `#${profile?.id ? profile.id.slice(0, 3) : '10'}`}
                 </span>
               </div>
@@ -243,7 +243,7 @@ export default async function Home() {
               </span>
               <Link
                 href="/perfil"
-                className="btn-tactile bg-white dark:bg-neutral-900 text-neutral-950 dark:text-white font-display font-black text-xs uppercase tracking-wide px-3 py-1.5 rounded-xl border border-neutral-300 dark:border-neutral-700 shadow-tactile-sm flex items-center gap-1 flex-shrink-0"
+                className="btn-tactile bg-white dark:bg-neutral-900 text-neutral-950 dark:text-white font-display font-bold text-xs uppercase tracking-wide px-3 py-1.5 rounded-xl border border-neutral-300 dark:border-neutral-700 shadow-tactile-sm flex items-center gap-1 flex-shrink-0"
               >
                 <span>Ver Ficha</span>
                 <ArrowRight className="w-3.5 h-3.5 text-neutral-950 dark:text-white" />
@@ -267,7 +267,7 @@ export default async function Home() {
                 <span className="text-neutral-400 uppercase">{club.name}</span>
               </div>
               <div>
-                <h2 className="font-display font-black text-2xl uppercase tracking-tight text-white leading-tight">
+                <h2 className="font-display font-bold text-2xl uppercase tracking-tight text-white leading-tight">
                   Bienvenido al Club
                 </h2>
                 <p className="text-xs text-neutral-300 mt-1 font-sans leading-relaxed">
@@ -276,7 +276,7 @@ export default async function Home() {
               </div>
               <Link
                 href="/login"
-                className="btn-tactile w-full py-3 px-4 rounded-xl bg-white dark:bg-neutral-900 text-neutral-950 dark:text-white font-display font-black text-sm uppercase tracking-wide border border-neutral-300 dark:border-neutral-700 shadow-tactile-sm flex items-center justify-center gap-2"
+                className="btn-tactile w-full py-3 px-4 rounded-xl bg-white dark:bg-neutral-900 text-neutral-950 dark:text-white font-display font-bold text-sm uppercase tracking-wide border border-neutral-300 dark:border-neutral-700 shadow-tactile-sm flex items-center justify-center gap-2"
               >
                 <UserCircle2 className="w-4 h-4" />
                 <span>Ingresar o Registrarme</span>
@@ -323,7 +323,7 @@ export default async function Home() {
                   <MapPin className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
                   <span className="truncate">{nextEvent.location}</span>
                 </div>
-                <h3 className="font-display font-black text-2xl uppercase tracking-tight text-neutral-950 dark:text-white leading-tight mt-0.5">
+                <h3 className="font-display font-bold text-2xl uppercase tracking-tight text-neutral-950 dark:text-white leading-tight mt-0.5">
                   {nextEvent.title}
                 </h3>
               </div>
@@ -334,7 +334,7 @@ export default async function Home() {
                 return (
                   <div className="grid grid-cols-2 gap-2 bg-neutral-100 dark:bg-neutral-800/60 p-2.5 rounded-2xl border border-neutral-300 dark:border-neutral-700">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 flex items-center justify-center font-display font-black text-sm text-neutral-900 dark:text-neutral-100 shadow-tactile-sm flex-shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 flex items-center justify-center font-display font-bold text-sm text-neutral-900 dark:text-neutral-100 shadow-tactile-sm flex-shrink-0">
                         {day}
                       </div>
                       <div className="min-w-0">
@@ -349,7 +349,7 @@ export default async function Home() {
                       </div>
                       <div className="min-w-0">
                         <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase block leading-none">Kickoff</span>
-                        <span className="font-mono font-extrabold text-xs text-neutral-900 dark:text-neutral-100 truncate block mt-0.5">{time} HRS</span>
+                        <span className="font-mono font-semibold text-xs tracking-wider text-neutral-900 dark:text-neutral-100 truncate block mt-0.5">{time} HRS</span>
                       </div>
                     </div>
                   </div>
@@ -363,7 +363,7 @@ export default async function Home() {
                     <Users className="w-3.5 h-3.5 text-neutral-400" />
                     <span>Convocatoria</span>
                   </span>
-                  <span className="font-mono text-xs font-black text-neutral-900 dark:text-neutral-100">
+                  <span className="font-mono text-xs font-bold text-neutral-900 dark:text-neutral-100">
                     {confirmedCount} {maxCap ? `/ ${maxCap}` : ''} Confirmados
                   </span>
                 </div>
@@ -394,7 +394,7 @@ export default async function Home() {
               <div className="flex items-center justify-between pt-1 gap-2">
                 <div>
                   <span className="font-mono text-[9px] uppercase text-neutral-500 dark:text-neutral-400 block">Cuota estimada</span>
-                  <span className="font-display font-black text-base text-neutral-950 dark:text-white">
+                  <span className="font-display font-bold text-base text-neutral-950 dark:text-white">
                     {nextEvent.total_cost && nextEvent.total_cost > 0
                       ? `~$${Math.round(nextEvent.total_cost / (maxCap || 14)).toLocaleString('es-CL')}`
                       : nextEvent.cost_per_player && nextEvent.cost_per_player > 0
@@ -406,7 +406,7 @@ export default async function Home() {
 
                 <Link
                   href={`/eventos/${nextEvent.id}`}
-                  className="btn-tactile bg-neutral-950 dark:bg-neutral-800 hover:bg-neutral-800 dark:hover:bg-neutral-700 text-white font-display text-xs font-black uppercase tracking-wider px-3.5 py-2.5 rounded-xl border border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex items-center gap-1.5 flex-shrink-0"
+                  className="btn-tactile bg-neutral-950 dark:bg-neutral-800 hover:bg-neutral-800 dark:hover:bg-neutral-700 text-white font-display text-xs font-bold uppercase tracking-wider px-3.5 py-2.5 rounded-xl border border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex items-center gap-1.5 flex-shrink-0"
                 >
                   <span>Ver Ficha</span>
                   <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
@@ -430,7 +430,7 @@ export default async function Home() {
         {/* ATHLETIC LOCKER CONSOLE (Accesos Rápidos) */}
         <div className="space-y-2.5 pt-2">
           <div className="flex items-center justify-between px-1">
-            <h2 className="font-display text-sm font-black text-neutral-900 dark:text-neutral-100 uppercase tracking-wider flex items-center gap-1.5">
+            <h2 className="font-display text-sm font-bold text-neutral-900 dark:text-neutral-100 uppercase tracking-wider flex items-center gap-1.5">
               <span>El Vestuario</span>
               <span className="text-neutral-400 dark:text-neutral-500 font-sans font-normal text-xs">• Accesos del Club</span>
             </h2>
@@ -460,7 +460,7 @@ export default async function Home() {
                 </span>
               </div>
               <div>
-                <p className="font-display text-base font-black text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
+                <p className="font-display text-base font-bold text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
                   Partidos & Eventos
                 </p>
                 <p className="font-sans text-[10px] text-neutral-500 dark:text-neutral-400 mt-1">
@@ -489,7 +489,7 @@ export default async function Home() {
                 )}
               </div>
               <div>
-                <p className="font-display text-base font-black text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
+                <p className="font-display text-base font-bold text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
                   Finanzas & Cuotas
                 </p>
                 <p className="font-sans text-[10px] text-neutral-500 dark:text-neutral-400 mt-1">
@@ -514,7 +514,7 @@ export default async function Home() {
                 )}
               </div>
               <div>
-                <p className="font-display text-base font-black text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
+                <p className="font-display text-base font-bold text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
                   Plantel Oficial
                 </p>
                 <p className="font-sans text-[10px] text-neutral-500 dark:text-neutral-400 mt-1">
@@ -537,7 +537,7 @@ export default async function Home() {
                 </span>
               </div>
               <div>
-                <p className="font-display text-base font-black text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
+                <p className="font-display text-base font-bold text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
                   Ranking & MVPs
                 </p>
                 <p className="font-sans text-[10px] text-neutral-500 dark:text-neutral-400 mt-1">

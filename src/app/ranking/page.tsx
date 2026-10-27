@@ -115,7 +115,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
             <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
           </Link>
           <div>
-            <h1 className="font-display font-black text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
+            <h1 className="font-display font-bold text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
               Ranking & MVPs
             </h1>
             <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mt-0.5">
@@ -133,7 +133,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
       <div className="grid grid-cols-2 gap-2 my-4">
         <Link
           href="/ranking?tab=mvps"
-          className={`btn-tactile py-2.5 px-3 rounded-xl text-center flex items-center justify-center gap-1.5 font-display font-black text-xs uppercase tracking-wider border-2 ${
+          className={`btn-tactile py-2.5 px-3 rounded-xl text-center flex items-center justify-center gap-1.5 font-display font-bold text-xs uppercase tracking-wider border-2 ${
             tab === 'mvps'
               ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
               : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
@@ -145,7 +145,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
 
         <Link
           href="/ranking?tab=presencias"
-          className={`btn-tactile py-2.5 px-3 rounded-xl text-center flex items-center justify-center gap-1.5 font-display font-black text-xs uppercase tracking-wider border-2 ${
+          className={`btn-tactile py-2.5 px-3 rounded-xl text-center flex items-center justify-center gap-1.5 font-display font-bold text-xs uppercase tracking-wider border-2 ${
             tab === 'presencias'
               ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
               : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
@@ -183,14 +183,14 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
                     ) : (
                       <User className="w-7 h-7 text-neutral-400" />
                     )}
-                    <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-md bg-neutral-300 text-neutral-950 font-mono font-black text-[10px] flex items-center justify-center border border-neutral-900 shadow-sm">
+                    <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-md bg-neutral-300 text-neutral-950 font-mono font-bold text-[10px] flex items-center justify-center border border-neutral-900 shadow-sm">
                       2
                     </span>
                   </div>
-                  <p className="font-display font-black text-xs uppercase mt-2 text-neutral-200 truncate w-full">
+                  <p className="font-display font-bold text-xs uppercase mt-2 text-neutral-200 truncate w-full">
                     {top2.profiles?.full_name?.split(' ')[0]}
                   </p>
-                  <span className="font-mono text-sm font-black text-neutral-300 mt-0.5">
+                  <span className="font-mono text-sm font-bold text-neutral-300 mt-0.5">
                     {tab === 'mvps' ? `${top2.mvp_count} MVPs` : `${top2.matches_played} PJ`}
                   </span>
                 </>
@@ -215,14 +215,14 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
                     ) : (
                       <User className="w-9 h-9 text-amber-400" />
                     )}
-                    <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-md bg-amber-400 text-amber-950 font-mono font-black text-xs flex items-center justify-center border-2 border-neutral-900 shadow-tactile-sm">
+                    <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-md bg-amber-400 text-amber-950 font-mono font-bold text-xs flex items-center justify-center border-2 border-neutral-900 shadow-tactile-sm">
                       1
                     </span>
                   </div>
-                  <p className="font-display font-black text-sm uppercase mt-2 text-amber-300 truncate w-full">
+                  <p className="font-display font-bold text-sm uppercase mt-2 text-amber-300 truncate w-full">
                     {top1.profiles?.full_name?.split(' ')[0]}
                   </p>
-                  <span className="font-display font-black text-2xl text-white mt-0.5 flex items-center gap-1 leading-none">
+                  <span className="font-display font-bold text-2xl text-white mt-0.5 flex items-center gap-1 leading-none">
                     <Flame className="w-4 h-4 text-amber-400 fill-current" />
                     {tab === 'mvps' ? `${top1.mvp_count} MVPs` : `${top1.matches_played} PJ`}
                   </span>
@@ -248,14 +248,14 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
                     ) : (
                       <User className="w-7 h-7 text-neutral-400" />
                     )}
-                    <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-md bg-amber-700 text-white font-mono font-black text-[10px] flex items-center justify-center border border-neutral-900 shadow-sm">
+                    <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-md bg-amber-700 text-white font-mono font-bold text-[10px] flex items-center justify-center border border-neutral-900 shadow-sm">
                       3
                     </span>
                   </div>
-                  <p className="font-display font-black text-xs uppercase mt-2 text-neutral-200 truncate w-full">
+                  <p className="font-display font-bold text-xs uppercase mt-2 text-neutral-200 truncate w-full">
                     {top3.profiles?.full_name?.split(' ')[0]}
                   </p>
-                  <span className="font-mono text-sm font-black text-amber-500 mt-0.5">
+                  <span className="font-mono text-sm font-bold text-amber-500 mt-0.5">
                     {tab === 'mvps' ? `${top3.mvp_count} MVPs` : `${top3.matches_played} PJ`}
                   </span>
                 </>
@@ -270,7 +270,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
       {/* Rest of Leaderboard Table */}
       <div className="mt-4 space-y-2.5">
         <div className="flex items-center justify-between px-1">
-          <h2 className="font-display font-black text-sm text-neutral-950 dark:text-white uppercase tracking-wider">
+          <h2 className="font-display font-bold text-sm text-neutral-950 dark:text-white uppercase tracking-wider">
             Tabla General de Posiciones
           </h2>
           <span className="font-mono text-[10px] text-neutral-400 uppercase">
@@ -281,7 +281,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
         {sortedStats.length === 0 ? (
           <div className="bg-white dark:bg-[#14161f] rounded-3xl p-8 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile text-center">
             <Trophy className="w-10 h-10 text-neutral-400 mx-auto mb-2" />
-            <p className="font-display font-black text-base uppercase text-neutral-950 dark:text-white">
+            <p className="font-display font-bold text-base uppercase text-neutral-950 dark:text-white">
               Sin estadísticas registradas aún
             </p>
             <p className="font-sans text-xs text-neutral-500 dark:text-neutral-400 mt-1">
@@ -304,7 +304,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <span
-                      className={`font-mono font-black text-xs w-6 text-center flex-shrink-0 ${
+                      className={`font-mono font-bold text-xs w-6 text-center flex-shrink-0 ${
                         idx === 0
                           ? 'text-amber-500 text-sm'
                           : idx === 1
@@ -327,7 +327,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
                           sizes="40px"
                         />
                       ) : (
-                        <span className="font-display font-black text-sm text-neutral-700 dark:text-neutral-300">
+                        <span className="font-display font-bold text-sm text-neutral-700 dark:text-neutral-300">
                           {p?.full_name?.charAt(0).toUpperCase() || 'J'}
                         </span>
                       )}
@@ -335,7 +335,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <p className="font-display font-black text-sm uppercase text-neutral-950 dark:text-white truncate leading-tight">
+                        <p className="font-display font-bold text-sm uppercase text-neutral-950 dark:text-white truncate leading-tight">
                           {p?.full_name || 'Socio'}
                         </p>
                         {isCurrentUser && (
@@ -356,7 +356,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
 
                   {/* Main Metric */}
                   <div className="text-right flex-shrink-0 pl-2">
-                    <span className="font-display font-black text-xl text-neutral-950 dark:text-white block leading-tight">
+                    <span className="font-display font-bold text-xl text-neutral-950 dark:text-white block leading-tight">
                       {tab === 'mvps' ? item.mvp_count : item.matches_played}
                     </span>
                     <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase block">
@@ -375,7 +375,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
       {/* Global Club Counter */}
       <div className="mt-5 bg-white dark:bg-[#14161f] rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile p-4 grid grid-cols-2 gap-3 text-center">
         <div>
-          <span className="font-display font-black text-2xl text-neutral-950 dark:text-white block leading-tight">
+          <span className="font-display font-bold text-2xl text-neutral-950 dark:text-white block leading-tight">
             {totalMvpsAwarded}
           </span>
           <span className="font-mono text-[10px] uppercase text-neutral-500 dark:text-neutral-400 font-bold">
@@ -384,7 +384,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
         </div>
 
         <div className="border-l-2 border-neutral-200 dark:border-neutral-800">
-          <span className="font-display font-black text-2xl text-neutral-950 dark:text-white block leading-tight">
+          <span className="font-display font-bold text-2xl text-neutral-950 dark:text-white block leading-tight">
             {validStats.length}
           </span>
           <span className="font-mono text-[10px] uppercase text-neutral-500 dark:text-neutral-400 font-bold">

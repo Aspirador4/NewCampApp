@@ -5,7 +5,7 @@ export default function RootLoading() {
         <div className="w-8 h-8 rounded-full border-3 border-neutral-200 dark:border-neutral-700 border-t-neutral-900 dark:border-t-white animate-spin" />
       </div>
       <div className="text-center space-y-1">
-        <p className="font-display font-black text-xs text-neutral-950 dark:text-white uppercase tracking-widest">
+        <p className="font-display font-bold text-xs text-neutral-950 dark:text-white uppercase tracking-widest">
           Sincronizando Vestuario
         </p>
         <p className="font-mono text-[10px] text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">

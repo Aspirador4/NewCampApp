@@ -40,7 +40,7 @@ export function EmptyState({
         <Icon className="w-7 h-7 stroke-[2]" />
       </div>
 
-      <h3 className="font-display font-black text-xl uppercase text-neutral-950 dark:text-white tracking-tight">
+      <h3 className="font-display font-bold text-xl uppercase text-neutral-950 dark:text-white tracking-tight">
         {title}
       </h3>
 
@@ -54,7 +54,7 @@ export function EmptyState({
             action.href ? (
               <Link
                 href={action.href}
-                className="btn-tactile w-full sm:w-auto flex-1 min-h-[44px] px-4 py-2.5 rounded-xl font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm transition flex items-center justify-center gap-1.5"
+                className="btn-tactile w-full sm:w-auto flex-1 min-h-[44px] px-4 py-2.5 rounded-xl font-display font-bold text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm transition flex items-center justify-center gap-1.5"
                 style={{
                   backgroundColor: 'var(--club-primary, #059669)',
                   color: 'var(--club-primary-text, #ffffff)',
@@ -66,7 +66,7 @@ export function EmptyState({
               <button
                 type="button"
                 onClick={action.onClick}
-                className="btn-tactile w-full sm:w-auto flex-1 min-h-[44px] px-4 py-2.5 rounded-xl font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm transition flex items-center justify-center gap-1.5"
+                className="btn-tactile w-full sm:w-auto flex-1 min-h-[44px] px-4 py-2.5 rounded-xl font-display font-bold text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm transition flex items-center justify-center gap-1.5"
                 style={{
                   backgroundColor: 'var(--club-primary, #059669)',
                   color: 'var(--club-primary-text, #ffffff)',

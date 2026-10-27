@@ -54,7 +54,7 @@ export function BottomNav({ isAuthenticated }: BottomNavProps) {
               }
             >
               <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
-              <span className="font-display uppercase tracking-tight text-[10px] mt-0.5 font-bold">
+              <span className="font-display uppercase tracking-wider text-[10px] mt-0.5 font-semibold">
                 {item.label}
               </span>
             </Link>

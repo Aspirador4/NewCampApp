@@ -69,7 +69,7 @@ export function PendingApprovalScreen({
             <Flame className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="font-display font-black text-xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none truncate max-w-[210px]">
+            <h1 className="font-display font-bold text-xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none truncate max-w-[210px]">
               {clubName}
             </h1>
             <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mt-0.5">
@@ -103,7 +103,7 @@ export function PendingApprovalScreen({
               ) : (
                 <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
               )}
-              <span className={`font-mono text-[10px] font-black uppercase tracking-wider ${
+              <span className={`font-mono text-[10px] font-bold uppercase tracking-wider ${
                 isRejected ? 'text-rose-900 dark:text-rose-300' : 'text-amber-900 dark:text-amber-300'
               }`}>
                 {isRejected ? 'PASE DENEGADO • TRIBUNAL DE CLUB' : 'PASE PROVISIONAL • EN ESPERA DE REVISIÓN'}
@@ -134,7 +134,7 @@ export function PendingApprovalScreen({
               </div>
 
               <div className="min-w-0 flex-1">
-                <span className={`inline-block font-mono text-[9px] font-extrabold uppercase px-2 py-0.5 rounded border mb-1 ${
+                <span className={`inline-block font-mono text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded border mb-1 ${
                   isRejected
                     ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-800'
                     : 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800'
@@ -142,7 +142,7 @@ export function PendingApprovalScreen({
                   {isRejected ? 'Solicitud Rechazada' : 'Postulación en Trámite'}
                 </span>
 
-                <h2 className="font-display font-black text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none truncate">
+                <h2 className="font-display font-bold text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none truncate">
                   {fullName}
                 </h2>
                 <p className="font-mono text-[11px] text-neutral-500 dark:text-neutral-400 mt-1 truncate">
@@ -167,7 +167,7 @@ export function PendingApprovalScreen({
             {/* Motivation Form */}
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between">
-                <label className="font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-white flex items-center gap-1.5">
+                <label className="font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                   <span>Carta de Presentación / Referencia</span>
                 </label>
@@ -203,7 +203,7 @@ export function PendingApprovalScreen({
                 <button
                   type="submit"
                   disabled={loading || !motivation.trim()}
-                  className="btn-tactile w-full py-2.5 px-4 rounded-xl border-2 border-neutral-900 dark:border-white bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:pointer-events-none min-h-[44px]"
+                  className="btn-tactile w-full py-2.5 px-4 rounded-xl border-2 border-neutral-900 dark:border-white bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:pointer-events-none min-h-[44px]"
                 >
                   {loading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -223,14 +223,14 @@ export function PendingApprovalScreen({
         <div className="space-y-2 pt-1">
           <Link
             href="/club/unirse"
-            className="btn-tactile w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-[#14161f] hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-900 dark:text-white font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition min-h-[44px]"
+            className="btn-tactile w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-[#14161f] hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-900 dark:text-white font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition min-h-[44px]"
           >
             <Compass className="w-4 h-4 stroke-[2.5]" />
             <span>Explorar o Unirme a Otro Club</span>
           </Link>
           <Link
             href="/club/nuevo"
-            className="btn-tactile w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 bg-amber-300 dark:bg-amber-400 hover:bg-amber-400 text-neutral-950 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition min-h-[44px]"
+            className="btn-tactile w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 bg-amber-300 dark:bg-amber-400 hover:bg-amber-400 text-neutral-950 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition min-h-[44px]"
           >
             <PlusCircle className="w-4 h-4 stroke-[2.5]" />
             <span>Crear mi propio Club Deportivo</span>

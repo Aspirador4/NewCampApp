@@ -65,12 +65,12 @@ Email: ${bankDetails.email}`
               <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-400">
                 ESTADO FINANCIERO OFICIAL
               </span>
-              <span className="inline-flex items-center gap-1 font-mono text-[10px] font-black uppercase bg-emerald-400 text-neutral-950 px-2.5 py-0.5 rounded-full border border-neutral-900 shadow-tactile-sm">
+              <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase bg-emerald-400 text-neutral-950 px-2.5 py-0.5 rounded-full border border-neutral-900 shadow-tactile-sm">
                 <CheckCircle2 className="w-3.5 h-3.5 stroke-[3]" />
                 <span>Al día ✓</span>
               </span>
             </div>
-            <h2 className="font-display font-black text-2xl uppercase tracking-tight text-white leading-tight">
+            <h2 className="font-display font-bold text-2xl uppercase tracking-tight text-white leading-tight">
               ¡Estás al día, {userName.split(' ')[0]}!
             </h2>
             <p className="font-sans text-xs text-neutral-300">
@@ -81,10 +81,10 @@ Email: ${bankDetails.email}`
       ) : (
         <div className="relative overflow-hidden rounded-3xl border-2 border-neutral-900 dark:border-amber-600 bg-amber-500 text-neutral-950 shadow-tactile p-5 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[10px] font-black uppercase tracking-widest text-neutral-950">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-neutral-950">
               SALDO PENDIENTE POR LIQUIDAR
             </span>
-            <span className="inline-flex items-center gap-1 font-mono text-[10px] font-black uppercase bg-neutral-950 text-amber-400 px-2.5 py-0.5 rounded-full">
+            <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase bg-neutral-950 text-amber-400 px-2.5 py-0.5 rounded-full">
               <AlertCircle className="w-3.5 h-3.5" />
               <span>{pending.length} cuota(s)</span>
             </span>
@@ -92,7 +92,7 @@ Email: ${bankDetails.email}`
 
           <div>
             <p className="font-mono text-[10px] text-neutral-900 uppercase font-bold">Monto Total Adeudado</p>
-            <p className="font-display font-black text-4xl text-neutral-950 tracking-tight leading-none mt-0.5">
+            <p className="font-display font-bold text-4xl text-neutral-950 tracking-tight leading-none mt-0.5">
               ${totalOwed.toLocaleString('es-CL')}
             </p>
           </div>
@@ -111,7 +111,7 @@ Email: ${bankDetails.email}`
       {/* Bank Account Transfer Voucher with 1-Click Copy */}
       <div className="bg-white dark:bg-[#14161f] rounded-3xl p-5 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile space-y-3.5">
         <div className="flex items-center justify-between border-b-2 border-neutral-900/10 dark:border-white/10 pb-2.5">
-          <h3 className="font-display font-black text-base text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
+          <h3 className="font-display font-bold text-base text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
             Datos Oficiales de Transferencia
           </h3>
           <span className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase font-bold">
@@ -132,11 +132,11 @@ Email: ${bankDetails.email}`
               </div>
               <div>
                 <span className="text-[9px] text-neutral-400 uppercase block leading-none">Nº de Cuenta</span>
-                <span className="font-black text-neutral-950 dark:text-white text-sm mt-0.5 block">{bankDetails.numero_cuenta}</span>
+                <span className="font-mono font-semibold text-neutral-950 dark:text-white text-xs mt-0.5 block">{bankDetails.numero_cuenta}</span>
               </div>
               <div>
                 <span className="text-[9px] text-neutral-400 uppercase block leading-none">RUT</span>
-                <span className="font-black text-neutral-950 dark:text-white text-sm mt-0.5 block">{bankDetails.rut || '-'}</span>
+                <span className="font-mono font-semibold text-neutral-950 dark:text-white text-xs mt-0.5 block">{bankDetails.rut || '-'}</span>
               </div>
             </div>
 
@@ -161,7 +161,7 @@ Email: ${bankDetails.email}`
           <button
             type="button"
             onClick={handleCopyTransfer}
-            className={`btn-tactile w-full min-h-[44px] py-2.5 px-3 rounded-xl font-display font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm transition ${
+            className={`btn-tactile w-full min-h-[44px] py-2.5 px-3 rounded-xl font-display font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm transition ${
               copied
                 ? 'bg-neutral-950 dark:bg-emerald-950 text-emerald-400'
                 : 'bg-white dark:bg-[#1c1f2e] hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-950 dark:text-white'
@@ -187,7 +187,7 @@ Email: ${bankDetails.email}`
         <button
           type="button"
           onClick={() => setActiveTab('pendientes')}
-          className={`btn-tactile min-h-[40px] py-2 rounded-xl transition text-center flex items-center justify-center gap-1.5 font-display font-black text-xs uppercase tracking-wider border-2 ${
+          className={`btn-tactile min-h-[40px] py-2 rounded-xl transition text-center flex items-center justify-center gap-1.5 font-display font-bold text-xs uppercase tracking-wider border-2 ${
             activeTab === 'pendientes'
               ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
               : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
@@ -195,7 +195,7 @@ Email: ${bankDetails.email}`
         >
           <span>Pendientes</span>
           {pending.length > 0 && (
-            <span className="px-1.5 py-0.2 rounded-md text-[10px] bg-amber-400 text-neutral-950 font-black">
+            <span className="px-1.5 py-0.2 rounded-md text-[10px] bg-amber-400 text-neutral-950 font-bold">
               {pending.length}
             </span>
           )}
@@ -204,7 +204,7 @@ Email: ${bankDetails.email}`
         <button
           type="button"
           onClick={() => setActiveTab('pagados')}
-          className={`btn-tactile min-h-[40px] py-2 rounded-xl transition text-center flex items-center justify-center gap-1.5 font-display font-black text-xs uppercase tracking-wider border-2 ${
+          className={`btn-tactile min-h-[40px] py-2 rounded-xl transition text-center flex items-center justify-center gap-1.5 font-display font-bold text-xs uppercase tracking-wider border-2 ${
             activeTab === 'pagados'
               ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
               : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
@@ -237,7 +237,7 @@ Email: ${bankDetails.email}`
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 mb-1">
                     <span
-                      className={`font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded border border-neutral-900 dark:border-neutral-700 ${
+                      className={`font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded border border-neutral-900 dark:border-neutral-700 ${
                         item.debt_type === 'invitado'
                           ? 'bg-purple-100 dark:bg-purple-950/60 text-purple-900 dark:text-purple-300'
                           : 'bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300'
@@ -253,7 +253,7 @@ Email: ${bankDetails.email}`
                     </span>
                   </div>
 
-                  <h4 className="font-display font-black text-base uppercase text-neutral-950 dark:text-white leading-tight">
+                  <h4 className="font-display font-bold text-base uppercase text-neutral-950 dark:text-white leading-tight">
                     {item.events?.title || item.description}
                   </h4>
                   {item.events && (
@@ -264,10 +264,10 @@ Email: ${bankDetails.email}`
                 </div>
 
                 <div className="text-right flex-shrink-0 pl-2">
-                  <span className="font-display font-black text-2xl text-neutral-950 dark:text-white block leading-tight">
+                  <span className="font-display font-bold text-2xl text-neutral-950 dark:text-white block leading-tight">
                     ${item.amount.toLocaleString('es-CL')}
                   </span>
-                  <span className="font-mono text-[9px] font-black uppercase text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded border border-amber-300 dark:border-amber-800/70 inline-block mt-0.5">
+                  <span className="font-mono text-[9px] font-bold uppercase text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded border border-amber-300 dark:border-amber-800/70 inline-block mt-0.5">
                     Pendiente
                   </span>
                 </div>
@@ -301,13 +301,13 @@ Email: ${bankDetails.email}`
                   )}
                 </div>
 
-                <h4 className="font-display font-black text-base uppercase text-neutral-950 dark:text-white leading-tight">
+                <h4 className="font-display font-bold text-base uppercase text-neutral-950 dark:text-white leading-tight">
                   {item.events?.title || item.description}
                 </h4>
               </div>
 
               <div className="text-right flex-shrink-0 pl-2">
-                <span className="font-display font-black text-xl text-neutral-900 dark:text-neutral-200 block leading-tight">
+                <span className="font-display font-bold text-xl text-neutral-900 dark:text-neutral-200 block leading-tight">
                   ${item.amount.toLocaleString('es-CL')}
                 </span>
                 <span className="font-mono text-[9px] font-bold uppercase text-emerald-800 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded border border-emerald-300 dark:border-emerald-800/70 inline-block mt-0.5">

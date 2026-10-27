@@ -140,7 +140,7 @@ export function EventFinancialClosure({
               <CheckCircle2 className="w-5 h-5 stroke-[2.5]" />
             </div>
             <div>
-              <p className="font-display font-black text-sm uppercase tracking-tight text-neutral-950 dark:text-white">
+              <p className="font-display font-bold text-sm uppercase tracking-tight text-neutral-950 dark:text-white">
                 Cierre Financiero Emitido
               </p>
               <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 mt-0.5">
@@ -156,14 +156,14 @@ export function EventFinancialClosure({
               <button
                 type="button"
                 onClick={() => setIsModalOpen(true)}
-                className="btn-tactile py-2 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-900 dark:text-white font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition active:scale-95 min-h-[40px]"
+                className="btn-tactile py-2 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-900 dark:text-white font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition active:scale-95 min-h-[40px]"
               >
                 Ajustar
               </button>
             )}
             <Link
               href={isAdmin ? "/finanzas?tab=admin" : "/finanzas"}
-              className="btn-tactile py-2 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-neutral-950 dark:bg-neutral-800 text-white font-display font-black text-xs uppercase tracking-wider hover:bg-neutral-900 transition flex items-center gap-1 shadow-tactile-sm min-h-[40px]"
+              className="btn-tactile py-2 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-neutral-950 dark:bg-neutral-800 text-white font-display font-bold text-xs uppercase tracking-wider hover:bg-neutral-900 transition flex items-center gap-1 shadow-tactile-sm min-h-[40px]"
             >
               <span>Finanzas</span>
               <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -177,7 +177,7 @@ export function EventFinancialClosure({
             <div className="flex items-center gap-2">
               <CircleDollarSign className="w-5 h-5 text-amber-700 dark:text-amber-400 stroke-[2.5]" />
               <div>
-                <h4 className="font-display font-black text-sm uppercase tracking-wider text-amber-950 dark:text-amber-200">
+                <h4 className="font-display font-bold text-sm uppercase tracking-wider text-amber-950 dark:text-amber-200">
                   Cierre Financiero Pendiente
                 </h4>
                 <p className="text-[11px] text-amber-800 dark:text-amber-300 font-sans">
@@ -195,7 +195,7 @@ export function EventFinancialClosure({
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="btn-tactile py-2 px-3.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-amber-400 hover:bg-amber-500 text-neutral-950 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition active:scale-95 flex items-center gap-1.5 min-h-[40px]"
+              className="btn-tactile py-2 px-3.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-amber-400 hover:bg-amber-500 text-neutral-950 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition active:scale-95 flex items-center gap-1.5 min-h-[40px]"
             >
               <span>Emitir Cierre</span>
               <ChevronRight className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -219,10 +219,10 @@ export function EventFinancialClosure({
 
             {/* Modal Header */}
             <div>
-              <span className="font-mono text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border border-emerald-300 dark:border-emerald-800 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-950 dark:text-emerald-300">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-emerald-300 dark:border-emerald-800 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-950 dark:text-emerald-300">
                 Liquidación Oficial de Partido
               </span>
-              <h3 className="font-display font-black text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none mt-2">
+              <h3 className="font-display font-bold text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none mt-2">
                 Cierre Financiero del Evento
               </h3>
               <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 font-sans">
@@ -241,13 +241,13 @@ export function EventFinancialClosure({
             <div className="grid grid-cols-2 gap-3 bg-neutral-50 dark:bg-neutral-800/60 p-3.5 rounded-2xl border-2 border-neutral-200 dark:border-neutral-700 text-xs">
               <div>
                 <span className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider block">Costo Cancha Club</span>
-                <span className="font-display font-black text-xl text-neutral-950 dark:text-white">
+                <span className="font-display font-bold text-xl text-neutral-950 dark:text-white">
                   {totalCost ? `$${totalCost.toLocaleString('es-CL')}` : 'Por definir'}
                 </span>
               </div>
               <div className="text-right">
                 <span className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider block">Total a Cobrar</span>
-                <span className={`font-display font-black text-xl ${totalCost && totalCollected < totalCost ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-700 dark:text-emerald-400'}`}>
+                <span className={`font-display font-bold text-xl ${totalCost && totalCollected < totalCost ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-700 dark:text-emerald-400'}`}>
                   ${totalCollected.toLocaleString('es-CL')}
                 </span>
               </div>
@@ -266,7 +266,7 @@ export function EventFinancialClosure({
 
             {/* Players List with editable amounts */}
             <div className="space-y-2 max-h-[45vh] overflow-y-auto pr-1">
-              <p className="font-display font-black text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+              <p className="font-display font-bold text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                 Jugadores Confirmados ({confirmedAttendees.length})
               </p>
               {confirmedAttendees.map((att) => (
@@ -279,12 +279,12 @@ export function EventFinancialClosure({
                       {att.avatarUrl ? (
                         <Image src={att.avatarUrl} alt={att.fullName} fill className="object-cover" sizes="36px" />
                       ) : (
-                        <span className="font-display font-black text-xs text-neutral-900 dark:text-white">
+                        <span className="font-display font-bold text-xs text-neutral-900 dark:text-white">
                           {att.fullName.charAt(0).toUpperCase()}
                         </span>
                       )}
                     </div>
-                    <span className="font-display font-black text-sm uppercase text-neutral-950 dark:text-white truncate">
+                    <span className="font-display font-bold text-sm uppercase text-neutral-950 dark:text-white truncate">
                       {att.fullName}
                     </span>
                   </div>
@@ -303,7 +303,7 @@ export function EventFinancialClosure({
 
               {approvedGuests.length > 0 && (
                 <>
-                  <p className="font-display font-black text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400 pt-2">
+                  <p className="font-display font-bold text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400 pt-2">
                     Invitados Aprobados ({approvedGuests.length})
                   </p>
                   {approvedGuests.map((g) => (
@@ -312,7 +312,7 @@ export function EventFinancialClosure({
                       className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 dark:bg-neutral-800/50 border-2 border-neutral-200 dark:border-neutral-700 gap-3"
                     >
                       <div className="min-w-0">
-                        <span className="font-display font-black text-sm uppercase text-neutral-950 dark:text-white block truncate">
+                        <span className="font-display font-bold text-sm uppercase text-neutral-950 dark:text-white block truncate">
                           {g.guestName}
                         </span>
                         <span className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400">
@@ -341,7 +341,7 @@ export function EventFinancialClosure({
                 type="button"
                 onClick={() => setIsModalOpen(false)}
                 disabled={loading}
-                className="btn-tactile py-2.5 px-4 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-xs font-display font-black uppercase tracking-wider text-neutral-800 dark:text-neutral-200 shadow-tactile-sm"
+                className="btn-tactile py-2.5 px-4 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-xs font-display font-bold uppercase tracking-wider text-neutral-800 dark:text-neutral-200 shadow-tactile-sm"
               >
                 Cancelar
               </button>
@@ -349,7 +349,7 @@ export function EventFinancialClosure({
                 type="button"
                 onClick={handleSubmitClosure}
                 disabled={loading}
-                className="btn-tactile flex-1 py-2.5 px-4 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-neutral-950 dark:bg-neutral-100 hover:bg-neutral-900 dark:hover:bg-neutral-200 text-white dark:text-neutral-950 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50 min-h-[44px]"
+                className="btn-tactile flex-1 py-2.5 px-4 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-neutral-950 dark:bg-neutral-100 hover:bg-neutral-900 dark:hover:bg-neutral-200 text-white dark:text-neutral-950 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50 min-h-[44px]"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 <span>Emitir Cierre (${totalCollected.toLocaleString('es-CL')})</span>

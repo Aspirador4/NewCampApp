@@ -140,7 +140,7 @@ export default async function PerfilPage() {
             <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
           </Link>
           <div>
-            <h1 className="font-display font-black text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
+            <h1 className="font-display font-bold text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
               Ficha del Socio
             </h1>
             <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mt-0.5">
@@ -152,7 +152,7 @@ export default async function PerfilPage() {
         {/* Financial shortcut badge */}
         <Link
           href="/finanzas"
-          className={`btn-tactile min-h-[40px] flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition ${
+          className={`btn-tactile min-h-[40px] flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition ${
             (pendingDebtsCount || 0) > 0
               ? 'bg-amber-400 text-neutral-950'
               : 'bg-emerald-400 text-neutral-950'
@@ -174,10 +174,10 @@ export default async function PerfilPage() {
           <div className="w-7 h-7 rounded-lg bg-amber-500 text-neutral-950 flex items-center justify-center mb-1">
             <Trophy className="w-4 h-4 stroke-[2.5]" />
           </div>
-          <span className="font-display font-black text-2xl text-neutral-950 dark:text-white leading-none">
+          <span className="font-display font-bold text-2xl text-neutral-950 dark:text-white leading-none">
             {userStats.mvp_count}
           </span>
-          <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase font-bold mt-1">
+          <span className="font-mono text-[10px] text-neutral-600 dark:text-neutral-400 uppercase font-semibold tracking-wider mt-1">
             MVPs
           </span>
         </div>
@@ -189,10 +189,10 @@ export default async function PerfilPage() {
           >
             <CalendarCheck className="w-4 h-4 stroke-[2.5]" />
           </div>
-          <span className="font-display font-black text-2xl text-neutral-950 dark:text-white leading-none">
+          <span className="font-display font-bold text-2xl text-neutral-950 dark:text-white leading-none">
             {userStats.matches_played}
           </span>
-          <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase font-bold mt-1">
+          <span className="font-mono text-[10px] text-neutral-600 dark:text-neutral-400 uppercase font-semibold tracking-wider mt-1">
             Partidos
           </span>
         </div>
@@ -201,10 +201,10 @@ export default async function PerfilPage() {
           <div className="w-7 h-7 rounded-lg bg-blue-500 text-white flex items-center justify-center mb-1">
             <Award className="w-4 h-4 stroke-[2.5]" />
           </div>
-          <span className="font-display font-black text-2xl text-neutral-950 dark:text-white leading-none">
+          <span className="font-display font-bold text-2xl text-neutral-950 dark:text-white leading-none">
             {userStats.mvp_votes_received}
           </span>
-          <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase font-bold mt-1">
+          <span className="font-mono text-[10px] text-neutral-600 dark:text-neutral-400 uppercase font-semibold tracking-wider mt-1">
             Votos
           </span>
         </div>
@@ -214,7 +214,7 @@ export default async function PerfilPage() {
       <div className="bg-white dark:bg-neutral-900 p-4 rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile mb-4">
         <div className="flex items-center justify-between mb-2.5">
           <div>
-            <h3 className="font-display font-black text-sm uppercase tracking-wider text-neutral-950 dark:text-white">
+            <h3 className="font-display font-bold text-sm uppercase tracking-wider text-neutral-950 dark:text-white">
               Tema y Apariencia
             </h3>
             <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 mt-0.5">

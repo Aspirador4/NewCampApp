@@ -72,7 +72,7 @@ export function EventAttendanceCTA({
               <CheckCircle2 className="w-6 h-6 stroke-[2.5]" />
             </div>
             <div>
-              <p className="font-display font-black text-base text-emerald-950 dark:text-emerald-200 uppercase tracking-tight leading-tight">
+              <p className="font-display font-bold text-base text-emerald-950 dark:text-emerald-200 uppercase tracking-tight leading-tight">
                 ¡Tu cupo está confirmado!
               </p>
               <p className="font-sans text-xs text-emerald-800 dark:text-emerald-300 mt-0.5">
@@ -85,7 +85,7 @@ export function EventAttendanceCTA({
             type="button"
             onClick={() => setShowCancelModal(true)}
             disabled={loading}
-            className="btn-tactile w-full py-2.5 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-900 dark:text-neutral-100 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5"
+            className="btn-tactile w-full py-2.5 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-900 dark:text-neutral-100 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5"
           >
             <UserMinus className="w-3.5 h-3.5 text-neutral-600 dark:text-neutral-400" />
             <span>Darme de baja</span>
@@ -101,7 +101,7 @@ export function EventAttendanceCTA({
               <Clock className="w-6 h-6 stroke-[2.5]" />
             </div>
             <div>
-              <p className="font-display font-black text-base text-amber-950 dark:text-amber-200 uppercase tracking-tight leading-tight">
+              <p className="font-display font-bold text-base text-amber-950 dark:text-amber-200 uppercase tracking-tight leading-tight">
                 En Lista de Espera {waitlistPosition ? `• Puesto #${waitlistPosition}` : ''}
               </p>
               <p className="font-sans text-xs text-amber-800 dark:text-amber-300 mt-0.5">
@@ -114,7 +114,7 @@ export function EventAttendanceCTA({
             type="button"
             onClick={() => setShowCancelModal(true)}
             disabled={loading}
-            className="btn-tactile w-full py-2.5 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-900 dark:text-neutral-100 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition"
+            className="btn-tactile w-full py-2.5 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-900 dark:text-neutral-100 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition"
           >
             Salir de la lista de espera
           </button>
@@ -128,7 +128,7 @@ export function EventAttendanceCTA({
             type="button"
             onClick={handleJoin}
             disabled={loading}
-            className={`btn-tactile w-full py-3.5 px-4 rounded-2xl text-white font-display font-black text-base uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile flex items-center justify-center gap-2 disabled:opacity-50`}
+            className={`btn-tactile w-full py-3.5 px-4 rounded-2xl text-white font-display font-bold text-base uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile flex items-center justify-center gap-2 disabled:opacity-50`}
             style={{
               backgroundColor: isFull ? '#d97706' : 'var(--club-primary, #059669)',
             }}
@@ -158,7 +158,7 @@ export function EventAttendanceCTA({
         <div className="fixed inset-0 bg-neutral-950/70 dark:bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-neutral-900 rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile p-5 w-full max-w-sm space-y-4">
             <div>
-              <h3 className="font-display font-black text-xl uppercase tracking-tight text-neutral-950 dark:text-white">
+              <h3 className="font-display font-bold text-xl uppercase tracking-tight text-neutral-950 dark:text-white">
                 ¿Confirmas darte de baja?
               </h3>
               <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-1 font-sans">
@@ -185,7 +185,7 @@ export function EventAttendanceCTA({
               <button
                 type="button"
                 onClick={() => setShowCancelModal(false)}
-                className="btn-tactile flex-1 py-2.5 px-3 rounded-xl border-2 border-neutral-300 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 bg-white dark:bg-neutral-800 font-display font-black text-xs uppercase"
+                className="btn-tactile flex-1 py-2.5 px-3 rounded-xl border-2 border-neutral-300 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 bg-white dark:bg-neutral-800 font-display font-bold text-xs uppercase"
               >
                 Volver
               </button>
@@ -193,7 +193,7 @@ export function EventAttendanceCTA({
                 type="button"
                 onClick={handleLeave}
                 disabled={loading}
-                className="btn-tactile flex-1 py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-display font-black text-xs uppercase border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm"
+                className="btn-tactile flex-1 py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-display font-bold text-xs uppercase border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm"
               >
                 {loading ? 'Liberando...' : 'Confirmar Baja'}
               </button>

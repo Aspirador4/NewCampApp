@@ -100,7 +100,7 @@ export function ClubSwitcher({
 
         <div className="flex flex-col min-w-0 pr-1">
           <div className="flex items-center gap-1.5">
-            <span className="font-display font-black text-neutral-950 dark:text-white text-base uppercase tracking-tight truncate max-w-[170px] sm:max-w-[210px] leading-tight">
+            <span className="font-display font-bold text-neutral-950 dark:text-white text-base uppercase tracking-tight truncate max-w-[170px] sm:max-w-[210px] leading-tight">
               {currentClub.name}
             </span>
             <ChevronDown className="w-4 h-4 text-neutral-400 group-hover:text-neutral-700 dark:group-hover:text-neutral-200 transition flex-shrink-0" />
@@ -142,7 +142,7 @@ export function ClubSwitcher({
             {/* Header */}
             <div className="p-4 border-b-2 border-neutral-900/10 dark:border-neutral-800 flex items-center justify-between bg-neutral-50 dark:bg-neutral-900/90">
               <div>
-                <h3 className="font-display font-black text-xl text-neutral-950 dark:text-white uppercase tracking-tight">Mis Clubes</h3>
+                <h3 className="font-display font-bold text-xl text-neutral-950 dark:text-white uppercase tracking-tight">Mis Clubes</h3>
                 <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mt-0.5">
                   Cambiar club activo para vestuario y finanzas
                 </p>
@@ -180,7 +180,7 @@ export function ClubSwitcher({
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div
-                          className="w-10 h-10 rounded-xl border border-neutral-900 dark:border-neutral-700 flex items-center justify-center text-white font-display font-black text-sm shadow-xs flex-shrink-0 overflow-hidden"
+                          className="w-10 h-10 rounded-xl border border-neutral-900 dark:border-neutral-700 flex items-center justify-center text-white font-display font-bold text-sm shadow-xs flex-shrink-0 overflow-hidden"
                           style={{
                             background: `linear-gradient(135deg, ${itemTheme.gradientFrom}, ${itemTheme.gradientTo})`,
                           }}
@@ -198,7 +198,7 @@ export function ClubSwitcher({
                         </div>
 
                         <div className="min-w-0">
-                          <p className="font-display font-black text-sm uppercase tracking-tight text-neutral-950 dark:text-white truncate">
+                          <p className="font-display font-bold text-sm uppercase tracking-tight text-neutral-950 dark:text-white truncate">
                             {item.club.name}
                           </p>
                           <div className="flex items-center gap-1.5 mt-0.5">
@@ -247,7 +247,7 @@ export function ClubSwitcher({
               <Link
                 href="/club/nuevo"
                 onClick={() => setIsOpen(false)}
-                className="btn-tactile w-full min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-amber-300 hover:bg-amber-400 text-neutral-950 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition"
+                className="btn-tactile w-full min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-amber-300 hover:bg-amber-400 text-neutral-950 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition"
               >
                 <PlusCircle className="w-4 h-4 stroke-[2.5]" />
                 Crear Nuevo Club
@@ -256,7 +256,7 @@ export function ClubSwitcher({
               <Link
                 href="/club/unirse"
                 onClick={() => setIsOpen(false)}
-                className="btn-tactile w-full min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-900 dark:text-white font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm transition"
+                className="btn-tactile w-full min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-900 dark:text-white font-display font-bold text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm transition"
               >
                 <Compass className="w-4 h-4 stroke-[2.5]" />
                 Explorar o Unirme a otro Club

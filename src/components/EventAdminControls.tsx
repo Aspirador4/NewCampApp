@@ -56,7 +56,7 @@ export function EventAdminControls({ eventId, currentStatus, isAdmin, eventType 
     <div className="bg-neutral-950 text-white rounded-3xl p-5 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile space-y-4">
       <div className="flex items-center gap-2">
         <Shield className="w-4 h-4 text-emerald-400 stroke-[2.5]" />
-        <h3 className="font-display font-black text-xs uppercase tracking-wider text-neutral-100">
+        <h3 className="font-display font-bold text-xs uppercase tracking-wider text-neutral-100">
           Control de Convocatoria (Capitán / Admin)
         </h3>
       </div>
@@ -75,7 +75,7 @@ export function EventAdminControls({ eventId, currentStatus, isAdmin, eventType 
                 type="button"
                 onClick={handleApprove}
                 disabled={loading}
-                className="btn-tactile flex-1 py-2.5 px-3 rounded-xl border-2 border-neutral-900 bg-emerald-500 hover:bg-emerald-600 text-neutral-950 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5 disabled:opacity-50 min-h-[44px]"
+                className="btn-tactile flex-1 py-2.5 px-3 rounded-xl border-2 border-neutral-900 bg-emerald-500 hover:bg-emerald-600 text-neutral-950 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5 disabled:opacity-50 min-h-[44px]"
               >
                 {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5 stroke-[2.5]" />}
                 <span>Aprobar Convocatoria</span>
@@ -84,7 +84,7 @@ export function EventAdminControls({ eventId, currentStatus, isAdmin, eventType 
                 type="button"
                 onClick={handleReject}
                 disabled={loading}
-                className="btn-tactile py-2.5 px-3 rounded-xl border-2 border-neutral-900 bg-rose-500 hover:bg-rose-600 text-white font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5 disabled:opacity-50 min-h-[44px]"
+                className="btn-tactile py-2.5 px-3 rounded-xl border-2 border-neutral-900 bg-rose-500 hover:bg-rose-600 text-white font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5 disabled:opacity-50 min-h-[44px]"
               >
                 {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5 stroke-[2.5]" />}
                 <span>Rechazar</span>
@@ -103,7 +103,7 @@ export function EventAdminControls({ eventId, currentStatus, isAdmin, eventType 
               type="button"
               onClick={() => handleStatusChange('finalizado')}
               disabled={loading}
-              className="btn-tactile flex-1 min-w-[130px] py-2.5 px-3.5 rounded-xl border-2 border-neutral-900 bg-emerald-500 hover:bg-emerald-600 text-neutral-950 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5 disabled:opacity-50 min-h-[44px]"
+              className="btn-tactile flex-1 min-w-[130px] py-2.5 px-3.5 rounded-xl border-2 border-neutral-900 bg-emerald-500 hover:bg-emerald-600 text-neutral-950 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5 disabled:opacity-50 min-h-[44px]"
             >
               {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />}
               <span>{eventType === 'partido' ? 'Finalizar y Abrir MVP' : 'Finalizar Evento'}</span>
@@ -115,7 +115,7 @@ export function EventAdminControls({ eventId, currentStatus, isAdmin, eventType 
               type="button"
               onClick={() => handleStatusChange('cancelado')}
               disabled={loading}
-              className="btn-tactile py-2.5 px-3 rounded-xl border-2 border-neutral-900 bg-neutral-900 hover:bg-rose-950 text-neutral-300 hover:text-rose-200 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5 disabled:opacity-50 min-h-[44px]"
+              className="btn-tactile py-2.5 px-3 rounded-xl border-2 border-neutral-900 bg-neutral-900 hover:bg-rose-950 text-neutral-300 hover:text-rose-200 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5 disabled:opacity-50 min-h-[44px]"
             >
               <Ban className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Cancelar</span>

@@ -46,7 +46,7 @@ export function PalettePicker({ selectedId, onSelect, disabled = false }: Palett
               </div>
 
               <div>
-                <p className="font-display font-black text-xs uppercase tracking-tight text-neutral-950 dark:text-white leading-tight">
+                <p className="font-display font-bold text-xs uppercase tracking-tight text-neutral-950 dark:text-white leading-tight">
                   {palette.name}
                 </p>
                 <p className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 truncate mt-0.5">

@@ -66,7 +66,7 @@ export default function NuevoClubPage() {
           <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
         </Link>
         <div>
-          <h1 className="font-display font-black text-2xl uppercase tracking-tight text-neutral-950 dark:text-white leading-none">
+          <h1 className="font-display font-bold text-2xl uppercase tracking-tight text-neutral-950 dark:text-white leading-none">
             Crear Nuevo Club
           </h1>
           <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mt-0.5">
@@ -85,7 +85,7 @@ export default function NuevoClubPage() {
       {/* Live Brand Preview Card */}
       <div className="mt-4 p-5 rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-[#14161f] shadow-tactile flex items-center gap-4">
         <div
-          className="w-14 h-14 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex items-center justify-center text-white font-display font-black text-lg flex-shrink-0 transition-colors overflow-hidden"
+          className="w-14 h-14 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex items-center justify-center text-white font-display font-bold text-lg flex-shrink-0 transition-colors overflow-hidden"
           style={{
             background: `linear-gradient(135deg, ${activePalette.gradientFrom}, ${activePalette.gradientTo})`,
           }}
@@ -105,10 +105,10 @@ export default function NuevoClubPage() {
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="font-mono text-[9px] font-black text-neutral-400 uppercase tracking-widest">
+          <p className="font-mono text-[9px] font-bold text-neutral-400 uppercase tracking-widest">
             Vista Previa de Escudo
           </p>
-          <h3 className="font-display font-black text-xl uppercase tracking-tight text-neutral-950 dark:text-white truncate">
+          <h3 className="font-display font-bold text-xl uppercase tracking-tight text-neutral-950 dark:text-white truncate">
             {name.trim() || 'Nombre de tu Club'}
           </h3>
           <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 truncate mt-0.5">
@@ -120,7 +120,7 @@ export default function NuevoClubPage() {
       {/* Form */}
       <form onSubmit={handleSubmit} className="mt-5 space-y-4">
         <div className="space-y-1.5">
-          <label className="font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-white">
+          <label className="font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white">
             Nombre Oficial del Club *
           </label>
           <input
@@ -135,7 +135,7 @@ export default function NuevoClubPage() {
 
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label className="font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-white">
+            <label className="font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white">
               Identificador Único (Slug) *
             </label>
             <span className="font-mono text-[10px] text-neutral-400 dark:text-neutral-500">
@@ -166,12 +166,12 @@ export default function NuevoClubPage() {
         {/* 10 Color Palettes Picker */}
         <div className="space-y-2 pt-1">
           <div className="flex items-center justify-between">
-            <label className="font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-white flex items-center gap-1.5">
+            <label className="font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white flex items-center gap-1.5">
               <Palette className="w-3.5 h-3.5 text-neutral-600 dark:text-neutral-400 stroke-[2.5]" />
               Color Institucional (10 Paletas Oficiales)
             </label>
             <span
-              className="font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-700"
+              className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-700"
               style={{
                 backgroundColor: activePalette.primaryLight,
                 color: activePalette.primary,
@@ -191,7 +191,7 @@ export default function NuevoClubPage() {
         </div>
 
         <div className="space-y-1.5">
-          <label className="font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-white">
+          <label className="font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white">
             Descripción o Lema Deportivo
           </label>
           <textarea
@@ -204,7 +204,7 @@ export default function NuevoClubPage() {
         </div>
 
         <div className="space-y-1.5">
-          <label className="font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-white">
+          <label className="font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white">
             URL del Escudo / Logo (Opcional)
           </label>
           <input
@@ -217,7 +217,7 @@ export default function NuevoClubPage() {
         </div>
 
         <div className="p-4 rounded-2xl bg-neutral-100 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700 text-xs text-neutral-800 dark:text-neutral-200 space-y-1">
-          <p className="font-display font-black text-xs uppercase tracking-wider flex items-center gap-1.5 text-neutral-950 dark:text-white">
+          <p className="font-display font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 text-neutral-950 dark:text-white">
             <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
             Configuración Automática
           </p>
@@ -230,7 +230,7 @@ export default function NuevoClubPage() {
         <button
           type="submit"
           disabled={loading || !name.trim() || !slug.trim()}
-          className="btn-tactile w-full min-h-[48px] py-3.5 px-4 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 text-white font-display font-black text-xs uppercase tracking-wider shadow-tactile transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
+          className="btn-tactile w-full min-h-[48px] py-3.5 px-4 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 text-white font-display font-bold text-xs uppercase tracking-wider shadow-tactile transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
           style={{
             backgroundColor: activePalette.primary,
           }}

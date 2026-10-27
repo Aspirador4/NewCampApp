@@ -79,7 +79,7 @@ export default async function UnirseClubPage({ params }: UnirseClubPageProps) {
           <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
         </Link>
         <div>
-          <h1 className="font-display font-black text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
+          <h1 className="font-display font-bold text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
             Solicitud de Fichaje
           </h1>
           <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mt-0.5">
@@ -91,7 +91,7 @@ export default async function UnirseClubPage({ params }: UnirseClubPageProps) {
       {/* Club Matchday Ticket Pass */}
       <div className="mt-4 bg-white dark:bg-[#14161f] border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile rounded-3xl overflow-hidden relative">
         <div className="bg-neutral-950 text-white p-4 border-b-2 border-neutral-900 dark:border-neutral-700 flex items-center justify-between">
-          <span className="font-mono text-[10px] font-black uppercase tracking-widest text-emerald-400">
+          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-400">
             FICHA OFICIAL DE CLUB
           </span>
           <span className="font-mono text-[10px] font-bold text-neutral-400 bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">
@@ -115,7 +115,7 @@ export default async function UnirseClubPage({ params }: UnirseClubPageProps) {
             </div>
 
             <div className="min-w-0 flex-1">
-              <h2 className="font-display font-black text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none truncate">
+              <h2 className="font-display font-bold text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none truncate">
                 {club.name}
               </h2>
               <div className="flex items-center gap-2 mt-1.5 flex-wrap">
@@ -143,7 +143,7 @@ export default async function UnirseClubPage({ params }: UnirseClubPageProps) {
               <Building2 className="w-7 h-7 stroke-[2.5]" />
             </div>
             <div>
-              <h3 className="font-display font-black text-xl uppercase tracking-tight text-neutral-950 dark:text-white">
+              <h3 className="font-display font-bold text-xl uppercase tracking-tight text-neutral-950 dark:text-white">
                 Inicia Sesión para Continuar
               </h3>
               <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-1 max-w-xs mx-auto">
@@ -152,7 +152,7 @@ export default async function UnirseClubPage({ params }: UnirseClubPageProps) {
             </div>
             <Link
               href={`/login?next=/club/unirse/${club.slug}`}
-              className="btn-tactile inline-flex items-center justify-center w-full py-3 px-4 rounded-xl border-2 border-neutral-900 dark:border-white bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition min-h-[44px]"
+              className="btn-tactile inline-flex items-center justify-center w-full py-3 px-4 rounded-xl border-2 border-neutral-900 dark:border-white bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition min-h-[44px]"
             >
               Iniciar Sesión o Registrarse
             </Link>
@@ -163,7 +163,7 @@ export default async function UnirseClubPage({ params }: UnirseClubPageProps) {
               <CheckCircle2 className="w-7 h-7 stroke-[2.5]" />
             </div>
             <div>
-              <h3 className="font-display font-black text-xl uppercase tracking-tight text-neutral-950 dark:text-white">
+              <h3 className="font-display font-bold text-xl uppercase tracking-tight text-neutral-950 dark:text-white">
                 ¡Ya Eres Miembro Oficial!
               </h3>
               <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-1">
@@ -181,7 +181,7 @@ export default async function UnirseClubPage({ params }: UnirseClubPageProps) {
               <Clock className="w-7 h-7 stroke-[2.5] animate-pulse" />
             </div>
             <div>
-              <h3 className="font-display font-black text-xl uppercase tracking-tight text-neutral-950 dark:text-white">
+              <h3 className="font-display font-bold text-xl uppercase tracking-tight text-neutral-950 dark:text-white">
                 Solicitud en Revisión
               </h3>
               <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-1">
@@ -195,7 +195,7 @@ export default async function UnirseClubPage({ params }: UnirseClubPageProps) {
             )}
             <Link
               href="/"
-              className="btn-tactile inline-flex items-center justify-center w-full py-2.5 px-4 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-[#1a1d28] hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-900 dark:text-white font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition min-h-[44px]"
+              className="btn-tactile inline-flex items-center justify-center w-full py-2.5 px-4 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-[#1a1d28] hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-900 dark:text-white font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition min-h-[44px]"
             >
               Volver al Clubhouse
             </Link>
@@ -203,7 +203,7 @@ export default async function UnirseClubPage({ params }: UnirseClubPageProps) {
         ) : (
           <div className="space-y-4">
             <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-xs text-neutral-900 dark:text-white">
-              <p className="font-display font-black text-xs uppercase tracking-wider flex items-center gap-1.5 text-amber-900 dark:text-amber-300">
+              <p className="font-display font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 text-amber-900 dark:text-amber-300">
                 <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                 Admisión Moderada por Directorio
               </p>

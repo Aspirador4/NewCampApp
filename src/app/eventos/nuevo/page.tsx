@@ -31,7 +31,7 @@ export default async function NuevoEventoPage() {
           <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
         </Link>
         <div>
-          <h1 className="font-display font-black text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
+          <h1 className="font-display font-bold text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
             Convocar Evento
           </h1>
           <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mt-0.5">

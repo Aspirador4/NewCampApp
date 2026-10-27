@@ -96,7 +96,7 @@ export default async function AdminInvitadosPage() {
             <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
           </Link>
           <div>
-            <h1 className="font-display font-black text-2xl uppercase tracking-tight text-neutral-950 dark:text-white leading-none">
+            <h1 className="font-display font-bold text-2xl uppercase tracking-tight text-neutral-950 dark:text-white leading-none">
               Moderación de Invitados
             </h1>
             <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mt-0.5">
@@ -104,7 +104,7 @@ export default async function AdminInvitadosPage() {
             </p>
           </div>
         </div>
-        <span className="font-mono text-[9px] font-black uppercase px-2.5 py-1 rounded-md bg-amber-400 text-neutral-950 border border-neutral-900 dark:border-neutral-700 shadow-tactile-sm">
+        <span className="font-mono text-[9px] font-bold uppercase px-2.5 py-1 rounded-md bg-amber-400 text-neutral-950 border border-neutral-900 dark:border-neutral-700 shadow-tactile-sm">
           {pendingList.length} pendientes
         </span>
       </div>
@@ -117,7 +117,7 @@ export default async function AdminInvitadosPage() {
               <ShieldCheck className="w-7 h-7 stroke-[2.5]" />
             </div>
             <div>
-              <h3 className="font-display font-black text-lg uppercase tracking-tight text-neutral-950 dark:text-white">
+              <h3 className="font-display font-bold text-lg uppercase tracking-tight text-neutral-950 dark:text-white">
                 ¡Al día! No hay invitados pendientes
               </h3>
               <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 font-sans">
@@ -134,7 +134,7 @@ export default async function AdminInvitadosPage() {
               <div className="border-b-2 border-neutral-900/10 dark:border-white/10 pb-3">
                 <Link
                   href={`/eventos/${event.id}`}
-                  className="font-display font-black text-lg uppercase tracking-tight text-neutral-950 dark:text-white hover:underline transition"
+                  className="font-display font-bold text-lg uppercase tracking-tight text-neutral-950 dark:text-white hover:underline transition"
                 >
                   {event.title}
                 </Link>

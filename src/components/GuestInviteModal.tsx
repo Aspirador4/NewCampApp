@@ -52,7 +52,7 @@ export function GuestInviteModal({ eventId, eventClosed }: GuestInviteModalProps
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="btn-tactile w-full py-3 px-4 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-950 dark:text-white font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition active:scale-[0.98] flex items-center justify-center gap-2 min-h-[44px]"
+        className="btn-tactile w-full py-3 px-4 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-950 dark:text-white font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition active:scale-[0.98] flex items-center justify-center gap-2 min-h-[44px]"
       >
         <UserPlus className="w-4 h-4 text-emerald-600 stroke-[2.5]" />
         <span>+ Sumar un Invitado al Partido</span>
@@ -67,7 +67,7 @@ export function GuestInviteModal({ eventId, eventClosed }: GuestInviteModalProps
                   <UserPlus className="w-4 h-4 stroke-[2.5]" />
                 </div>
                 <div>
-                  <h3 className="font-display font-black text-base text-neutral-950 dark:text-white uppercase tracking-tight">
+                  <h3 className="font-display font-bold text-base text-neutral-950 dark:text-white uppercase tracking-tight">
                     Postular Invitado
                   </h3>
                   <p className="font-mono text-[9px] text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
@@ -94,7 +94,7 @@ export function GuestInviteModal({ eventId, eventClosed }: GuestInviteModalProps
             {success ? (
               <div className="py-6 flex flex-col items-center justify-center text-center space-y-2">
                 <CheckCircle2 className="w-10 h-10 text-emerald-600 animate-bounce stroke-[2.5]" />
-                <p className="font-display font-black text-base uppercase text-neutral-950 dark:text-white">
+                <p className="font-display font-bold text-base uppercase text-neutral-950 dark:text-white">
                   ¡Postulación Enviada!
                 </p>
                 <p className="text-xs text-neutral-500 dark:text-neutral-400 font-sans">
@@ -104,7 +104,7 @@ export function GuestInviteModal({ eventId, eventClosed }: GuestInviteModalProps
             ) : (
               <form onSubmit={handleSubmit} className="space-y-3.5">
                 <div>
-                  <label htmlFor="guest_name" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-neutral-100 mb-1">
+                  <label htmlFor="guest_name" className="block font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-neutral-100 mb-1">
                     Nombre y Apellido <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -127,7 +127,7 @@ export function GuestInviteModal({ eventId, eventClosed }: GuestInviteModalProps
                     type="button"
                     onClick={() => setIsOpen(false)}
                     disabled={loading}
-                    className="btn-tactile flex-1 py-2.5 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 font-display font-black text-xs uppercase tracking-wider text-neutral-800 dark:text-neutral-200 shadow-tactile-sm"
+                    className="btn-tactile flex-1 py-2.5 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 font-display font-bold text-xs uppercase tracking-wider text-neutral-800 dark:text-neutral-200 shadow-tactile-sm"
                   >
                     Cancelar
                   </button>
@@ -135,7 +135,7 @@ export function GuestInviteModal({ eventId, eventClosed }: GuestInviteModalProps
                   <button
                     type="submit"
                     disabled={loading}
-                    className="btn-tactile flex-1 py-2.5 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-neutral-950 dark:bg-neutral-100 hover:bg-neutral-900 dark:hover:bg-neutral-200 font-display font-black text-xs uppercase tracking-wider text-white dark:text-neutral-950 shadow-tactile-sm flex items-center justify-center gap-1.5 min-h-[44px]"
+                    className="btn-tactile flex-1 py-2.5 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-neutral-950 dark:bg-neutral-100 hover:bg-neutral-900 dark:hover:bg-neutral-200 font-display font-bold text-xs uppercase tracking-wider text-white dark:text-neutral-950 shadow-tactile-sm flex items-center justify-center gap-1.5 min-h-[44px]"
                   >
                     {loading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />

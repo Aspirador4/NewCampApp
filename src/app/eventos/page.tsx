@@ -132,7 +132,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
             <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
           </Link>
           <div>
-            <h1 className="font-display font-black text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
+            <h1 className="font-display font-bold text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
               Partidos & Eventos
             </h1>
             <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mt-0.5">
@@ -143,7 +143,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
 
         <Link
           href="/eventos/nuevo"
-          className="btn-tactile min-h-[42px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-white font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm"
+          className="btn-tactile min-h-[42px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-white font-display font-bold text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm"
           style={{ backgroundColor: 'var(--club-primary, #059669)' }}
         >
           <Plus className="w-4 h-4 stroke-[3]" />
@@ -155,7 +155,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
       <div className="flex gap-2 my-3 overflow-x-auto pb-1 text-xs no-scrollbar">
         <Link
           href={`/eventos?filtro=proximos${tipo ? `&tipo=${tipo}` : ''}`}
-          className={`btn-tactile min-h-[38px] px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 dark:border-neutral-700 ${
+          className={`btn-tactile min-h-[38px] px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display uppercase tracking-wider text-xs font-bold border-2 border-neutral-900 dark:border-neutral-700 ${
             filtro === 'proximos'
               ? 'bg-neutral-950 dark:bg-neutral-100 text-white dark:text-neutral-950 shadow-tactile-sm'
               : 'bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800'
@@ -165,7 +165,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         </Link>
         <Link
           href={`/eventos?filtro=finalizados${tipo ? `&tipo=${tipo}` : ''}`}
-          className={`btn-tactile min-h-[38px] px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 dark:border-neutral-700 ${
+          className={`btn-tactile min-h-[38px] px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display uppercase tracking-wider text-xs font-bold border-2 border-neutral-900 dark:border-neutral-700 ${
             filtro === 'finalizados'
               ? 'bg-neutral-950 dark:bg-neutral-100 text-white dark:text-neutral-950 shadow-tactile-sm'
               : 'bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800'
@@ -176,7 +176,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         {isAdmin && pendingClosureCount && pendingClosureCount > 0 && (
           <Link
             href={`/eventos?filtro=pendientes_cierre${tipo ? `&tipo=${tipo}` : ''}`}
-            className={`btn-tactile min-h-[38px] px-3.5 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 dark:border-neutral-700 ${
+            className={`btn-tactile min-h-[38px] px-3.5 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 font-display uppercase tracking-wider text-xs font-bold border-2 border-neutral-900 dark:border-neutral-700 ${
               filtro === 'pendientes_cierre'
                 ? 'bg-amber-400 text-neutral-950 shadow-tactile-sm'
                 : 'bg-amber-100 dark:bg-amber-950/60 text-amber-950 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60'
@@ -188,7 +188,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         {isAdmin && (
           <Link
             href={`/eventos?filtro=pendientes${tipo ? `&tipo=${tipo}` : ''}`}
-            className={`btn-tactile min-h-[38px] px-3.5 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 font-display uppercase tracking-wider text-xs font-black border-2 border-neutral-900 dark:border-neutral-700 ${
+            className={`btn-tactile min-h-[38px] px-3.5 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 font-display uppercase tracking-wider text-xs font-bold border-2 border-neutral-900 dark:border-neutral-700 ${
               filtro === 'pendientes'
                 ? 'bg-amber-400 text-neutral-950 shadow-tactile-sm'
                 : 'bg-white dark:bg-neutral-900 text-amber-900 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-neutral-800'
@@ -212,7 +212,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
             <Link
               key={item.key}
               href={`/eventos?filtro=${filtro}&tipo=${item.key}`}
-              className={`btn-tactile min-h-[32px] px-3 py-1 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 ${
+              className={`btn-tactile min-h-[32px] px-3 py-1 rounded-xl whitespace-nowrap transition flex items-center justify-center font-display font-bold text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 ${
                 isActive
                   ? 'bg-neutral-950 dark:bg-neutral-100 text-white dark:text-neutral-950 shadow-tactile-sm'
                   : 'bg-white dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800'
@@ -315,7 +315,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                       <MapPin className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
                       <span className="truncate">{event.location}</span>
                     </div>
-                    <h2 className="font-display font-black text-2xl uppercase tracking-tight text-neutral-950 dark:text-white leading-tight mt-0.5">
+                    <h2 className="font-display font-bold text-2xl uppercase tracking-tight text-neutral-950 dark:text-white leading-tight mt-0.5">
                       {event.title}
                     </h2>
                   </div>
@@ -323,7 +323,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                   {/* Kickoff and Date Box */}
                   <div className="grid grid-cols-2 gap-2 bg-neutral-100 dark:bg-neutral-800/60 p-2.5 rounded-2xl border border-neutral-300 dark:border-neutral-700">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 flex items-center justify-center font-display font-black text-sm text-neutral-900 dark:text-neutral-100 shadow-tactile-sm flex-shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 flex items-center justify-center font-display font-bold text-sm text-neutral-900 dark:text-neutral-100 shadow-tactile-sm flex-shrink-0">
                         {day}
                       </div>
                       <div className="min-w-0">
@@ -338,7 +338,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                       </div>
                       <div className="min-w-0">
                         <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase block leading-none">Kickoff</span>
-                        <span className="font-mono font-extrabold text-xs text-neutral-900 dark:text-neutral-100 truncate block mt-0.5">{time} HRS</span>
+                        <span className="font-mono font-semibold text-xs tracking-wider text-neutral-900 dark:text-neutral-100 truncate block mt-0.5">{time} HRS</span>
                       </div>
                     </div>
                   </div>
@@ -350,7 +350,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                         <Users className="w-3.5 h-3.5 text-neutral-400" />
                         <span>Cupos</span>
                       </span>
-                      <span className="font-mono text-xs font-black text-neutral-900 dark:text-neutral-100">
+                      <span className="font-mono text-xs font-bold text-neutral-900 dark:text-neutral-100">
                         {totalConfirmed} {maxCap ? `/ ${maxCap}` : ''}
                         {waitlistCount > 0 && (
                           <span className="ml-1 text-amber-700 dark:text-amber-400 font-bold">(+{waitlistCount} espera)</span>
@@ -378,7 +378,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                   <div className="flex items-center justify-between pt-1">
                     <div>
                       <span className="font-mono text-[9px] uppercase text-neutral-500 dark:text-neutral-400 block">Cuota Cancha</span>
-                      <span className="font-display font-black text-base text-neutral-950 dark:text-white">
+                      <span className="font-display font-bold text-base text-neutral-950 dark:text-white">
                         {event.total_cost && event.total_cost > 0
                           ? `~$${Math.round(event.total_cost / (maxCap || 14)).toLocaleString('es-CL')}`
                           : event.cost_per_player && event.cost_per_player > 0
@@ -388,7 +388,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                       </span>
                     </div>
 
-                    <div className="btn-tactile bg-neutral-950 dark:bg-neutral-800 text-white font-display text-xs font-black uppercase tracking-wider px-3.5 py-2 rounded-xl border border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex items-center gap-1">
+                    <div className="btn-tactile bg-neutral-950 dark:bg-neutral-800 text-white font-display text-xs font-bold uppercase tracking-wider px-3.5 py-2 rounded-xl border border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex items-center gap-1">
                       <span>Ver Ficha</span>
                       <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
                     </div>

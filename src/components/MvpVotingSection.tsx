@@ -99,7 +99,7 @@ export function MvpVotingSection({
               <Trophy className="w-5 h-5 stroke-[2.5]" />
             </div>
             <div>
-              <h3 className="font-display font-black text-lg text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
+              <h3 className="font-display font-bold text-lg text-neutral-950 dark:text-white uppercase tracking-tight leading-none">
                 Votación de Jugador del Partido
               </h3>
               <p className="font-mono text-[10px] text-amber-900 dark:text-amber-300 uppercase tracking-wider mt-0.5">
@@ -163,11 +163,11 @@ export function MvpVotingSection({
                       </div>
 
                       <div className="min-w-0">
-                        <p className="font-display font-black text-sm text-neutral-950 dark:text-white uppercase truncate leading-tight">
+                        <p className="font-display font-bold text-sm text-neutral-950 dark:text-white uppercase truncate leading-tight">
                           {cand.full_name}
                         </p>
                         <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase">
-                          {cand.posicion || cand.sports_role}
+                          {cand.posicion || 'Jugador'}
                           {cand.numero_camiseta ? ` • #${cand.numero_camiseta}` : ''}
                         </p>
                       </div>
@@ -191,7 +191,7 @@ export function MvpVotingSection({
               type="button"
               onClick={handleVote}
               disabled={loading || !selectedPlayerId}
-              className="btn-tactile w-full py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 font-display font-black text-xs uppercase tracking-wider text-neutral-950 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm transition disabled:opacity-50 flex items-center justify-center gap-2"
+              className="btn-tactile w-full py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 font-display font-bold text-xs uppercase tracking-wider text-neutral-950 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm transition disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -209,7 +209,7 @@ export function MvpVotingSection({
         {(hasVoted || successMsg) && (
           <div className="p-4 rounded-2xl bg-white dark:bg-neutral-900 border-2 border-neutral-900 dark:border-neutral-700 text-center space-y-1 shadow-tactile-sm">
             <CheckCircle2 className="w-7 h-7 text-emerald-600 mx-auto" />
-            <p className="font-display font-black text-sm uppercase text-neutral-950 dark:text-white">
+            <p className="font-display font-bold text-sm uppercase text-neutral-950 dark:text-white">
               ¡Tu voto ha sido registrado!
             </p>
             <p className="font-sans text-xs text-neutral-500 dark:text-neutral-400">
@@ -232,7 +232,7 @@ export function MvpVotingSection({
               type="button"
               onClick={handleCloseVoting}
               disabled={adminClosing}
-              className="btn-tactile w-full py-2.5 px-3 rounded-xl bg-neutral-950 dark:bg-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-800/80 text-amber-400 font-display font-black text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm transition flex items-center justify-center gap-1.5 disabled:opacity-50"
+              className="btn-tactile w-full py-2.5 px-3 rounded-xl bg-neutral-950 dark:bg-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-800/80 text-amber-400 font-display font-bold text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm transition flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
               {adminClosing ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -258,7 +258,7 @@ export function MvpVotingSection({
         <div className="relative flex items-center justify-between border-b border-white/10 pb-3">
           <div className="flex items-center gap-2">
             <Trophy className="w-6 h-6 text-amber-400 animate-pulse" />
-            <h3 className="font-display font-black text-xl uppercase tracking-tight text-white leading-none">
+            <h3 className="font-display font-bold text-xl uppercase tracking-tight text-white leading-none">
               {isTie ? 'Ganadores MVP Compartido' : 'Jugador del Partido (MVP)'}
             </h3>
           </div>
@@ -286,10 +286,10 @@ export function MvpVotingSection({
               </div>
 
               <div className="mt-2.5">
-                <p className="font-display font-black text-base uppercase leading-tight text-white">
+                <p className="font-display font-bold text-base uppercase leading-tight text-white">
                   {winner.full_name}
                 </p>
-                <div className="inline-flex items-center gap-1 mt-1 px-2.5 py-0.5 rounded-full bg-amber-400 text-neutral-950 font-mono font-black text-[10px]">
+                <div className="inline-flex items-center gap-1 mt-1 px-2.5 py-0.5 rounded-full bg-amber-400 text-neutral-950 font-mono font-bold text-[10px]">
                   <Flame className="w-3.5 h-3.5 fill-current" />
                   <span>{winner.vote_count} {winner.vote_count === 1 ? 'voto' : 'votos'}</span>
                 </div>
@@ -308,7 +308,7 @@ export function MvpVotingSection({
               {allVoteResults.map((r) => (
                 <div key={r.player_id} className="flex items-center justify-between py-1 px-2.5 rounded-lg bg-white/5 border border-white/10">
                   <span className="truncate text-neutral-200">{r.full_name}</span>
-                  <span className="font-black text-amber-400">{r.vote_count} pts</span>
+                  <span className="font-bold text-amber-400">{r.vote_count} pts</span>
                 </div>
               ))}
             </div>

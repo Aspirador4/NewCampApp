@@ -71,7 +71,7 @@ export function EventGuestsSection({
       <div className="flex items-center justify-between border-b-2 border-neutral-900/10 dark:border-neutral-800 pb-2">
         <div className="flex items-center gap-2">
           <UserCheck className="w-5 h-5 text-neutral-900 dark:text-white stroke-[2.5]" />
-          <h2 className="font-display font-black text-lg text-neutral-950 dark:text-white uppercase tracking-tight">
+          <h2 className="font-display font-bold text-lg text-neutral-950 dark:text-white uppercase tracking-tight">
             Invitados Externos
           </h2>
           {approvedGuests.length > 0 && (
@@ -95,7 +95,7 @@ export function EventGuestsSection({
       {isAdmin && pendingGuests.length > 0 && (
         <div className="bg-amber-50 dark:bg-amber-950/40 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile rounded-3xl p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 font-display font-black text-xs text-amber-950 dark:text-amber-200 uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 font-display font-bold text-xs text-amber-950 dark:text-amber-200 uppercase tracking-wider">
               <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400 stroke-[2.5]" />
               <span>Aprobaciones Pendientes ({pendingGuests.length})</span>
             </div>
@@ -109,7 +109,7 @@ export function EventGuestsSection({
               return (
                 <div key={guest.id} className="p-3 flex items-center justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="font-display font-black text-sm text-neutral-950 dark:text-white uppercase tracking-tight truncate">
+                    <p className="font-display font-bold text-sm text-neutral-950 dark:text-white uppercase tracking-tight truncate">
                       {guest.guest_name}
                     </p>
                     <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400">
@@ -154,7 +154,7 @@ export function EventGuestsSection({
       {/* Member's own invited guests */}
       {!isAdmin && myGuests.length > 0 && (
         <div className="bg-white dark:bg-neutral-900 rounded-3xl p-4 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile space-y-3">
-          <p className="font-display font-black text-sm uppercase tracking-wider text-neutral-950 dark:text-white">
+          <p className="font-display font-bold text-sm uppercase tracking-wider text-neutral-950 dark:text-white">
             Mis Invitaciones ({myGuests.length})
           </p>
 
@@ -165,7 +165,7 @@ export function EventGuestsSection({
                 className="bg-neutral-50 dark:bg-neutral-800/60 p-3 rounded-2xl border-2 border-neutral-200 dark:border-neutral-700 flex items-center justify-between text-xs"
               >
                 <div>
-                  <p className="font-display font-black text-sm uppercase tracking-tight text-neutral-950 dark:text-white">{guest.guest_name}</p>
+                  <p className="font-display font-bold text-sm uppercase tracking-tight text-neutral-950 dark:text-white">{guest.guest_name}</p>
                   <span
                     className={`font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded border inline-block mt-0.5 ${
                       guest.status === 'aprobado'

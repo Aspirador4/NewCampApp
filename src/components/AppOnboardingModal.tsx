@@ -178,10 +178,10 @@ export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: A
             <Bell className="w-6 h-6 stroke-[2.5] animate-bounce" />
           </div>
           <div>
-            <span className="font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100">
+            <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100">
               Vestuario & Alertas
             </span>
-            <h3 className="font-display font-black text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none mt-1">
+            <h3 className="font-display font-bold text-2xl text-neutral-950 dark:text-white uppercase tracking-tight leading-none mt-1">
               ¡No te pierdas de nada!
             </h3>
           </div>
@@ -216,7 +216,7 @@ export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: A
         {/* Action 1: Notifications */}
         <div>
           {pushSuccess ? (
-            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-300 dark:border-emerald-800 rounded-2xl flex items-center justify-center gap-2 text-emerald-950 dark:text-emerald-200 text-xs font-display font-black uppercase tracking-wider">
+            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-300 dark:border-emerald-800 rounded-2xl flex items-center justify-center gap-2 text-emerald-950 dark:text-emerald-200 text-xs font-display font-bold uppercase tracking-wider">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 stroke-[2.5]" />
               <span>¡Notificaciones activadas en tu cuenta!</span>
             </div>
@@ -225,7 +225,7 @@ export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: A
               type="button"
               onClick={handleActivatePush}
               disabled={pushLoading || pushStatus === 'unsupported'}
-              className="btn-tactile w-full py-3 px-4 rounded-xl border-2 border-neutral-900 dark:border-white bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950 font-display font-black text-xs uppercase tracking-wider shadow-tactile transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50 min-h-[44px]"
+              className="btn-tactile w-full py-3 px-4 rounded-xl border-2 border-neutral-900 dark:border-white bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950 font-display font-bold text-xs uppercase tracking-wider shadow-tactile transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50 min-h-[44px]"
             >
               {pushLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -244,7 +244,7 @@ export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: A
         {/* Action 2: Add to Home Screen (PWA) */}
         {!isStandalone && (
           <div className="p-3.5 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700 text-xs space-y-2">
-            <div className="flex items-center gap-2 text-neutral-950 dark:text-white font-display font-black text-xs uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-neutral-950 dark:text-white font-display font-bold text-xs uppercase tracking-wider">
               <Smartphone className="w-4 h-4 text-neutral-700 dark:text-neutral-300 stroke-[2.5]" />
               <span>Instalar en tu Pantalla de Inicio</span>
             </div>
@@ -253,7 +253,7 @@ export function AppOnboardingModal({ isLoggedIn, userId, hasPushSub = false }: A
               <button
                 type="button"
                 onClick={handleInstallApp}
-                className="btn-tactile w-full py-2.5 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-amber-400 hover:bg-amber-500 text-neutral-950 font-display font-black text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5 shadow-tactile-sm"
+                className="btn-tactile w-full py-2.5 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-amber-400 hover:bg-amber-500 text-neutral-950 font-display font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5 shadow-tactile-sm"
               >
                 <Smartphone className="w-3.5 h-3.5 stroke-[2.5]" />
                 <span>Instalar App en el Celular</span>

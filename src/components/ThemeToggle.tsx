@@ -61,7 +61,7 @@ export function ThemeToggle({ variant = 'compact', className = '' }: ThemeToggle
               key={opt.value}
               type="button"
               onClick={() => setTheme(opt.value)}
-              className={`btn-tactile min-h-[44px] py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 text-xs font-display font-black uppercase tracking-wider transition ${
+              className={`btn-tactile min-h-[44px] py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 text-xs font-display font-bold uppercase tracking-wider transition ${
                 isSelected
                   ? 'bg-white dark:bg-neutral-900 text-neutral-950 dark:text-white border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm'
                   : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-white border-2 border-transparent'

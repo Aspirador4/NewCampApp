@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Search, Trophy, Calendar, User, X, Sparkles, Shield, UserCheck, UserX, Trash2, Check, AlertCircle, Loader2 } from 'lucide-react'
+import { Search, Trophy, Calendar, User, Flame, Filter, ChevronDown, X, Sparkles, Shield, UserCheck, UserX, Trash2, Check, AlertCircle, Loader2 } from 'lucide-react'
 import { approveMemberAction, rejectMemberAction, reconsiderMemberAction, deleteMemberAction, updateMemberRoleAction } from '@/app/miembros/actions'
 import { SystemRole } from '@/types/database.types'
 import { EmptyState } from '@/components/EmptyState'
@@ -184,7 +184,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <UserCheck className="w-4 h-4 text-amber-700 dark:text-amber-400" />
-              <h3 className="text-xs font-black uppercase tracking-wider text-amber-900 dark:text-amber-200">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-200">
                 Solicitudes de Admisión ({pendingMembers.length})
               </h3>
             </div>
@@ -242,7 +242,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <UserX className="w-4 h-4 text-rose-700 dark:text-rose-400" />
-              <h3 className="text-xs font-black uppercase tracking-wider text-rose-900 dark:text-rose-200">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-rose-900 dark:text-rose-200">
                 Postulaciones Rechazadas ({rejectedMembers.length})
               </h3>
             </div>
@@ -303,39 +303,41 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
         </div>
       )}
 
-      {/* Search Input */}
-      <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
-          <Search className="w-4 h-4 stroke-[2.5]" />
+      {/* Search & Position Filters */}
+      <div className="flex flex-col sm:flex-row gap-2.5">
+        <div className="relative flex-1">
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
+            <Search className="w-4 h-4 stroke-[2.5]" />
+          </div>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar jugador por nombre o correo..."
+            className="w-full pl-10 pr-3.5 py-2.5 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 text-base sm:text-sm bg-white dark:bg-[#14161f] focus:outline-none focus:ring-2 focus:ring-neutral-900 dark:focus:ring-white text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-tactile-sm"
+          />
         </div>
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar jugador por nombre o correo..."
-          className="w-full pl-10 pr-3.5 py-3 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 text-base sm:text-sm bg-white dark:bg-[#14161f] focus:outline-none focus:ring-2 focus:ring-neutral-900 dark:focus:ring-white text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-tactile-sm"
-        />
-      </div>
 
-      {/* Position Filter Chips */}
-      <div className="flex gap-1.5 overflow-x-auto pb-1 text-xs font-mono no-scrollbar">
-        {positions.map((pos) => {
-          const isActive = selectedPosition === pos
-          return (
-            <button
-              key={pos}
-              type="button"
-              onClick={() => setSelectedPosition(pos)}
-              className={`min-h-[36px] px-3.5 py-1.5 rounded-xl whitespace-nowrap transition active:scale-95 font-bold uppercase text-[11px] border-2 ${
-                isActive
-                  ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
-                  : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/10 border-neutral-900 dark:border-neutral-700'
-              }`}
-            >
-              {pos === 'todos' ? 'Todos los roles' : pos}
-            </button>
-          )
-        })}
+        <div className="relative sm:w-56 flex-shrink-0">
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500 dark:text-neutral-400">
+            <Filter className="w-4 h-4 stroke-[2.5]" />
+          </div>
+          <select
+            value={selectedPosition}
+            onChange={(e) => setSelectedPosition(e.target.value)}
+            aria-label="Filtrar por posición"
+            className="w-full appearance-none pl-9 pr-9 py-2.5 rounded-2xl border-2 border-neutral-900 dark:border-neutral-700 text-sm font-bold bg-white dark:bg-[#14161f] text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-900 dark:focus:ring-white shadow-tactile-sm cursor-pointer"
+          >
+            {positions.map((pos) => (
+              <option key={pos} value={pos} className="bg-white dark:bg-[#14161f] text-neutral-900 dark:text-white">
+                {pos === 'todos' ? 'Todas las posiciones' : pos}
+              </option>
+            ))}
+          </select>
+          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-neutral-500 dark:text-neutral-400">
+            <ChevronDown className="w-4 h-4 stroke-[2.5]" />
+          </div>
+        </div>
       </div>
 
       {/* Members Count */}
@@ -382,7 +384,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                         sizes="48px"
                       />
                     ) : (
-                      <span className="font-display font-black text-xl text-white">
+                      <span className="font-display font-bold text-xl text-white">
                         {member.full_name.charAt(0).toUpperCase()}
                       </span>
                     )}
@@ -390,11 +392,11 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <h3 className="font-display font-black text-base uppercase text-neutral-950 dark:text-white truncate leading-tight">
+                      <h3 className="font-display font-bold text-base uppercase text-neutral-950 dark:text-white truncate leading-tight">
                         {member.full_name}
                       </h3>
                       {member.system_role === 'admin' && (
-                        <span className="font-mono text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-neutral-950 dark:bg-white text-white dark:text-neutral-950">
+                        <span className="font-mono text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-neutral-950 dark:bg-white text-white dark:text-neutral-950">
                           Admin
                         </span>
                       )}
@@ -412,12 +414,12 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                         ))
                       ) : (
                         <span className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase">
-                          {member.sports_role}
+                          Jugador
                         </span>
                       )}
 
                       {Boolean(member.custom_attributes?.numero_camiseta) && (
-                        <span className="font-display font-black text-xs text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.2 rounded border border-neutral-300 dark:border-neutral-700">
+                        <span className="font-display font-bold text-xs text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.2 rounded border border-neutral-300 dark:border-neutral-700">
                           #{String(member.custom_attributes.numero_camiseta)}
                         </span>
                       )}
@@ -428,15 +430,15 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                 {/* Stats badges */}
                 <div className="flex items-center gap-2 text-right flex-shrink-0 pl-1">
                   <div className="bg-amber-50 dark:bg-amber-950/40 border-2 border-neutral-900 dark:border-neutral-700 px-2 py-1 rounded-xl text-center min-w-[44px] shadow-tactile-sm">
-                    <div className="flex items-center justify-center gap-0.5 text-amber-700 dark:text-amber-400 font-display font-black text-sm leading-none">
+                    <div className="flex items-center justify-center gap-0.5 text-amber-700 dark:text-amber-400 font-display font-bold text-sm leading-none">
                       <Trophy className="w-3 h-3 stroke-[2.5]" />
                       <span>{stats.mvp_count}</span>
                     </div>
-                    <span className="font-mono text-[8px] font-black text-amber-800 dark:text-amber-300 uppercase block mt-0.5">MVP</span>
+                    <span className="font-mono text-[8px] font-bold text-amber-800 dark:text-amber-300 uppercase block mt-0.5">MVP</span>
                   </div>
 
                   <div className="bg-neutral-100 dark:bg-neutral-800 border-2 border-neutral-900 dark:border-neutral-700 px-2 py-1 rounded-xl text-center min-w-[44px] shadow-tactile-sm">
-                    <span className="font-display font-black text-sm text-neutral-900 dark:text-white block leading-none">
+                    <span className="font-display font-bold text-sm text-neutral-900 dark:text-white block leading-none">
                       {stats.matches_played}
                     </span>
                     <span className="font-mono text-[8px] font-bold text-neutral-500 dark:text-neutral-400 uppercase block mt-0.5">PJ</span>
@@ -476,22 +478,24 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                     sizes="80px"
                   />
                 ) : (
-                  <span className="font-display font-black text-3xl text-white">
+                  <span className="font-display font-bold text-3xl text-white">
                     {activeMember.full_name.charAt(0).toUpperCase()}
                   </span>
                 )}
               </div>
 
               <div>
-                <h2 className="font-display font-black text-xl uppercase text-neutral-950 dark:text-white leading-tight">
+                <h2 className="font-display font-bold text-xl uppercase text-neutral-950 dark:text-white leading-tight">
                   {activeMember.full_name}
                 </h2>
                 <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                   <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300">
-                    {activeMember.sports_role}
+                    {Array.isArray(activeMember.custom_attributes?.posicion)
+                      ? (activeMember.custom_attributes.posicion as string[]).join(', ')
+                      : (activeMember.custom_attributes?.posicion as string) || 'Jugador'}
                   </span>
                   {activeMember.system_role === 'admin' && (
-                    <span className="font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded bg-neutral-950 dark:bg-white text-white dark:text-neutral-950">
+                    <span className="font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-neutral-950 dark:bg-white text-white dark:text-neutral-950">
                       Administrador
                     </span>
                   )}
@@ -501,49 +505,52 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
             {/* Stats Row */}
             <div className="grid grid-cols-4 gap-2 pt-2">
-              <div className="p-2.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-center">
+              <div className="p-2 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-center">
                 <Trophy className="w-4 h-4 text-amber-600 dark:text-amber-400 mx-auto mb-0.5 stroke-[2.5]" />
-                <span className="font-display font-black text-lg text-neutral-950 dark:text-white block leading-tight">
+                <span className="font-display font-bold text-xl text-neutral-950 dark:text-white block leading-tight">
                   {activeMember.stats?.mvp_count || 0}
                 </span>
-                <span className="font-mono text-[8px] font-black uppercase text-amber-800 dark:text-amber-300">MVPs</span>
+                <span className="font-mono text-[10px] font-semibold tracking-wider uppercase text-amber-800 dark:text-amber-300">MVPs</span>
               </div>
 
-              <div className="p-2.5 rounded-2xl bg-neutral-100 dark:bg-neutral-800 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-center">
+              <div className="p-2 rounded-2xl bg-neutral-100 dark:bg-neutral-800 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-center">
                 <Calendar className="w-4 h-4 text-neutral-700 dark:text-neutral-300 mx-auto mb-0.5 stroke-[2.5]" />
-                <span className="font-display font-black text-lg text-neutral-950 dark:text-white block leading-tight">
+                <span className="font-display font-bold text-xl text-neutral-950 dark:text-white block leading-tight">
                   {activeMember.stats?.matches_played || 0}
                 </span>
-                <span className="font-mono text-[8px] font-black uppercase text-neutral-600 dark:text-neutral-400">Partidos</span>
+                <span className="font-mono text-[10px] font-semibold tracking-wider uppercase text-neutral-600 dark:text-neutral-400">Partidos</span>
               </div>
 
-              <div className="p-2.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-center">
+              <div className="p-2 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-center">
                 <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 mx-auto mb-0.5 stroke-[2.5]" />
-                <span className="font-display font-black text-lg text-neutral-950 dark:text-white block leading-tight">
+                <span className="font-display font-bold text-xl text-neutral-950 dark:text-white block leading-tight">
                   {activeMember.stats?.mvp_votes_received || 0}
                 </span>
-                <span className="font-mono text-[8px] font-black uppercase text-blue-800 dark:text-blue-300">Votos</span>
+                <span className="font-mono text-[10px] font-semibold tracking-wider uppercase text-blue-800 dark:text-blue-300">Votos</span>
               </div>
 
-              <div className="p-2.5 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-center">
-                <User className="w-4 h-4 text-purple-600 dark:text-purple-400 mx-auto mb-0.5 stroke-[2.5]" />
-                <span className="font-display font-black text-lg text-neutral-950 dark:text-white block leading-tight">
+              <div
+                className="p-2 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-center"
+                title="Eventos sociales, asados y tercer tiempo"
+              >
+                <Flame className="w-4 h-4 text-purple-600 dark:text-purple-400 mx-auto mb-0.5 stroke-[2.5]" />
+                <span className="font-display font-bold text-xl text-neutral-950 dark:text-white block leading-tight">
                   {activeMember.stats?.social_events_attended || 0}
                 </span>
-                <span className="font-mono text-[8px] font-black uppercase text-purple-800 dark:text-purple-300">Social</span>
+                <span className="font-mono text-[10px] font-semibold tracking-wider uppercase text-purple-800 dark:text-purple-300">Juntadas</span>
               </div>
             </div>
 
             {/* Custom Attributes & Profile Info */}
             <div className="space-y-2 pt-2 border-t-2 border-neutral-900/10 dark:border-white/10 text-xs">
-              <h4 className="font-display font-black uppercase tracking-wider text-xs text-neutral-500 dark:text-neutral-400">
+              <h4 className="font-display font-bold uppercase tracking-wider text-xs text-neutral-500 dark:text-neutral-400">
                 Ficha Deportiva & Datos
               </h4>
 
               {/* Posiciones */}
               <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700">
                 <span className="text-neutral-500 dark:text-neutral-400 font-medium">Posición(es):</span>
-                <span className="font-display font-black text-sm uppercase text-neutral-950 dark:text-white text-right">
+                <span className="font-display font-bold text-sm uppercase text-neutral-950 dark:text-white text-right">
                   {activeMember.custom_attributes?.posicion
                     ? Array.isArray(activeMember.custom_attributes.posicion)
                       ? (activeMember.custom_attributes.posicion as string[])?.join(', ')
@@ -556,7 +563,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
               {Boolean(activeMember.custom_attributes?.numero_camiseta) && (
                 <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700">
                   <span className="text-neutral-500 dark:text-neutral-400 font-medium">Dorsal preferido:</span>
-                  <span className="font-display font-black text-base text-neutral-950 dark:text-white">
+                  <span className="font-display font-bold text-base text-neutral-950 dark:text-white">
                     #{String(activeMember.custom_attributes.numero_camiseta)}
                   </span>
                 </div>
@@ -566,7 +573,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
               {Boolean(activeMember.custom_attributes?.pie_habil) && (
                 <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700">
                   <span className="text-neutral-500 dark:text-neutral-400 font-medium">Pie hábil:</span>
-                  <span className="font-display font-black text-sm uppercase text-neutral-950 dark:text-white">
+                  <span className="font-display font-bold text-sm uppercase text-neutral-950 dark:text-white">
                     {String(activeMember.custom_attributes.pie_habil)}
                   </span>
                 </div>
@@ -586,7 +593,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
               {activeMember.gender && (
                 <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700">
                   <span className="text-neutral-500 dark:text-neutral-400 font-medium">Categoría:</span>
-                  <span className="font-display font-black text-xs uppercase text-neutral-950 dark:text-white">
+                  <span className="font-display font-bold text-xs uppercase text-neutral-950 dark:text-white">
                     {activeMember.gender}
                   </span>
                 </div>
@@ -596,7 +603,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
             {/* Admin Management Section */}
             {isAdmin && (
               <div className="pt-3 border-t-2 border-neutral-900/10 dark:border-white/10 space-y-2">
-                <h4 className="font-display font-black uppercase tracking-wider text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
+                <h4 className="font-display font-bold uppercase tracking-wider text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
                   <Shield className="w-3.5 h-3.5 text-neutral-700 dark:text-neutral-300 stroke-[2.5]" />
                   <span>Gestión de Miembro (Admin)</span>
                 </h4>
@@ -605,7 +612,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                   {/* Assign / Remove Admin Role */}
                   <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700">
                     <div>
-                      <p className="font-display font-black text-xs uppercase text-neutral-950 dark:text-white">
+                      <p className="font-display font-bold text-xs uppercase text-neutral-950 dark:text-white">
                         Rol: <span>{activeMember.system_role === 'admin' ? 'Administrador' : 'Socio'}</span>
                       </p>
                       <p className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400">
@@ -618,7 +625,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                       type="button"
                       onClick={() => handleRoleChange(activeMember.id, activeMember.system_role === 'admin' ? 'member' : 'admin')}
                       disabled={actionLoading === activeMember.id}
-                      className={`btn-tactile min-h-[40px] py-1.5 px-3.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 font-display font-black text-xs uppercase tracking-wider transition active:scale-95 flex items-center gap-1.5 shadow-tactile-sm ${
+                      className={`btn-tactile min-h-[40px] py-1.5 px-3.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 font-display font-bold text-xs uppercase tracking-wider transition active:scale-95 flex items-center gap-1.5 shadow-tactile-sm ${
                         activeMember.system_role === 'admin'
                           ? 'bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-950 dark:text-white'
                           : 'bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950'
@@ -639,7 +646,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
                       type="button"
                       onClick={() => handleDelete(activeMember.id, activeMember.full_name)}
                       disabled={actionLoading === activeMember.id}
-                      className="btn-tactile w-full min-h-[44px] py-2 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-800 dark:text-rose-300 font-display font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition active:scale-98 disabled:opacity-50 shadow-tactile-sm"
+                      className="btn-tactile w-full min-h-[44px] py-2 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-800 dark:text-rose-300 font-display font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition active:scale-98 disabled:opacity-50 shadow-tactile-sm"
                     >
                       {actionLoading === activeMember.id ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -656,7 +663,7 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
             <button
               type="button"
               onClick={() => setActiveMember(null)}
-              className="btn-tactile w-full min-h-[44px] py-2.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950 font-display font-black text-xs uppercase tracking-wider transition active:scale-98 shadow-tactile-sm"
+              className="btn-tactile w-full min-h-[44px] py-2.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950 font-display font-bold text-xs uppercase tracking-wider transition active:scale-98 shadow-tactile-sm"
             >
               Cerrar Ficha
             </button>

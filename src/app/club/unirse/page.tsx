@@ -61,7 +61,7 @@ export default async function UnirseDirectorioPage() {
           <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
         </Link>
         <div>
-          <h1 className="font-display font-black text-2xl uppercase tracking-tight text-neutral-950 dark:text-white leading-none">
+          <h1 className="font-display font-bold text-2xl uppercase tracking-tight text-neutral-950 dark:text-white leading-none">
             Explorar Clubes
           </h1>
           <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mt-0.5">
@@ -73,12 +73,12 @@ export default async function UnirseDirectorioPage() {
       {/* Clubs List */}
       <div className="mt-5 space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="font-display font-black text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+          <h2 className="font-display font-bold text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
             Clubes Disponibles ({clubs.length})
           </h2>
           <Link
             href="/club/nuevo"
-            className="btn-tactile font-display font-black text-xs uppercase tracking-wider text-neutral-950 bg-amber-300 hover:bg-amber-400 border border-neutral-900 dark:border-neutral-700 px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-2xs"
+            className="btn-tactile font-display font-bold text-xs uppercase tracking-wider text-neutral-950 bg-amber-300 hover:bg-amber-400 border border-neutral-900 dark:border-neutral-700 px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-2xs"
           >
             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>+ Fundar Club</span>
@@ -119,7 +119,7 @@ export default async function UnirseDirectorioPage() {
                 </div>
 
                 <div className="min-w-0">
-                  <h3 className="font-display font-black text-base uppercase text-neutral-950 dark:text-white truncate leading-tight">
+                  <h3 className="font-display font-bold text-base uppercase text-neutral-950 dark:text-white truncate leading-tight">
                     {c.name}
                   </h3>
                   <p className="text-xs text-neutral-500 dark:text-neutral-400 line-clamp-1 mt-0.5">

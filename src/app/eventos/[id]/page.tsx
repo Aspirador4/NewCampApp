@@ -393,11 +393,11 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         )}
 
         <div className="flex items-start justify-between gap-3">
-          <h1 className="font-display font-black text-3xl uppercase tracking-tight text-neutral-950 dark:text-white leading-tight">
+          <h1 className="font-display font-bold text-3xl uppercase tracking-tight text-neutral-950 dark:text-white leading-tight">
             {event.title}
           </h1>
           <span
-            className={`font-mono text-[9px] font-black uppercase px-2.5 py-1 rounded-md border border-neutral-900 dark:border-neutral-700 whitespace-nowrap shadow-tactile-sm ${
+            className={`font-mono text-[9px] font-bold uppercase px-2.5 py-1 rounded-md border border-neutral-900 dark:border-neutral-700 whitespace-nowrap shadow-tactile-sm ${
               event.status === 'convocado'
                 ? 'bg-emerald-400 text-neutral-950'
                 : event.status === 'en_curso'
@@ -556,7 +556,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
               <CircleDollarSign className="w-4 h-4 text-emerald-700" />
               <span className="text-xs font-bold text-emerald-950">Tu cuota liquidada por este evento:</span>
             </div>
-            <span className="text-sm font-black text-emerald-950">
+            <span className="text-sm font-bold text-emerald-950">
               {hasUserDebts ? `$${userTotalDebtAmount.toLocaleString('es-CL')}` : '$0 (Eximido)'}
             </span>
           </div>
@@ -649,9 +649,9 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       {/* Confirmed Players List (Includes Socios and Approved Guests) */}
       <div className="mt-5 space-y-3">
         <div className="flex items-center justify-between border-b-2 border-neutral-900/10 dark:border-neutral-800 pb-2">
-          <h2 className="font-display font-black text-lg text-neutral-950 dark:text-white uppercase tracking-tight flex items-center gap-2">
+          <h2 className="font-display font-bold text-lg text-neutral-950 dark:text-white uppercase tracking-tight flex items-center gap-2">
             <span>Plantel Confirmado</span>
-            <span className="font-mono text-xs px-2 py-0.5 rounded-md bg-emerald-400 text-neutral-950 border border-neutral-900 font-black">
+            <span className="font-mono text-xs px-2 py-0.5 rounded-md bg-emerald-400 text-neutral-950 border border-neutral-900 font-bold">
               {totalConfirmedCount}{maxCap ? `/${maxCap}` : ''}
             </span>
           </h2>
@@ -810,10 +810,10 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       {waitlistAttendees.length > 0 && (
         <div className="mt-6 space-y-3">
           <div className="flex items-center justify-between border-b-2 border-neutral-900/10 dark:border-neutral-800 pb-2">
-            <h2 className="font-display font-black text-lg text-neutral-950 dark:text-white uppercase tracking-tight flex items-center gap-2">
+            <h2 className="font-display font-bold text-lg text-neutral-950 dark:text-white uppercase tracking-tight flex items-center gap-2">
               <Clock className="w-5 h-5 text-amber-500 stroke-[2.5]" />
               <span>Lista de Espera Oficial</span>
-              <span className="font-mono text-xs px-2 py-0.5 rounded-md bg-amber-400 text-neutral-950 border border-neutral-900 font-black">
+              <span className="font-mono text-xs px-2 py-0.5 rounded-md bg-amber-400 text-neutral-950 border border-neutral-900 font-bold">
                 {waitlistAttendees.length}
               </span>
             </h2>
@@ -835,7 +835,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-extrabold text-amber-600 w-5 text-center">
+                    <span className="text-xs font-bold text-amber-600 w-5 text-center">
                       #{index + 1}
                     </span>
 

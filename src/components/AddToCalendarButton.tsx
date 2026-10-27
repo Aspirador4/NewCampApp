@@ -79,7 +79,7 @@ export function AddToCalendarButton({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="btn-tactile inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-[#14161f] hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-950 dark:text-white border-2 border-neutral-900 dark:border-neutral-700 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm transition active:scale-95"
+        className="btn-tactile inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-[#14161f] hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-950 dark:text-white border-2 border-neutral-900 dark:border-neutral-700 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition active:scale-95"
       >
         <CalendarPlus className="w-3.5 h-3.5 text-neutral-900 dark:text-white stroke-[2.5]" />
         <span>Calendario</span>
@@ -98,7 +98,7 @@ export function AddToCalendarButton({
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsOpen(false)}
-              className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-950 dark:text-white font-display font-black uppercase tracking-wider transition"
+              className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-950 dark:text-white font-display font-bold uppercase tracking-wider transition"
             >
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-blue-500 border border-neutral-900 dark:border-neutral-700" />
@@ -110,7 +110,7 @@ export function AddToCalendarButton({
             <button
               type="button"
               onClick={handleDownloadIcs}
-              className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-950 dark:text-white font-display font-black uppercase tracking-wider transition text-left"
+              className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-950 dark:text-white font-display font-bold uppercase tracking-wider transition text-left"
             >
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-neutral-900 dark:border-neutral-700" />

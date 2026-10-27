@@ -93,7 +93,7 @@ export function CreateEventForm() {
 
       {/* Title */}
       <div>
-        <label htmlFor="title" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-white mb-1">
+        <label htmlFor="title" className="block font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white mb-1">
           Título del Evento <span className="text-red-500">*</span>
         </label>
         <input
@@ -114,7 +114,7 @@ export function CreateEventForm() {
 
       {/* Event Type: Only partido, entrenamiento, otro */}
       <div>
-        <label htmlFor="event_type" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-white mb-1">
+        <label htmlFor="event_type" className="block font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white mb-1">
           Tipo de Evento <span className="text-red-500">*</span>
         </label>
         <select
@@ -123,7 +123,7 @@ export function CreateEventForm() {
           required
           value={eventType}
           onChange={(e) => setEventType(e.target.value as 'partido' | 'entrenamiento' | 'otro')}
-          className="input-tactile w-full px-3.5 py-2.5 text-xs font-display font-black uppercase tracking-wider"
+          className="input-tactile w-full px-3.5 py-2.5 text-xs font-medium"
         >
           <option value="partido">⚽ Partido</option>
           <option value="entrenamiento">🏃 Entrenamiento</option>
@@ -133,7 +133,7 @@ export function CreateEventForm() {
 
       {/* Gender Category */}
       <div>
-        <label className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-white mb-1">
+        <label className="block font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white mb-1">
           Categoría de Género <span className="text-red-500">*</span>
         </label>
         <input type="hidden" name="gender_category" value={genderCategory} />
@@ -147,7 +147,7 @@ export function CreateEventForm() {
               key={cat.value}
               type="button"
               onClick={() => setGenderCategory(cat.value as 'mixto' | 'masculino' | 'femenino')}
-              className={`btn-tactile py-2.5 px-3 rounded-xl font-display font-black text-xs uppercase tracking-wider border-2 transition text-center ${
+              className={`btn-tactile py-2.5 px-3 rounded-xl font-display font-bold text-xs uppercase tracking-wider border-2 transition text-center ${
                 genderCategory === cat.value
                   ? 'border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-white'
                   : 'bg-white dark:bg-[#14161f] text-neutral-800 dark:text-neutral-200 border-neutral-300 dark:border-neutral-700 hover:border-neutral-900 dark:hover:border-neutral-500'
@@ -167,7 +167,7 @@ export function CreateEventForm() {
       {/* Date & Time */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label htmlFor="start_date" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-white mb-1">
+          <label htmlFor="start_date" className="block font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white mb-1">
             Fecha <span className="text-red-500">*</span>
           </label>
           <input
@@ -180,7 +180,7 @@ export function CreateEventForm() {
         </div>
 
         <div>
-          <label htmlFor="start_time" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-white mb-1">
+          <label htmlFor="start_time" className="block font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white mb-1">
             Hora de Inicio <span className="text-red-500">*</span>
           </label>
           <input
@@ -195,7 +195,7 @@ export function CreateEventForm() {
 
       {/* Location */}
       <div>
-        <label htmlFor="location" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-white mb-1">
+        <label htmlFor="location" className="block font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white mb-1">
           Lugar / Cancha / Sede <span className="text-red-500">*</span>
         </label>
         <div className="relative">
@@ -215,7 +215,7 @@ export function CreateEventForm() {
 
       {/* Max Capacity */}
       <div>
-        <label htmlFor="max_capacity" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-white mb-1">
+        <label htmlFor="max_capacity" className="block font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white mb-1">
           {eventType === 'otro' ? 'Cupo / Asistentes esperados' : 'Cupo Máximo de Jugadores'}
         </label>
         <div className="relative">
@@ -242,7 +242,7 @@ export function CreateEventForm() {
       {/* Billing Configuration for PARTIDO */}
       {eventType === 'partido' && (
         <div className="bg-white dark:bg-[#14161f] border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm rounded-3xl p-4 space-y-2">
-          <label htmlFor="total_cost" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-white">
+          <label htmlFor="total_cost" className="block font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white">
             Costo Total de la Cancha ($)
           </label>
           <div className="relative">
@@ -258,7 +258,7 @@ export function CreateEventForm() {
               value={totalCost}
               onChange={(e) => setTotalCost(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
               placeholder="Ej: 42000"
-              className="input-tactile w-full pl-10 pr-3.5 py-2.5 text-xs font-mono font-bold"
+              className="input-tactile w-full pl-10 pr-3.5 py-2.5 text-xs font-mono font-medium"
             />
           </div>
           {estimatedProrrated !== null ? (
@@ -276,14 +276,14 @@ export function CreateEventForm() {
       {/* Billing Configuration for ENTRENAMIENTO */}
       {eventType === 'entrenamiento' && (
         <div className="space-y-3 bg-neutral-50 dark:bg-[#1a1d28] p-4 rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm">
-          <label className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-white">
+          <label className="block font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white">
             Modalidad de Cobro del Entrenamiento
           </label>
           <div className="grid grid-cols-3 gap-2 text-xs">
             <button
               type="button"
               onClick={() => setTrainingBillingMode('prorrateo')}
-              className={`btn-tactile p-2 rounded-xl border-2 font-display font-black uppercase tracking-wider transition text-center ${
+              className={`btn-tactile p-2 rounded-xl border-2 font-display font-bold uppercase tracking-wider transition text-center ${
                 trainingBillingMode === 'prorrateo'
                   ? 'border-neutral-900 dark:border-white bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 shadow-tactile-sm'
                   : 'bg-white dark:bg-[#14161f] text-neutral-800 dark:text-neutral-200 border-neutral-300 dark:border-neutral-700 hover:border-neutral-900 dark:hover:border-neutral-500'
@@ -294,7 +294,7 @@ export function CreateEventForm() {
             <button
               type="button"
               onClick={() => setTrainingBillingMode('fijo')}
-              className={`btn-tactile p-2 rounded-xl border-2 font-display font-black uppercase tracking-wider transition text-center ${
+              className={`btn-tactile p-2 rounded-xl border-2 font-display font-bold uppercase tracking-wider transition text-center ${
                 trainingBillingMode === 'fijo'
                   ? 'border-neutral-900 dark:border-white bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 shadow-tactile-sm'
                   : 'bg-white dark:bg-[#14161f] text-neutral-800 dark:text-neutral-200 border-neutral-300 dark:border-neutral-700 hover:border-neutral-900 dark:hover:border-neutral-500'
@@ -305,7 +305,7 @@ export function CreateEventForm() {
             <button
               type="button"
               onClick={() => setTrainingBillingMode('gratis')}
-              className={`btn-tactile p-2 rounded-xl border-2 font-display font-black uppercase tracking-wider transition text-center ${
+              className={`btn-tactile p-2 rounded-xl border-2 font-display font-bold uppercase tracking-wider transition text-center ${
                 trainingBillingMode === 'gratis'
                   ? 'border-neutral-900 dark:border-white bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 shadow-tactile-sm'
                   : 'bg-white dark:bg-[#14161f] text-neutral-800 dark:text-neutral-200 border-neutral-300 dark:border-neutral-700 hover:border-neutral-900 dark:hover:border-neutral-500'
@@ -317,7 +317,7 @@ export function CreateEventForm() {
 
           {trainingBillingMode === 'prorrateo' && (
             <div>
-              <label htmlFor="total_cost" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-700 dark:text-neutral-300 mb-1">
+              <label htmlFor="total_cost" className="block font-display font-bold text-xs uppercase tracking-wider text-neutral-700 dark:text-neutral-300 mb-1">
                 Costo Total de la Cancha ($)
               </label>
               <input
@@ -329,7 +329,7 @@ export function CreateEventForm() {
                 value={totalCost}
                 onChange={(e) => setTotalCost(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
                 placeholder="Ej: 35000"
-                className="input-tactile w-full px-3 py-2 text-xs font-mono font-bold"
+                className="input-tactile w-full px-3 py-2 text-xs font-mono font-medium"
               />
               {estimatedProrrated !== null && (
                 <p className="font-mono text-[11px] text-emerald-800 dark:text-emerald-300 font-bold mt-1">
@@ -341,7 +341,7 @@ export function CreateEventForm() {
 
           {trainingBillingMode === 'fijo' && (
             <div>
-              <label htmlFor="cost_per_player" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-700 dark:text-neutral-300 mb-1">
+              <label htmlFor="cost_per_player" className="block font-display font-bold text-xs uppercase tracking-wider text-neutral-700 dark:text-neutral-300 mb-1">
                 Cuota Fija por Jugador ($)
               </label>
               <input
@@ -353,7 +353,7 @@ export function CreateEventForm() {
                 value={fixedCostPerPlayer}
                 onChange={(e) => setFixedCostPerPlayer(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
                 placeholder="Ej: 3000"
-                className="input-tactile w-full px-3 py-2 text-xs font-mono font-bold"
+                className="input-tactile w-full px-3 py-2 text-xs font-mono font-medium"
               />
             </div>
           )}
@@ -365,13 +365,13 @@ export function CreateEventForm() {
         <div className="space-y-2.5 bg-neutral-50 dark:bg-[#1a1d28] p-4 rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-display font-black text-xs uppercase tracking-wider text-neutral-950 dark:text-white">Campos Personalizados (Mutable)</h4>
+              <h4 className="font-display font-bold text-xs uppercase tracking-wider text-neutral-950 dark:text-white">Campos Personalizados (Mutable)</h4>
               <p className="text-[10px] text-neutral-500 dark:text-neutral-400 font-sans">Agrega cualquier detalle: qué traer, cuota, temas a tratar, etc.</p>
             </div>
             <button
               type="button"
               onClick={addCustomField}
-              className="btn-tactile text-xs font-display font-black uppercase tracking-wider text-neutral-950 dark:text-white bg-white dark:bg-[#14161f] hover:bg-neutral-100 dark:hover:bg-white/10 border-2 border-neutral-900 dark:border-neutral-700 py-1.5 px-3 rounded-xl flex items-center gap-1 transition shadow-tactile-sm"
+              className="btn-tactile text-xs font-display font-bold uppercase tracking-wider text-neutral-950 dark:text-white bg-white dark:bg-[#14161f] hover:bg-neutral-100 dark:hover:bg-white/10 border-2 border-neutral-900 dark:border-neutral-700 py-1.5 px-3 rounded-xl flex items-center gap-1 transition shadow-tactile-sm"
             >
               <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Agregar</span>
@@ -410,7 +410,7 @@ export function CreateEventForm() {
 
       {/* Description / Additional notes */}
       <div>
-        <label htmlFor="description" className="block font-display font-black text-xs uppercase tracking-wider text-neutral-900 dark:text-white mb-1">
+        <label htmlFor="description" className="block font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white mb-1">
           Descripción o Instrucciones Generales (opcional)
         </label>
         <textarea
@@ -431,7 +431,7 @@ export function CreateEventForm() {
       <button
         type="submit"
         disabled={loading}
-        className="btn-tactile w-full min-h-[48px] py-3.5 px-4 rounded-2xl text-white font-display font-black text-base uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile flex items-center justify-center gap-2 disabled:opacity-50"
+        className="btn-tactile w-full min-h-[48px] py-3.5 px-4 rounded-2xl text-white font-display font-bold text-base uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile flex items-center justify-center gap-2 disabled:opacity-50"
         style={{
           backgroundColor: 'var(--club-primary, #059669)',
         }}

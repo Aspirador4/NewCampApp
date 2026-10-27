@@ -204,7 +204,7 @@ export function FinanzasAdminPanel({
       {/* Global Club Financial Health Card */}
       <div className="bg-neutral-950 text-white rounded-3xl p-5 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile space-y-4 relative overflow-hidden bg-mesh-pattern-white">
         <div className="flex items-center justify-between">
-          <span className="font-mono text-[10px] font-black uppercase tracking-wider text-emerald-400 bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">
+          <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">
             Resumen General de Tesorería
           </span>
           <span className="font-mono text-[10px] font-bold text-neutral-400">
@@ -215,13 +215,13 @@ export function FinanzasAdminPanel({
         <div className="grid grid-cols-2 gap-4 pt-1">
           <div>
             <p className="font-mono text-[10px] text-neutral-400 uppercase tracking-wider">Por Cobrar en el Club</p>
-            <p className="font-display font-black text-3xl text-amber-400 tracking-tight leading-none mt-1">
+            <p className="font-display font-bold text-3xl text-amber-400 tracking-tight leading-none mt-1">
               ${totalClubDebt.toLocaleString('es-CL')}
             </p>
           </div>
           <div className="text-right">
             <p className="font-mono text-[10px] text-neutral-400 uppercase tracking-wider">Jugadores Deudores</p>
-            <p className="font-display font-black text-3xl text-white tracking-tight leading-none mt-1">
+            <p className="font-display font-bold text-3xl text-white tracking-tight leading-none mt-1">
               {playerSummaries.length}
             </p>
           </div>
@@ -232,7 +232,7 @@ export function FinanzasAdminPanel({
           <button
             type="button"
             onClick={() => setIsEditingSettings(true)}
-            className="btn-tactile min-h-[44px] text-xs font-display font-black uppercase tracking-wider text-neutral-900 dark:text-white bg-white dark:bg-[#1a1d28] hover:bg-neutral-100 dark:hover:bg-white/10 py-2 px-3.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex items-center gap-1.5 transition active:scale-95"
+            className="btn-tactile min-h-[44px] text-xs font-display font-bold uppercase tracking-wider text-neutral-900 dark:text-white bg-white dark:bg-[#1a1d28] hover:bg-neutral-100 dark:hover:bg-white/10 py-2 px-3.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex items-center gap-1.5 transition active:scale-95"
           >
             <Settings2 className="w-4 h-4 text-emerald-600 stroke-[2.5]" />
             <span>Configuración & Colores del Club</span>
@@ -246,7 +246,7 @@ export function FinanzasAdminPanel({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-amber-700 flex-shrink-0" />
-              <h4 className="font-display font-black text-sm uppercase tracking-wider text-amber-950 dark:text-amber-200">
+              <h4 className="font-display font-bold text-sm uppercase tracking-wider text-amber-950 dark:text-amber-200">
                 Partidos Pendientes de Cierre ({pendingClosureEvents.length})
               </h4>
             </div>
@@ -263,7 +263,7 @@ export function FinanzasAdminPanel({
             {pendingClosureEvents.map((ev) => (
               <div key={ev.id} className="p-3 flex items-center justify-between gap-3 hover:bg-amber-50/50 dark:hover:bg-white/5 transition">
                 <div className="min-w-0">
-                  <p className="font-display font-black text-sm text-neutral-950 dark:text-white uppercase tracking-tight truncate">{ev.title}</p>
+                  <p className="font-display font-bold text-sm text-neutral-950 dark:text-white uppercase tracking-tight truncate">{ev.title}</p>
                   <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 mt-0.5">
                     {new Date(ev.start_time).toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short' })} • {ev.confirmed_count} jugadores
                     {ev.total_cost ? ` • Total Cancha: $${ev.total_cost.toLocaleString('es-CL')}` : ''}
@@ -271,7 +271,7 @@ export function FinanzasAdminPanel({
                 </div>
                 <Link
                   href={`/eventos/${ev.id}`}
-                  className="btn-tactile min-h-[44px] py-2 px-3.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-amber-400 hover:bg-amber-500 text-neutral-950 font-display font-black text-xs uppercase tracking-wider flex items-center gap-1 transition active:scale-95 shadow-tactile-sm flex-shrink-0"
+                  className="btn-tactile min-h-[44px] py-2 px-3.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-amber-400 hover:bg-amber-500 text-neutral-950 font-display font-bold text-xs uppercase tracking-wider flex items-center gap-1 transition active:scale-95 shadow-tactile-sm flex-shrink-0"
                 >
                   <span>Cerrar Finanzas</span>
                   <ChevronRight className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -287,7 +287,7 @@ export function FinanzasAdminPanel({
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4">
           <div className="bg-white dark:bg-[#14161f] w-full max-w-md rounded-t-3xl sm:rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile p-6 space-y-4 max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
             <div className="flex items-center justify-between border-b-2 border-neutral-900/10 dark:border-white/10 pb-3">
-              <h3 className="font-display font-black text-xl text-neutral-950 dark:text-white uppercase tracking-tight">
+              <h3 className="font-display font-bold text-xl text-neutral-950 dark:text-white uppercase tracking-tight">
                 Ajustes & Finanzas del Club
               </h3>
               <button
@@ -304,7 +304,7 @@ export function FinanzasAdminPanel({
               {/* 10-Color Palette Customizer */}
               {clubId && (
                 <div className="p-3.5 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700 space-y-2">
-                  <label className="font-display font-black text-xs text-neutral-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <label className="font-display font-bold text-xs text-neutral-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                     <Palette className="w-3.5 h-3.5 text-neutral-600 dark:text-neutral-400" />
                     Color Institucional del Club (10 Paletas)
                   </label>
@@ -321,7 +321,7 @@ export function FinanzasAdminPanel({
 
               {/* Bank Details */}
               <div className="space-y-2.5">
-                <h4 className="font-display font-black text-xs text-neutral-900 dark:text-white uppercase tracking-wider">
+                <h4 className="font-display font-bold text-xs text-neutral-900 dark:text-white uppercase tracking-wider">
                   Cuenta de Transferencia para Socios
                 </h4>
 
@@ -399,14 +399,14 @@ export function FinanzasAdminPanel({
                 <button
                   type="button"
                   onClick={() => setIsEditingSettings(false)}
-                  className="btn-tactile flex-1 min-h-[44px] py-2.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-[#1a1d28] hover:bg-neutral-100 dark:hover:bg-white/10 font-display font-black text-xs uppercase tracking-wider text-neutral-800 dark:text-neutral-200 transition shadow-tactile-sm"
+                  className="btn-tactile flex-1 min-h-[44px] py-2.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-[#1a1d28] hover:bg-neutral-100 dark:hover:bg-white/10 font-display font-bold text-xs uppercase tracking-wider text-neutral-800 dark:text-neutral-200 transition shadow-tactile-sm"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={savingSettings}
-                  className="btn-tactile flex-1 min-h-[44px] py-2.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950 font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm flex items-center justify-center gap-1.5 disabled:opacity-50 transition"
+                  className="btn-tactile flex-1 min-h-[44px] py-2.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm flex items-center justify-center gap-1.5 disabled:opacity-50 transition"
                 >
                   {savingSettings ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   <span>Guardar Ajustes</span>
@@ -419,7 +419,7 @@ export function FinanzasAdminPanel({
 
       {/* Debtors List */}
       <div className="space-y-3">
-        <h4 className="font-display font-black text-sm uppercase tracking-wider text-neutral-950 dark:text-white px-1">
+        <h4 className="font-display font-bold text-sm uppercase tracking-wider text-neutral-950 dark:text-white px-1">
           Jugadores con Saldo Pendiente ({playerSummaries.length})
         </h4>
 
@@ -441,11 +441,11 @@ export function FinanzasAdminPanel({
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-2xl bg-neutral-900 dark:bg-neutral-800 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-white font-display font-black flex items-center justify-center text-base overflow-hidden flex-shrink-0">
+                    <div className="w-11 h-11 rounded-2xl bg-neutral-900 dark:bg-neutral-800 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-white font-display font-bold flex items-center justify-center text-base overflow-hidden flex-shrink-0">
                       {player.full_name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <h5 className="font-display font-black text-base text-neutral-950 dark:text-white uppercase tracking-tight leading-tight">
+                      <h5 className="font-display font-bold text-base text-neutral-950 dark:text-white uppercase tracking-tight leading-tight">
                         {player.full_name}
                       </h5>
                       <div className="flex items-center gap-1.5 mt-0.5 font-mono text-[10px] text-neutral-500 dark:text-neutral-400">
@@ -460,7 +460,7 @@ export function FinanzasAdminPanel({
                   </div>
 
                   <div className="text-right flex-shrink-0">
-                    <p className="font-display font-black text-xl text-amber-600 dark:text-amber-400 leading-tight">
+                    <p className="font-display font-bold text-xl text-amber-600 dark:text-amber-400 leading-tight">
                       ${player.total_amount.toLocaleString('es-CL')}
                     </p>
                     <button
@@ -480,7 +480,7 @@ export function FinanzasAdminPanel({
                     type="button"
                     onClick={() => handleSettleAll(player)}
                     disabled={isUserLoading}
-                    className="btn-tactile flex-1 min-h-[44px] py-2 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-white font-display font-black text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5 disabled:opacity-50"
+                    className="btn-tactile flex-1 min-h-[44px] py-2 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm text-white font-display font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5 disabled:opacity-50"
                     style={{
                       backgroundColor: 'var(--club-primary, #059669)',
                     }}
@@ -516,7 +516,7 @@ export function FinanzasAdminPanel({
                           </p>
                         </div>
                         <div className="flex items-center gap-2.5">
-                          <span className="font-display font-black text-sm text-neutral-950 dark:text-white">
+                          <span className="font-display font-bold text-sm text-neutral-950 dark:text-white">
                             ${item.amount.toLocaleString('es-CL')}
                           </span>
                           <button
@@ -546,7 +546,7 @@ export function FinanzasAdminPanel({
       {/* Recently Paid Section */}
       {paidDebts.length > 0 && (
         <div className="mt-6 pt-4 border-t-2 border-neutral-900/10 dark:border-white/10 space-y-2">
-          <h4 className="font-display font-black text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400 px-1">
+          <h4 className="font-display font-bold text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400 px-1">
             Historial de Pagos Recientes Saneados ({paidDebts.length})
           </h4>
           <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -556,7 +556,7 @@ export function FinanzasAdminPanel({
                 className="p-2.5 rounded-xl bg-white dark:bg-[#14161f] border-2 border-neutral-200 dark:border-neutral-800 flex items-center justify-between text-xs text-neutral-700 dark:text-neutral-300 shadow-2xs"
               >
                 <div>
-                  <span className="font-display font-black text-xs uppercase tracking-tight text-neutral-950 dark:text-white">{paid.profiles?.full_name}</span>
+                  <span className="font-display font-bold text-xs uppercase tracking-tight text-neutral-950 dark:text-white">{paid.profiles?.full_name}</span>
                   <span className="font-mono text-[10px] text-neutral-400 block">{paid.description}</span>
                 </div>
                 <div className="flex items-center gap-2">

@@ -31,7 +31,7 @@ export function JoinClubForm({ clubId, initialStatus, initialMotivation = '' }: 
         type="button"
         onClick={handleSwitch}
         disabled={loading}
-        className="btn-tactile w-full py-3 px-4 rounded-xl border-2 border-neutral-900 dark:border-white bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950 font-display font-black text-xs uppercase tracking-wider shadow-tactile transition active:scale-98 flex items-center justify-center gap-2 min-h-[44px]"
+        className="btn-tactile w-full py-3 px-4 rounded-xl border-2 border-neutral-900 dark:border-white bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950 font-display font-bold text-xs uppercase tracking-wider shadow-tactile transition active:scale-98 flex items-center justify-center gap-2 min-h-[44px]"
       >
         {loading ? (
           <Loader2 className="w-4 h-4 animate-spin" />
@@ -65,7 +65,7 @@ export function JoinClubForm({ clubId, initialStatus, initialMotivation = '' }: 
     return (
       <div className="p-5 rounded-3xl bg-white dark:bg-[#14161f] border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile text-center space-y-2">
         <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400 mx-auto" />
-        <h4 className="font-display font-black text-lg text-neutral-950 dark:text-white uppercase tracking-tight">¡Solicitud Enviada!</h4>
+        <h4 className="font-display font-bold text-lg text-neutral-950 dark:text-white uppercase tracking-tight">¡Solicitud Enviada!</h4>
         <p className="text-xs text-neutral-600 dark:text-neutral-400 font-sans">
           Los administradores han recibido tu solicitud. Te notificaremos cuando tu pase sea validado.
         </p>
@@ -84,7 +84,7 @@ export function JoinClubForm({ clubId, initialStatus, initialMotivation = '' }: 
 
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <label className="font-display font-black text-xs text-neutral-900 dark:text-white uppercase tracking-wider">
+          <label className="font-display font-bold text-xs text-neutral-900 dark:text-white uppercase tracking-wider">
             Carta de Presentación / Referencia Deportiva
           </label>
           <span className="font-mono text-[10px] text-neutral-400 dark:text-neutral-500">
@@ -107,7 +107,7 @@ export function JoinClubForm({ clubId, initialStatus, initialMotivation = '' }: 
       <button
         type="submit"
         disabled={loading}
-        className="btn-tactile w-full py-3 px-4 rounded-xl border-2 border-neutral-900 dark:border-white bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950 font-display font-black text-xs uppercase tracking-wider shadow-tactile transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50 min-h-[44px]"
+        className="btn-tactile w-full py-3 px-4 rounded-xl border-2 border-neutral-900 dark:border-white bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 text-white dark:text-neutral-950 font-display font-bold text-xs uppercase tracking-wider shadow-tactile transition active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50 min-h-[44px]"
       >
         {loading ? (
           <Loader2 className="w-4 h-4 animate-spin" />

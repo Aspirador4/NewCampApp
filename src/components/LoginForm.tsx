@@ -45,7 +45,7 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
         type="button"
         onClick={handleGoogleLogin}
         disabled={googleLoading}
-        className="btn-tactile w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-[#1a1d28] hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-950 dark:text-white font-display font-black text-sm uppercase tracking-wider shadow-tactile-sm transition disabled:opacity-50"
+        className="btn-tactile w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-[#1a1d28] hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-950 dark:text-white font-display font-bold text-sm uppercase tracking-wider shadow-tactile-sm transition disabled:opacity-50"
       >
         {googleLoading ? (
           <Loader2 className="w-5 h-5 animate-spin text-neutral-500" />

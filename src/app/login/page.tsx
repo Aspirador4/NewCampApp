@@ -26,7 +26,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <div className="w-16 h-16 rounded-2xl bg-neutral-950 border-2 border-neutral-900 dark:border-neutral-700 flex items-center justify-center text-emerald-400 mx-auto shadow-tactile mb-4">
           <Flame className="w-9 h-9 fill-current" />
         </div>
-        <h1 className="font-display font-black text-3xl uppercase tracking-tight text-neutral-950 dark:text-white leading-tight">
+        <h1 className="font-display font-bold text-3xl uppercase tracking-tight text-neutral-950 dark:text-white leading-tight">
           Club Deportivo
         </h1>
         <p className="font-mono text-xs text-neutral-500 dark:text-neutral-400 uppercase tracking-wider max-w-xs mx-auto">

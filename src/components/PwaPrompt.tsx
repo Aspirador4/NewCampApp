@@ -126,7 +126,7 @@ export function PwaPrompt() {
               <Smartphone className="w-5 h-5 stroke-[2.5]" />
             </div>
             <div>
-              <p className="font-display font-black text-sm uppercase tracking-tight text-white">Instalar Aplicación</p>
+              <p className="font-display font-bold text-sm uppercase tracking-tight text-white">Instalar Aplicación</p>
               <p className="font-mono text-[10px] text-neutral-400">
                 Agrégala a tu pantalla de inicio
               </p>
@@ -136,7 +136,7 @@ export function PwaPrompt() {
           <button
             type="button"
             onClick={handleInstallClick}
-            className="btn-tactile px-3.5 py-2 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-[#1a1d28] text-neutral-950 dark:text-white font-display font-black text-xs uppercase tracking-wider shadow-tactile-sm hover:bg-neutral-100 dark:hover:bg-white/10 transition active:scale-95"
+            className="btn-tactile px-3.5 py-2 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-[#1a1d28] text-neutral-950 dark:text-white font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm hover:bg-neutral-100 dark:hover:bg-white/10 transition active:scale-95"
           >
             Instalar
           </button>
@@ -150,7 +150,7 @@ export function PwaPrompt() {
             <Share className="w-4 h-4 stroke-[2.5]" />
           </div>
           <div>
-            <p className="font-display font-black text-xs uppercase tracking-wider text-neutral-950 dark:text-white">
+            <p className="font-display font-bold text-xs uppercase tracking-wider text-neutral-950 dark:text-white">
               Instalar en tu iPhone
             </p>
             <p className="text-[11px] text-neutral-600 dark:text-neutral-300 mt-0.5 font-sans">
@@ -168,7 +168,7 @@ export function PwaPrompt() {
               <Bell className="w-4 h-4 stroke-[2.5]" />
             </div>
             <div>
-              <p className="font-display font-black text-xs uppercase tracking-wider text-neutral-950 dark:text-white">
+              <p className="font-display font-bold text-xs uppercase tracking-wider text-neutral-950 dark:text-white">
                 Notificaciones Push Oficiales
               </p>
               <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400">
@@ -180,7 +180,7 @@ export function PwaPrompt() {
           </div>
 
           {pushStatus === 'granted' && (
-            <span className="inline-flex items-center gap-1 font-mono text-[9px] font-black uppercase text-emerald-950 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-800 px-2 py-0.5 rounded">
+            <span className="inline-flex items-center gap-1 font-mono text-[9px] font-bold uppercase text-emerald-950 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-800 px-2 py-0.5 rounded">
               <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400 stroke-[2.5]" />
               Activas
             </span>
@@ -207,7 +207,7 @@ export function PwaPrompt() {
               type="button"
               onClick={handleSubscribePush}
               disabled={pushLoading}
-              className="btn-tactile w-full py-2.5 px-4 rounded-xl border-2 border-neutral-900 dark:border-white bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 font-display font-black text-xs uppercase tracking-wider text-white dark:text-neutral-950 shadow-tactile-sm transition active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px]"
+              className="btn-tactile w-full py-2.5 px-4 rounded-xl border-2 border-neutral-900 dark:border-white bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-100 font-display font-bold text-xs uppercase tracking-wider text-white dark:text-neutral-950 shadow-tactile-sm transition active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px]"
             >
               {pushLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -223,7 +223,7 @@ export function PwaPrompt() {
               type="button"
               onClick={handleSendTestPush}
               disabled={testLoading}
-              className="btn-tactile w-full py-2 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-[#1a1d28] hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-900 dark:text-white font-display font-black text-xs uppercase tracking-wider transition active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-tactile-sm min-h-[40px]"
+              className="btn-tactile w-full py-2 px-3 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-white dark:bg-[#1a1d28] hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-900 dark:text-white font-display font-bold text-xs uppercase tracking-wider transition active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-tactile-sm min-h-[40px]"
             >
               {testLoading ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
