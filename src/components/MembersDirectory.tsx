@@ -6,6 +6,7 @@ import { Search, Trophy, Calendar, User, Flame, Filter, ChevronDown, X, Sparkles
 import { approveMemberAction, rejectMemberAction, reconsiderMemberAction, deleteMemberAction, updateMemberRoleAction } from '@/app/miembros/actions'
 import { SystemRole } from '@/types/database.types'
 import { EmptyState } from '@/components/EmptyState'
+import { formatBirthDate, calculateAge } from '@/utils/date'
 
 export interface MemberItem {
   id: string
@@ -146,14 +147,9 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
   // Format age from birth_date
   const getAgeString = (birthDate: string | null) => {
     if (!birthDate) return null
-    const birth = new Date(birthDate)
-    const now = new Date()
-    let age = now.getFullYear() - birth.getFullYear()
-    const m = now.getMonth() - birth.getMonth()
-    if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) {
-      age--
-    }
-    const formattedDate = birth.toLocaleDateString('es-CL', {
+    const age = calculateAge(birthDate)
+    if (age === null) return null
+    const formattedDate = formatBirthDate(birthDate, {
       day: 'numeric',
       month: 'short',
       year: 'numeric',

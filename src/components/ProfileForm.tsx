@@ -6,6 +6,7 @@ import { AvatarUpload } from '@/components/AvatarUpload'
 import { DynamicProfileFields } from '@/components/DynamicProfileFields'
 import { Database, Json } from '@/types/database.types'
 import { Loader2, CheckCircle2, AlertCircle, LogOut, Save, Edit3, X, ShieldCheck, Mail, Calendar, UserCheck } from 'lucide-react'
+import { formatBirthDate, calculateAge } from '@/utils/date'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 type FieldDefinition = Database['public']['Tables']['profile_field_definitions']['Row']
@@ -31,11 +32,8 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const maxBirthDate = new Date(
-    new Date().getFullYear() - 18,
-    new Date().getMonth(),
-    new Date().getDate()
-  ).toISOString().split('T')[0]
+  const today = new Date()
+  const maxBirthDate = `${today.getFullYear() - 18}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
 
   const handleCustomFieldChange = (key: string, val: Json) => {
     setCustomAttributes((prev) => ({
@@ -61,14 +59,8 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
 
     // Validate 18+ years
     if (birthDate) {
-      const birth = new Date(birthDate)
-      const today = new Date()
-      let age = today.getFullYear() - birth.getFullYear()
-      const m = today.getMonth() - birth.getMonth()
-      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
-        age--
-      }
-      if (age < 18) {
+      const age = calculateAge(birthDate)
+      if (age === null || age < 18) {
         setError('Debes tener al menos 18 años para participar en el club.')
         return
       }
@@ -101,13 +93,7 @@ export function ProfileForm({ profile, fieldDefinitions }: ProfileFormProps) {
   }
 
   // Format birth_date display
-  const formattedBirthDate = profile.birth_date
-    ? new Date(profile.birth_date).toLocaleDateString('es-CL', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      })
-    : null
+  const formattedBirthDate = formatBirthDate(profile.birth_date)
 
   return (
     <div className="space-y-5">

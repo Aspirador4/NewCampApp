@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { castMvpVote, closeMvpVoting } from '@/app/eventos/mvp-actions'
 import { Trophy, CheckCircle2, User, Loader2, AlertCircle, Clock, ShieldCheck, Flame } from 'lucide-react'
+import { formatTime } from '@/utils/date'
 
 export interface MvpCandidate {
   id: string
@@ -115,7 +116,7 @@ export function MvpVotingSection({
         {mvpDeadline && (
           <div className="flex items-center gap-1.5 font-mono text-[11px] text-amber-900 dark:text-amber-300 bg-amber-100/70 dark:bg-amber-900/30 px-2.5 py-1.5 rounded-xl border border-amber-300 dark:border-amber-700">
             <Clock className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 flex-shrink-0" />
-            <span>Cierre: {new Date(mvpDeadline).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} hrs</span>
+            <span>Cierre: {formatTime(mvpDeadline)} hrs</span>
           </div>
         )}
 

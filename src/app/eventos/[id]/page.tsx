@@ -11,6 +11,7 @@ import { ShareEventButton } from '@/components/ShareEventButton'
 import { AddToCalendarButton } from '@/components/AddToCalendarButton'
 import { EventFinancialClosure } from '@/components/EventFinancialClosure'
 import { ArrowLeft, Calendar, MapPin, Users, History, Clock, User, UserCheck, CircleDollarSign } from 'lucide-react'
+import { formatTime, formatLogTimestamp, DEFAULT_CLUB_TIMEZONE } from '@/utils/date'
 
 interface AttendeeProfile {
   id: string
@@ -97,6 +98,16 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
   const isAdmin = membership?.system_role === 'admin'
   const isCreator = event.created_by === user.id
   const canManageEvent = isAdmin || isCreator
+
+  // Fetch club settings (for timezone, etc.)
+  const { data: eventClub } = await supabase
+    .from('clubs')
+    .select('settings')
+    .eq('id', event.club_id)
+    .maybeSingle()
+
+  const clubTimezone =
+    ((eventClub?.settings as Record<string, unknown>)?.timezone as string) || DEFAULT_CLUB_TIMEZONE
 
   // Fetch debts for this event to reflect exact amounts charged per player
   const { data: debtsRaw } = await supabase
@@ -735,10 +746,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                       </span>
                     )}
                     <span className="text-[10px] text-neutral-400 font-mono">
-                      {new Date(attendee.registered_at).toLocaleTimeString('es-AR', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
+                      {formatTime(attendee.registered_at, clubTimezone)}
                     </span>
                   </div>
                 </div>
@@ -785,10 +793,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                     </span>
                   )}
                   <span className="text-[10px] text-neutral-400 font-mono">
-                    {new Date(guest.created_at).toLocaleTimeString('es-AR', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                    {formatTime(guest.created_at, clubTimezone)}
                   </span>
                 </div>
               </div>
@@ -865,10 +870,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                         )}
                       </div>
                       <p className="text-[10px] text-neutral-500 dark:text-neutral-400">
-                        Entró a espera {new Date(attendee.registered_at).toLocaleTimeString('es-AR', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
+                        Entró a espera {formatTime(attendee.registered_at, clubTimezone)}
                       </p>
                     </div>
                   </div>
@@ -896,10 +898,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           <div className="bg-neutral-100 dark:bg-neutral-800/60 rounded-xl p-3 space-y-2">
             {logs.map((log) => {
               const userName = log.profiles?.full_name || 'Un socio'
-              const dateStr = new Date(log.created_at).toLocaleTimeString('es-AR', {
-                hour: '2-digit',
-                minute: '2-digit',
-              })
+              const dateStr = formatLogTimestamp(log.created_at, clubTimezone)
 
               return (
                 <div key={log.id} className="text-[11px] text-neutral-600 dark:text-neutral-300 flex items-start justify-between gap-2">

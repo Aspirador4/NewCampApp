@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 import { SportsRole } from '@/types/database.types'
+import { calculateAge } from '@/utils/date'
 
 export async function signInWithOtp(formData: FormData) {
   const email = formData.get('email') as string
@@ -52,14 +53,8 @@ export async function updateProfile(formData: FormData) {
   const customAttributesRaw = formData.get('custom_attributes') as string
 
   if (birthDate) {
-    const birth = new Date(birthDate)
-    const now = new Date()
-    let age = now.getFullYear() - birth.getFullYear()
-    const m = now.getMonth() - birth.getMonth()
-    if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) {
-      age--
-    }
-    if (age < 18) {
+    const age = calculateAge(birthDate)
+    if (age === null || age < 18) {
       return { error: 'Debes tener al menos 18 años para participar en el club' }
     }
   }

@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { sendPushToUser } from '@/app/api/push/actions'
+import { formatTime } from '@/utils/date'
 
 export async function processAutomatedReminders() {
   const supabase = await createClient()
@@ -32,8 +33,7 @@ export async function processAutomatedReminders() {
     } else if (upcomingEvents && upcomingEvents.length > 0) {
       for (const event of upcomingEvents) {
         const clubName = (event.clubs as unknown as { name?: string })?.name || 'Club Deportivo'
-        const eventDate = new Date(event.start_time)
-        const timeStr = eventDate.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })
+        const timeStr = formatTime(event.start_time)
 
         // Fetch confirmed attendees
         const { data: attendees } = await supabase
