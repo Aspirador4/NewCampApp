@@ -54,10 +54,36 @@ Al crear un evento, el convocante define la modalidad:
 
 **Validación de Inscripción**: En [`toggleEventAttendance`](../../src/app/eventos/actions.ts), si el evento es categorizado (`masculino` o `femenino`), se exige que el socio tenga definido su género en su perfil y que este coincida con la categoría del evento. En caso contrario, se bloquea la inscripción con un mensaje informativo guiando al socio a completar su perfil.
 
-### Convocatorias y Moderación
+### Convocatorias, Edición y Moderación
 - **Atribución de Creador**: Cada evento muestra claramente quién lo convocó en la cabecera.
 - **Aprobación de Eventos**: Si un socio no-administrador crea un evento, este queda en estado `pendiente_aprobacion` hasta que un administrador lo revise y autorice.
-- **Ciclo de Estados Simplificado**: Se eliminó el botón intermedio *"Iniciar Partido"*. Las convocatorias pasan directamente de `convocado` a `finalizado` (abriendo el cierre financiero y el MVP en partidos) o `cancelado`.
+- **Edición Post-Convocatoria ([`/eventos/[id]/editar`](../../src/app/eventos/[id]/editar/page.tsx))**:
+  - Habilitada exclusivamente para el **creador de la convocatoria** o **administradores del club**.
+  - Permite rectificar o modificar cualquier parámetro post-creación:
+    - Título del evento y descripción/instrucciones generales.
+    - Tipo de evento (`partido`, `entrenamiento`, `otro`).
+    - Categoría de género (`mixto`, `masculino`, `femenino`).
+    - Fecha y hora de inicio.
+    - Sede / Cancha / Ubicación.
+    - Cupo máximo (`max_capacity`): si el cupo se incrementa o se elimina el límite, el sistema ejecuta de inmediato `promote_waitlist` en bucle para promover automáticamente a los socios e invitados que estaban en espera, notificándolos por push.
+    - Configuración de costos (cancha total para prorrateo automático, cuota fija o gratuito) y campos dinámicos mutables para eventos tipo "otro".
+  - **Accesos Rápidos**:
+    1. En el panel de control del evento [`EventAdminControls.tsx`](../../src/components/EventAdminControls.tsx) mediante el botón destacado **"Editar Convocatoria"**.
+    2. En la barra superior de acciones junto a los botones de compartir y calendario.
+- **Ciclo de Estados Simplificado**: Las convocatorias pasan directamente de `convocado` a `finalizado` (abriendo el cierre financiero y el MVP en partidos) o `cancelado`.
+
+---
+
+## 3. Lista de Espera Unificada (Socios + Invitados)
+
+La lista de espera no discrimina el tipo de postulante una vez aprobada la postulación externa:
+1. **Cola Cronológica Estricta**: Se ordena por marca temporal de solicitud (`queue_time = registered_at` para socios y `created_at` para invitados en espera).
+2. **Auto-Promoción Multicausal**: Se activa ante cualquiera de los siguientes disparadores:
+   - Baja voluntaria de un socio confirmado (`leave_event`).
+   - Cambio de modalidad de un socio confirmado de jugador a espectador (`join_event`).
+   - Cancelación o rechazo de un invitado que estaba previamente confirmado (`cancelGuestRequest`, `rejectGuest`).
+   - Aumento manual del cupo en la edición de la convocatoria (`updateEventAction`).
+3. **Identificación Visual Transparente**: La tarjeta *"Lista de Espera Oficial"* numera secuencialmente las posiciones (`#1, #2...`), resalta al usuario actual con tag *"Tú"*, y muestra las insignias de invitados externos (`Invitado de [Nombre Socio]` o *"Tu Invitado"*).
 
 ---
 
@@ -81,18 +107,22 @@ Ubicado en la cabecera del detalle de cada evento, permite agendar el partido co
 | `/eventos` | [`EventosPage`](../../src/app/eventos/page.tsx) | Feed mobile de eventos con filtros (Partidos, Asados, Entrenamientos, Finalizados) y barras de progreso de cupos. |
 | `/eventos/nuevo` | [`NuevoEventoPage`](../../src/app/eventos/nuevo/page.tsx) | Formulario restringido a administradores para convocar eventos con fecha, hora, lugar y cupo máximo. |
 | `/eventos/[id]` | [`EventDetailPage`](../../src/app/eventos/[id]/page.tsx) | Ficha del evento con botón 1-click CTA, listado de confirmados, lista de espera ordenada y auditoría. |
+| `/eventos/[id]/editar` | [`EditarEventoPage`](../../src/app/eventos/[id]/editar/page.tsx) | Edición post-convocatoria completa (título, costos, fecha, hora, lugar, categoría, cupo y campos mutables) para admins y creador. |
+| Componente | [`EditEventForm`](../../src/components/EditEventForm.tsx) | Formulario táctil interactivo pre-poblado con revalidación y auto-promoción de lista de espera. |
 | Componente | [`EventAttendanceCTA`](../../src/components/EventAttendanceCTA.tsx) | Control interactivo móvil con confirmación 1-click, advertencia de lista de espera y modal de baja. |
-| Componente | [`EventAdminControls`](../../src/components/EventAdminControls.tsx) | Botones rápidos para que los administradores aprueben convocatorias, finalicen o cancelen el evento. |
+| Componente | [`EventAdminControls`](../../src/components/EventAdminControls.tsx) | Botones rápidos para que los administradores editen, aprueben convocatorias, finalicen o cancelen el evento. |
 
 ---
 
 ## 5. Bitácora de Auditoría Inmutable (`event_attendance_logs`)
 
 Todos los movimientos quedan registrados de manera append-only:
-- `confirmo`: El socio confirmó su presencia.
+- `confirmo`: El socio confirmó su presencia como jugador.
+- `confirmo_espectador`: El socio confirmó asistencia como espectador (no consume cupo en cancha).
 - `bajo`: El socio se bajó voluntariamente (con motivo opcional).
 - `entro_espera`: El socio quedó en lista de espera por cupo lleno.
-- `subio_espera`: El socio ascendió automáticamente por liberación de cupo.
+- `subio_espera`: El socio o invitado ascendió automáticamente por liberación de cupo.
 - `solicito_invitado`: Se solicitó un invitado externo.
-- `invitado_aprobado`: El administrador aprobó al invitado.
+- `invitado_aprobado`: El administrador aprobó al invitado para jugar en cancha.
+- `invitado_espera`: El administrador aprobó al invitado pero quedó en lista de espera por cupo completo.
 - `invitado_rechazado`: El administrador rechazó la solicitud.

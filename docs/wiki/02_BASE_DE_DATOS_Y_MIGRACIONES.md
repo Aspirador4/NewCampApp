@@ -134,10 +134,10 @@ Inscripciones de los socios.
 - **`status`**: `confirmado`, `lista_espera`, `cancelado`.
 
 ### `event_guests`
-Invitados externos propuestos por socios. Requieren aprobación de un administrador (`pendiente_aprobacion`, `aprobado`, `rechazado`).
+Invitados externos propuestos por socios. Requieren aprobación de un administrador (`pendiente_aprobacion`, `aprobado`, `lista_espera`, `rechazado`).
 
 ### `event_attendance_logs`
-Bitácora de auditoría inmutable que registra quién confirmó, quién se dio de baja, quién subió de lista de espera y los motivos opcionales.
+Bitácora de auditoría inmutable que registra quién confirmó (`confirmo`, `confirmo_espectador`), quién se dio de baja (`bajo`), quién entró o subió de espera (`entro_espera`, `subio_espera`), solicitudes y aprobaciones de invitados (`solicito_invitado`, `invitado_aprobado`, `invitado_espera`, `invitado_rechazado`) y los motivos opcionales.
 
 ### `mvp_votes`
 Votos de jugador más valioso por evento.
@@ -163,9 +163,12 @@ Para evitar condiciones de carrera (*race conditions*) con múltiples usuarios c
    Calcula en una única transacción si la suma de confirmados e invitados aprobados supera `max_capacity`. Si hay cupo, asigna `confirmado`. Si está lleno, asigna `lista_espera`. Registra la auditoría en `event_attendance_logs`.
 
 2. **`leave_event(p_event_id, p_user_id, p_actor_id, p_reason)`**:
-   Cancela la asistencia del usuario. Si estaba confirmado, selecciona con bloqueo exclusivo (`FOR UPDATE SKIP LOCKED`) al primer integrante de la lista de espera por orden de registro (`registered_at ASC`), lo promueve a `confirmado`, registra el log y retorna su `user_id` para disparar la notificación Push.
+   Cancela la asistencia del usuario, lo remueve de la alineación de equipos si estaba asignado, y si estaba confirmado, invoca a `promote_waitlist` para promover con cerrojo pesimista al siguiente postulante de la cola unificada.
 
-3. **`close_event_finances(p_event_id, p_custom_debts)`**:
+3. **`promote_waitlist(p_event_id, p_actor_id)`**:
+   Procedimiento atómico con bloqueo de fila (`SELECT ... FOR UPDATE` en `events`) que unifica las colas de espera de socios (`event_attendees.registered_at`) e invitados externos (`event_guests.created_at`). Si existe un cupo vacante, promueve al primer candidato por riguroso orden cronológico (`queue_time ASC`), actualiza su estado, asienta la auditoría `subio_espera` y retorna los metadatos necesarios para la notificación Web Push.
+
+4. **`close_event_finances(p_event_id, p_custom_debts)`**:
    Realiza la liquidación financiera manual del partido en una única transacción:
    - Procesa un arreglo de cargos personalizados (`userId`, `guestId`, `amount`, `description`).
    - Maneja exenciones ($0) eliminando cargos pendientes si fueron perdonados o becados.
@@ -196,3 +199,10 @@ Las migraciones se ejecutan ordenadamente en el SQL Editor de Supabase:
 4. **[`004_event_gender_category_and_profile_gender.sql`](../../supabase/migrations/004_event_gender_category_and_profile_gender.sql)**: Incorporación de `gender` en `profiles` y `gender_category` en `events`.
 5. **[`004_multiclub_architecture.sql`](../../supabase/migrations/004_multiclub_architecture.sql)**: Multi-tenancy multi-club con `clubs`, `club_members`, dynamic fields y migración de datos.
 6. **[`005_notifications_and_reminders.sql`](../../supabase/migrations/005_notifications_and_reminders.sql)**: Buzón `in_app_notifications`, RPCs de push segmentadas por club, banderas de recordatorio `reminder_24h_sent` y `reminder_mvp_sent`, y publicación Realtime.
+7. **[`006_custom_field_definitions.sql`](../../supabase/migrations/006_custom_field_definitions.sql)**: Motor de atributos personalizados para socios por club.
+8. **[`007_teams_ratings_spectators_and_awards.sql`](../../supabase/migrations/007_teams_ratings_spectators_and_awards.sql)**: Armador de equipos F7, evaluación de desempeño y notas por club, modo espectador y nuevos reconocimientos (`mejor_compañero`, `jugador_sorpresa`).
+9. **[`008_club_slug_and_share_urls.sql`](../../supabase/migrations/008_club_slug_and_share_urls.sql)**: Identificadores únicos slug por club y enlaces de invitación.
+10. **[`009_fix_join_event_and_unique_constraint.sql`](../../supabase/migrations/009_fix_join_event_and_unique_constraint.sql)**: Sobrecarga atómica de `join_event` con soporte de espectadores y constraint de auditoría.
+11. **[`010_guest_support_and_team_removal_on_leave.sql`](../../supabase/migrations/010_guest_support_and_team_removal_on_leave.sql)**: Soporte de invitados en fixtures de equipos y remoción automática de alineaciones al darse de baja o pasar a espectador.
+12. **[`011_guest_waitlist_and_event_editing.sql`](../../supabase/migrations/011_guest_waitlist_and_event_editing.sql)**: Aprobación de invitados en lista de espera ante cupo lleno (`lista_espera` en `event_guests`), auditoría `invitado_espera` y RPC unificada `promote_waitlist`.
+13. **[`012_pessimistic_locking_for_event_capacity.sql`](../../supabase/migrations/012_pessimistic_locking_for_event_capacity.sql)**: Cerrojo pesimista (`FOR UPDATE`) a nivel de fila en `events` para erradicar condiciones de carrera en inscripciones simultáneas.
