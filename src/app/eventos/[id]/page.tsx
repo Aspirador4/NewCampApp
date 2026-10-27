@@ -14,7 +14,7 @@ import { MatchTeamsView } from '@/components/MatchTeamsView'
 import { TeamCandidatePlayer } from '@/components/TeamBuilderModal'
 import { TrainingOvercapacitySection } from '@/components/TrainingOvercapacitySection'
 import { AwardType } from '@/types/database.types'
-import { ArrowLeft, Calendar, MapPin, Users, History, Clock, User, UserCheck, CircleDollarSign, Eye } from 'lucide-react'
+import { ArrowLeft, Calendar, MapPin, Users, History, Clock, User, UserCheck, CircleDollarSign, Eye, Edit3 } from 'lucide-react'
 import { formatTime, formatLogTimestamp, DEFAULT_CLUB_TIMEZONE } from '@/utils/date'
 
 interface AttendeeProfile {
@@ -173,6 +173,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
   const guests = (guestsRaw || []) as unknown as EventGuestItem[]
   const approvedGuests = guests.filter((g) => g.status === 'aprobado')
+  const waitlistGuests = guests.filter((g) => g.status === 'lista_espera' && !g.is_overcapacity)
 
   // Categorize attendees into Players and Spectators
   const confirmedPlayers = attendees.filter(
@@ -182,6 +183,41 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
     (a) => a.status === 'confirmado' && a.attendance_type === 'espectador'
   )
   const waitlistAttendees = attendees.filter((a) => a.status === 'lista_espera')
+
+  // Unified Waitlist combining waiting club members and approved external guests
+  interface UnifiedWaitlistEntry {
+    id: string
+    isGuest: boolean
+    name: string
+    avatarUrl: string | null
+    timestamp: string
+    userId?: string
+    guestId?: string
+    inviterName?: string | null
+    isCurrentUser: boolean
+  }
+
+  const unifiedWaitlist: UnifiedWaitlistEntry[] = [
+    ...waitlistAttendees.map((a) => ({
+      id: a.id,
+      isGuest: false,
+      name: a.profiles?.full_name || 'Socio',
+      avatarUrl: a.profiles?.avatar_url || null,
+      timestamp: a.registered_at,
+      userId: a.user_id,
+      isCurrentUser: a.user_id === user.id,
+    })),
+    ...waitlistGuests.map((g) => ({
+      id: g.id,
+      isGuest: true,
+      name: g.guest_name,
+      avatarUrl: null,
+      timestamp: g.created_at,
+      guestId: g.id,
+      inviterName: g.inviter?.full_name || 'Socio',
+      isCurrentUser: g.invited_by_user_id === user.id,
+    })),
+  ].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
 
   // Distinguish regular guests from training overcapacity guests
   const regularApprovedGuests = approvedGuests.filter((g) => !g.is_overcapacity)
@@ -194,7 +230,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
   const userStatus = userAttendee?.status === 'cancelado' ? null : (userAttendee?.status as 'confirmado' | 'lista_espera' | null)
   const userAttendanceType = userAttendee?.attendance_type || 'jugador'
 
-  const waitlistIndex = waitlistAttendees.findIndex((a) => a.user_id === user.id)
+  const waitlistIndex = unifiedWaitlist.findIndex((item) => !item.isGuest && item.userId === user.id)
   const waitlistPosition = waitlistIndex !== -1 ? waitlistIndex + 1 : undefined
 
   const maxCap = event.max_capacity
@@ -505,6 +541,15 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
         </Link>
         <div className="flex items-center gap-1.5 flex-wrap">
+          {canManageEvent && event.status !== 'cancelado' && (
+            <Link
+              href={`/eventos/${event.id}/editar`}
+              className="p-2 rounded-xl text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 border-2 border-neutral-900/10 dark:border-white/10 transition min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95 bg-white dark:bg-neutral-900 shadow-xs"
+              title="Editar Convocatoria"
+            >
+              <Edit3 className="w-4 h-4 stroke-[2.5]" />
+            </Link>
+          )}
           {event.status !== 'pendiente_aprobacion' && event.status !== 'cancelado' && (
             <>
               <AddToCalendarButton
@@ -618,7 +663,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
               <Users className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
               <span className="font-medium text-neutral-700 dark:text-neutral-300">
                 Cupo: {totalConfirmedCount} / {maxCap} jugadores
-                {waitlistAttendees.length > 0 && ` (${waitlistAttendees.length} en espera)`}
+                {unifiedWaitlist.length > 0 && ` (${unifiedWaitlist.length} en espera)`}
               </span>
             </div>
           )}
@@ -1089,14 +1134,14 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       />
 
       {/* Waitlist Section */}
-      {waitlistAttendees.length > 0 && (
+      {unifiedWaitlist.length > 0 && (
         <div className="mt-6 space-y-3">
           <div className="flex items-center justify-between border-b-2 border-neutral-900/10 dark:border-neutral-800 pb-2">
             <h2 className="font-display font-bold text-lg text-neutral-950 dark:text-white uppercase tracking-tight flex items-center gap-2">
               <Clock className="w-5 h-5 text-amber-500 stroke-[2.5]" />
               <span>Lista de Espera Oficial</span>
               <span className="font-mono text-xs px-2 py-0.5 rounded-md bg-amber-400 text-neutral-950 border border-neutral-900 font-bold">
-                {waitlistAttendees.length}
+                {unifiedWaitlist.length}
               </span>
             </h2>
             <span className="font-mono text-[10px] text-neutral-400 uppercase">
@@ -1105,15 +1150,12 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           </div>
 
           <div className="divide-y-2 divide-neutral-100 dark:divide-neutral-800 bg-white dark:bg-neutral-900 rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile overflow-hidden">
-            {waitlistAttendees.map((attendee, index) => {
-              const p = attendee.profiles
-              const isCurrentUser = attendee.user_id === user.id
-
+            {unifiedWaitlist.map((item, index) => {
               return (
                 <div
-                  key={attendee.id}
+                  key={item.id}
                   className={`flex items-center justify-between p-3 ${
-                    isCurrentUser ? 'bg-amber-50/70 dark:bg-amber-950/30' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
+                    item.isCurrentUser ? 'bg-amber-50/70 dark:bg-amber-950/30' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/40'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -1122,10 +1164,10 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                     </span>
 
                     <div className="w-8 h-8 rounded-full overflow-hidden bg-neutral-200 dark:bg-neutral-700 relative flex items-center justify-center border border-neutral-200 dark:border-neutral-700">
-                      {p?.avatar_url ? (
+                      {item.avatarUrl ? (
                         <Image
-                          src={p.avatar_url}
-                          alt={p.full_name || 'Jugador'}
+                          src={item.avatarUrl}
+                          alt={item.name}
                           fill
                           className="object-cover"
                           sizes="32px"
@@ -1136,18 +1178,23 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                     </div>
 
                     <div>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <p className="text-xs font-bold text-neutral-900 dark:text-white">
-                          {p?.full_name || 'Socio'}
+                          {item.name}
                         </p>
-                        {isCurrentUser && (
+                        {item.isGuest && (
+                          <span className="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border border-neutral-300 dark:border-neutral-700">
+                            Invitado de {item.inviterName}
+                          </span>
+                        )}
+                        {item.isCurrentUser && (
                           <span className="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-amber-500 text-white">
-                            Tú
+                            {item.isGuest ? 'Tu Invitado' : 'Tú'}
                           </span>
                         )}
                       </div>
                       <p className="text-[10px] text-neutral-500 dark:text-neutral-400">
-                        Entró a espera {formatTime(attendee.registered_at, clubTimezone)}
+                        Entró a espera {formatTime(item.timestamp, clubTimezone)}
                       </p>
                     </div>
                   </div>

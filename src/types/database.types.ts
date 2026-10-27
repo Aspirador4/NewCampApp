@@ -16,7 +16,7 @@ export type EventStatus = 'pendiente_aprobacion' | 'convocado' | 'en_curso' | 'f
 export type AttendeeStatus = 'confirmado' | 'lista_espera' | 'cancelado'
 export type AttendanceType = 'jugador' | 'espectador'
 export type AwardType = 'mvp' | 'mejor_compañero' | 'jugador_sorpresa'
-export type GuestStatus = 'pendiente_aprobacion' | 'aprobado' | 'rechazado'
+export type GuestStatus = 'pendiente_aprobacion' | 'aprobado' | 'lista_espera' | 'rechazado'
 export type DebtType = 'partido_propio' | 'invitado'
 export type DebtStatus = 'pendiente' | 'pagado'
 export type AttendanceAction =
@@ -27,6 +27,7 @@ export type AttendanceAction =
   | 'subio_espera'
   | 'solicito_invitado'
   | 'invitado_aprobado'
+  | 'invitado_espera'
   | 'invitado_rechazado'
 export type FieldType = 'text' | 'number' | 'select' | 'multiselect' | 'boolean'
 export type NotificationType = 'evento' | 'finanzas' | 'membresia' | 'mvp' | 'admin' | 'recordatorio' | 'sistema'
@@ -1032,6 +1033,13 @@ export interface Database {
           p_user_id: string
           p_actor_id: string
           p_reason?: string
+        }
+        Returns: Json
+      }
+      promote_waitlist: {
+        Args: {
+          p_event_id: string
+          p_actor_id: string
         }
         Returns: Json
       }

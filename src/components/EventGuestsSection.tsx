@@ -11,7 +11,7 @@ export interface EventGuestItem {
   invited_by_user_id: string
   guest_name: string
   guest_contact: string | null
-  status: 'pendiente_aprobacion' | 'aprobado' | 'rechazado'
+  status: 'pendiente_aprobacion' | 'aprobado' | 'lista_espera' | 'rechazado'
   is_overcapacity?: boolean
   created_at: string
   inviter?: {
@@ -36,17 +36,21 @@ export function EventGuestsSection({
 }: EventGuestsSectionProps) {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [infoMessage, setInfoMessage] = useState<string | null>(null)
 
   const handleApprove = async (guestId: string) => {
     setError(null)
+    setInfoMessage(null)
     setActionLoading(guestId)
     const res = await approveGuest(guestId, eventId)
     setActionLoading(null)
     if (res?.error) setError(res.error)
+    if (res?.message) setInfoMessage(res.message)
   }
 
   const handleReject = async (guestId: string) => {
     setError(null)
+    setInfoMessage(null)
     setActionLoading(guestId)
     const res = await rejectGuest(guestId, eventId)
     setActionLoading(null)
@@ -56,6 +60,7 @@ export function EventGuestsSection({
   const handleCancel = async (guestId: string) => {
     if (!confirm('¿Deseas cancelar esta invitación?')) return
     setError(null)
+    setInfoMessage(null)
     setActionLoading(guestId)
     const res = await cancelGuestRequest(guestId, eventId)
     setActionLoading(null)
@@ -86,6 +91,12 @@ export function EventGuestsSection({
       {error && (
         <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border-2 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-200 text-xs font-medium">
           {error}
+        </div>
+      )}
+
+      {infoMessage && (
+        <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border-2 border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs font-medium">
+          {infoMessage}
         </div>
       )}
 
@@ -171,20 +182,24 @@ export function EventGuestsSection({
                     className={`font-mono text-[9px] font-bold uppercase px-2 py-0.5 rounded border inline-block mt-0.5 ${
                       guest.status === 'aprobado'
                         ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
-                        : guest.status === 'pendiente_aprobacion'
+                        : guest.status === 'lista_espera'
                         ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800'
+                        : guest.status === 'pendiente_aprobacion'
+                        ? 'bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 border-sky-300 dark:border-sky-800'
                         : 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-800'
                     }`}
                   >
                     {guest.status === 'aprobado'
                       ? 'Aprobado'
+                      : guest.status === 'lista_espera'
+                      ? 'En Lista de Espera ⏳'
                       : guest.status === 'pendiente_aprobacion'
                       ? 'Pendiente'
                       : 'Rechazado'}
                   </span>
                 </div>
 
-                {guest.status === 'pendiente_aprobacion' && (
+                {(guest.status === 'pendiente_aprobacion' || guest.status === 'lista_espera') && (
                   <button
                     type="button"
                     onClick={() => handleCancel(guest.id)}

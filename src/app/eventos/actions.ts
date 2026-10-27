@@ -8,6 +8,16 @@ import { Database, EventStatus, EventType, GenderCategory, Json, AttendanceType,
 import { sendPushToUser, sendPushToClubMembers, sendPushToClubAdmins } from '@/app/api/push/actions'
 import { getActiveClub } from '@/utils/club'
 
+interface PromotionInfo {
+  promoted?: boolean
+  kind?: 'attendee' | 'guest'
+  user_id?: string
+  user_name?: string
+  guest_id?: string
+  guest_name?: string
+  inviter_id?: string
+}
+
 export async function createEvent(formData: FormData) {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -123,6 +133,141 @@ export async function createEvent(formData: FormData) {
   redirect(`/eventos/${newEvent.id}`)
 }
 
+export async function updateEventAction(eventId: string, formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: 'Debes iniciar sesión para editar una convocatoria' }
+  }
+
+  // Fetch current event
+  const { data: event, error: eventErr } = await supabase
+    .from('events')
+    .select('*, clubs(name)')
+    .eq('id', eventId)
+    .single()
+
+  if (eventErr || !event) {
+    return { error: 'Evento no encontrado' }
+  }
+
+  // Check permissions: club admin or event creator
+  const { isAdmin, isApproved } = await getActiveClub(supabase)
+  const isCreator = event.created_by === user.id
+
+  if (!isApproved || (!isAdmin && !isCreator)) {
+    return { error: 'Solo los administradores del club o el creador de la convocatoria pueden editarla' }
+  }
+
+  const title = (formData.get('title') as string)?.trim()
+  const description = (formData.get('description') as string)?.trim() || null
+  const eventType = (formData.get('event_type') as EventType) || 'partido'
+  const genderCategory = (formData.get('gender_category') as GenderCategory) || 'mixto'
+  const startDate = formData.get('start_date') as string
+  const startTime = formData.get('start_time') as string
+  const location = (formData.get('location') as string)?.trim()
+  const maxCapacityRaw = formData.get('max_capacity') as string
+  const totalCostRaw = formData.get('total_cost') as string
+  const costPerPlayerRaw = formData.get('cost_per_player') as string
+  const customFieldsRaw = formData.get('custom_fields') as string
+
+  if (!title || !startDate || !startTime || !location) {
+    return { error: 'Por favor completa todos los campos obligatorios' }
+  }
+
+  const startTimestamp = new Date(`${startDate}T${startTime}:00`).toISOString()
+  const maxCapacity = maxCapacityRaw ? parseInt(maxCapacityRaw, 10) : null
+  const totalCost = totalCostRaw !== null && totalCostRaw !== '' ? parseInt(totalCostRaw, 10) : null
+
+  let customFields = (event.custom_fields as Record<string, Json>) || {}
+  if (customFieldsRaw) {
+    try {
+      customFields = JSON.parse(customFieldsRaw) as Record<string, Json>
+    } catch {}
+  }
+
+  let costPerPlayer = 0
+  if (costPerPlayerRaw !== null && costPerPlayerRaw !== '') {
+    costPerPlayer = parseInt(costPerPlayerRaw, 10) || 0
+  } else if (totalCost && totalCost > 0) {
+    costPerPlayer = maxCapacity && maxCapacity > 0 ? Math.round(totalCost / maxCapacity) : Math.round(totalCost / 14)
+  }
+
+  const oldCapacity = event.max_capacity
+
+  const { error: updateError } = await supabase
+    .from('events')
+    .update({
+      title,
+      description,
+      event_type: eventType,
+      gender_category: genderCategory,
+      start_time: startTimestamp,
+      location,
+      max_capacity: maxCapacity,
+      total_cost: totalCost,
+      cost_per_player: costPerPlayer,
+      custom_fields: customFields,
+    })
+    .eq('id', eventId)
+
+  if (updateError) {
+    return { error: `Error al actualizar la convocatoria: ${updateError.message}` }
+  }
+
+  // If max_capacity was increased or removed, promote from unified waitlist to fill newly opened slots
+  if (maxCapacity === null || (oldCapacity !== null && maxCapacity > oldCapacity)) {
+    let spotsToFill = maxCapacity === null ? 50 : maxCapacity - (oldCapacity ?? 0)
+    const clubName = (event.clubs as unknown as { name?: string })?.name || 'Club Deportivo'
+
+    while (spotsToFill > 0) {
+      const { data: promoData } = await supabase.rpc('promote_waitlist', {
+        p_event_id: eventId,
+        p_actor_id: user.id,
+      })
+      const promo = promoData as PromotionInfo | null
+      if (promo && promo.promoted) {
+        spotsToFill--
+        if (promo.kind === 'attendee' && promo.user_id) {
+          try {
+            await sendPushToUser(promo.user_id, {
+              title: `[${clubName}] ¡Subiste de Lista de Espera! 🎉`,
+              body: 'Se ampliaron los cupos del partido y quedaste confirmado automáticamente.',
+              url: `/eventos/${eventId}`,
+              type: 'evento',
+              clubId: event.club_id,
+            })
+          } catch (e) {
+            console.error('Error push promoted attendee on quota expansion:', e)
+          }
+        } else if (promo.kind === 'guest' && promo.inviter_id) {
+          try {
+            await sendPushToUser(promo.inviter_id, {
+              title: `[${clubName}] ¡Tu Invitado Subió de Lista de Espera! 🎉`,
+              body: `Se ampliaron los cupos del partido y tu invitado ${promo.guest_name || ''} fue confirmado.`,
+              url: `/eventos/${eventId}`,
+              type: 'evento',
+              clubId: event.club_id,
+            })
+          } catch (e) {
+            console.error('Error push promoted guest on quota expansion:', e)
+          }
+        }
+      } else {
+        break
+      }
+    }
+  }
+
+  revalidatePath(`/eventos/${eventId}`)
+  revalidatePath(`/eventos/${eventId}/editar`)
+  revalidatePath('/eventos')
+  revalidatePath('/')
+
+  return { success: true }
+}
+
 export async function joinEvent(eventId: string, attendanceType: AttendanceType = 'jugador') {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -193,6 +338,37 @@ export async function joinEvent(eventId: string, attendanceType: AttendanceType 
 
   if (error) {
     return fallbackJoinEvent(supabase, eventId, user.id, attendanceType)
+  }
+
+  // Trigger Web Push Notification if someone was promoted from waitlist on spectator switch
+  const resObj = data && typeof data === 'object' ? (data as Record<string, unknown>) : null
+  const promo = resObj?.promotion as PromotionInfo | undefined
+  const promotedUserId = resObj?.promoted_user_id as string | undefined
+
+  if (promo?.promoted && promo?.kind === 'guest' && promo?.inviter_id) {
+    try {
+      await sendPushToUser(promo.inviter_id, {
+        title: `[${clubName}] ¡Tu Invitado Subió de Lista de Espera! 🎉`,
+        body: `Se liberó un cupo y tu invitado ${promo.guest_name || ''} quedó confirmado automáticamente.`,
+        url: `/eventos/${eventId}`,
+        type: 'evento',
+        clubId: targetEvent?.club_id,
+      })
+    } catch (e) {
+      console.error('Error sending push to promoted guest inviter on spectator switch:', e)
+    }
+  } else if (promotedUserId) {
+    try {
+      await sendPushToUser(promotedUserId as string, {
+        title: `[${clubName}] ¡Subiste de Lista de Espera! 🎉`,
+        body: 'Se liberó un cupo en el partido y quedaste confirmado automáticamente.',
+        url: `/eventos/${eventId}`,
+        type: 'evento',
+        clubId: targetEvent?.club_id,
+      })
+    } catch (e) {
+      console.error('Error sending push to promoted user on spectator switch:', e)
+    }
   }
 
   revalidatePath(`/eventos/${eventId}`)
@@ -315,10 +491,26 @@ export async function leaveEvent(eventId: string, reason?: string) {
     return fallbackLeaveEvent(supabase, eventId, user.id, reason, clubName)
   }
 
-  // Trigger Web Push Notification if a player was promoted from waitlist
-  if (data && typeof data === 'object' && 'promoted_user_id' in data && data.promoted_user_id) {
+  // Trigger Web Push Notification if someone was promoted from unified waitlist
+  const resObj = data && typeof data === 'object' ? (data as Record<string, unknown>) : null
+  const promo = resObj?.promotion as PromotionInfo | undefined
+  const promotedUserId = resObj?.promoted_user_id as string | undefined
+
+  if (promo?.promoted && promo?.kind === 'guest' && promo?.inviter_id) {
     try {
-      await sendPushToUser(data.promoted_user_id as string, {
+      await sendPushToUser(promo.inviter_id, {
+        title: `[${clubName}] ¡Tu Invitado Subió de Lista de Espera! 🎉`,
+        body: `Se liberó un cupo y tu invitado ${promo.guest_name || ''} quedó confirmado automáticamente.`,
+        url: `/eventos/${eventId}`,
+        type: 'evento',
+        clubId: event?.club_id,
+      })
+    } catch (e) {
+      console.error('Error sending push to promoted guest inviter:', e)
+    }
+  } else if (promotedUserId) {
+    try {
+      await sendPushToUser(promotedUserId as string, {
         title: `[${clubName}] ¡Subiste de Lista de Espera! 🎉`,
         body: 'Se liberó un cupo en el partido y quedaste confirmado automáticamente.',
         url: `/eventos/${eventId}`,
@@ -399,38 +591,32 @@ async function fallbackLeaveEvent(
 
   // Promote next if confirmed cancelled
   if (wasConfirmed) {
-    const { data: nextInLine } = await supabase
-      .from('event_attendees')
-      .select('user_id')
-      .eq('event_id', eventId)
-      .eq('status', 'lista_espera')
-      .order('registered_at', { ascending: true })
-      .limit(1)
-      .maybeSingle()
-
-    if (nextInLine) {
-      await supabase
-        .from('event_attendees')
-        .update({ status: 'confirmado' })
-        .eq('event_id', eventId)
-        .eq('user_id', nextInLine.user_id)
-
-      await supabase.from('event_attendance_logs').insert({
-        event_id: eventId,
-        user_id: nextInLine.user_id,
-        actor_id: userId,
-        action: 'subio_espera',
-        reason: 'Promovido automáticamente por baja de cupo',
-      })
-
-      try {
-        await sendPushToUser(nextInLine.user_id, {
-          title: `[${clubName}] ¡Subiste de Lista de Espera! 🎉`,
-          body: 'Se liberó un cupo en el partido y quedaste confirmado automáticamente.',
-          url: `/eventos/${eventId}`,
-        })
-      } catch (e) {
-        console.error('Error sending push to promoted user:', e)
+    const { data: promoData } = await supabase.rpc('promote_waitlist', {
+      p_event_id: eventId,
+      p_actor_id: userId,
+    })
+    const promo = promoData as PromotionInfo | null
+    if (promo && promo.promoted) {
+      if (promo.kind === 'attendee' && promo.user_id) {
+        try {
+          await sendPushToUser(promo.user_id, {
+            title: `[${clubName}] ¡Subiste de Lista de Espera! 🎉`,
+            body: 'Se liberó un cupo en el partido y quedaste confirmado automáticamente.',
+            url: `/eventos/${eventId}`,
+          })
+        } catch (e) {
+          console.error('Error sending push to promoted user:', e)
+        }
+      } else if (promo.kind === 'guest' && promo.inviter_id) {
+        try {
+          await sendPushToUser(promo.inviter_id, {
+            title: `[${clubName}] ¡Tu Invitado Subió de Lista de Espera! 🎉`,
+            body: `Se liberó un cupo y tu invitado ${promo.guest_name || ''} quedó confirmado automáticamente.`,
+            url: `/eventos/${eventId}`,
+          })
+        } catch (e) {
+          console.error('Error sending push to promoted guest inviter:', e)
+        }
       }
     }
   }

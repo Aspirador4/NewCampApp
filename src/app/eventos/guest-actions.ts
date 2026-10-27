@@ -4,6 +4,17 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
 import { sendPushToUser, sendPushToClubAdmins } from '@/app/api/push/actions'
 
+interface WaitlistPromotionResult {
+  success?: boolean
+  promoted?: boolean
+  kind?: 'attendee' | 'guest'
+  user_id?: string
+  user_name?: string
+  guest_id?: string
+  guest_name?: string
+  inviter_id?: string
+}
+
 export async function requestGuest(formData: FormData) {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -100,6 +111,19 @@ export async function cancelGuestRequest(guestId: string, eventId: string) {
     return { error: 'No autorizado' }
   }
 
+  // Fetch guest first to know if they held a confirmed spot
+  const { data: guest } = await supabase
+    .from('event_guests')
+    .select('status, is_overcapacity, events(club_id, clubs(name))')
+    .eq('id', guestId)
+    .eq('invited_by_user_id', user.id)
+    .single()
+
+  const wasConfirmed = guest?.status === 'aprobado' && !guest?.is_overcapacity
+  const eventDetails = guest?.events as unknown as { club_id?: string; clubs?: { name?: string } } | null
+  const clubId = eventDetails?.club_id
+  const clubName = eventDetails?.clubs?.name || 'Club Deportivo'
+
   // Delete guest if belongs to user
   const { error } = await supabase
     .from('event_guests')
@@ -109,6 +133,49 @@ export async function cancelGuestRequest(guestId: string, eventId: string) {
 
   if (error) {
     return { error: error.message }
+  }
+
+  // Remove from team roster
+  await supabase
+    .from('event_team_players')
+    .delete()
+    .eq('event_id', eventId)
+    .eq('guest_id', guestId)
+
+  // If was confirmed, promote next in line
+  if (wasConfirmed) {
+    const { data: promoData } = await supabase.rpc('promote_waitlist', {
+      p_event_id: eventId,
+      p_actor_id: user.id,
+    })
+    const promo = promoData as WaitlistPromotionResult | null
+    if (promo && promo.promoted) {
+      if (promo.kind === 'attendee' && promo.user_id) {
+        try {
+          await sendPushToUser(promo.user_id, {
+            title: `[${clubName}] ¡Subiste de Lista de Espera! 🎉`,
+            body: 'Se liberó un cupo en el partido y quedaste confirmado automáticamente.',
+            url: `/eventos/${eventId}`,
+            type: 'evento',
+            clubId,
+          })
+        } catch (e) {
+          console.error('Push error:', e)
+        }
+      } else if (promo.kind === 'guest' && promo.inviter_id) {
+        try {
+          await sendPushToUser(promo.inviter_id, {
+            title: `[${clubName}] ¡Tu Invitado Subió de Lista de Espera! 🎉`,
+            body: `Se liberó un cupo y tu invitado ${promo.guest_name || ''} quedó confirmado automáticamente.`,
+            url: `/eventos/${eventId}`,
+            type: 'evento',
+            clubId,
+          })
+        } catch (e) {
+          console.error('Push error:', e)
+        }
+      }
+    }
   }
 
   revalidatePath(`/eventos/${eventId}`)
@@ -151,26 +218,30 @@ export async function approveGuest(guestId: string, eventId: string) {
     return { error: 'Solo los administradores del club pueden aprobar invitados' }
   }
 
+  let targetStatus: 'aprobado' | 'lista_espera' = 'aprobado'
+  let isWaitlist = false
+
   if (event.max_capacity) {
-    // Count confirmed attendees + approved guests
+    // Count confirmed attendees + approved non-overcapacity guests
     const { count: confirmedCount } = await supabase
       .from('event_attendees')
       .select('*', { count: 'exact', head: true })
       .eq('event_id', eventId)
       .eq('status', 'confirmado')
+      .neq('attendance_type', 'espectador')
 
     const { count: approvedGuestsCount } = await supabase
       .from('event_guests')
       .select('*', { count: 'exact', head: true })
       .eq('event_id', eventId)
       .eq('status', 'aprobado')
+      .eq('is_overcapacity', false)
 
     const totalConfirmed = (confirmedCount || 0) + (approvedGuestsCount || 0)
 
     if (totalConfirmed >= event.max_capacity) {
-      return {
-        error: `No hay cupos disponibles (${totalConfirmed}/${event.max_capacity}). Debes ampliar el cupo o esperar una baja.`,
-      }
+      targetStatus = 'lista_espera'
+      isWaitlist = true
     }
   }
 
@@ -178,7 +249,7 @@ export async function approveGuest(guestId: string, eventId: string) {
   const { data: updatedGuest, error: updateErr } = await supabase
     .from('event_guests')
     .update({
-      status: 'aprobado',
+      status: targetStatus,
       reviewed_by: user.id,
       reviewed_at: new Date().toISOString(),
     })
@@ -190,32 +261,46 @@ export async function approveGuest(guestId: string, eventId: string) {
     return { error: updateErr.message }
   }
 
-  // Remove rejected guest from event_team_players if they were assigned to a team
-  await supabase
-    .from('event_team_players')
-    .delete()
-    .eq('event_id', eventId)
-    .eq('guest_id', guestId)
+  // If placed on waitlist, ensure not assigned in team roster
+  if (isWaitlist) {
+    await supabase
+      .from('event_team_players')
+      .delete()
+      .eq('event_id', eventId)
+      .eq('guest_id', guestId)
+  }
 
   // Insert audit log
   await supabase.from('event_attendance_logs').insert({
     event_id: eventId,
     user_id: updatedGuest?.invited_by_user_id || null,
     actor_id: user.id,
-    action: 'invitado_aprobado',
-    reason: `Invitado aprobado: ${updatedGuest?.guest_name}`,
+    action: isWaitlist ? 'invitado_espera' : 'invitado_aprobado',
+    reason: isWaitlist
+      ? `Invitado aprobado en lista de espera por cupo lleno: ${updatedGuest?.guest_name}`
+      : `Invitado aprobado: ${updatedGuest?.guest_name}`,
   })
 
   // Send push notification with club name
   if (updatedGuest?.invited_by_user_id) {
     try {
-      await sendPushToUser(updatedGuest.invited_by_user_id, {
-        title: `[${clubName}] ¡Invitado Aprobado! ✅`,
-        body: `Tu invitado ${updatedGuest.guest_name} fue aprobado y confirmado para el partido.`,
-        url: `/eventos/${eventId}`,
-        type: 'evento',
-        clubId: event.club_id,
-      })
+      if (isWaitlist) {
+        await sendPushToUser(updatedGuest.invited_by_user_id, {
+          title: `[${clubName}] Invitado en Lista de Espera ⏳`,
+          body: `Tu invitado ${updatedGuest.guest_name} fue aprobado pero quedó en lista de espera por cupo completo.`,
+          url: `/eventos/${eventId}`,
+          type: 'evento',
+          clubId: event.club_id,
+        })
+      } else {
+        await sendPushToUser(updatedGuest.invited_by_user_id, {
+          title: `[${clubName}] ¡Invitado Aprobado! ✅`,
+          body: `Tu invitado ${updatedGuest.guest_name} fue aprobado y confirmado para el partido.`,
+          url: `/eventos/${eventId}`,
+          type: 'evento',
+          clubId: event.club_id,
+        })
+      }
     } catch (e) {
       console.error('Push error:', e)
     }
@@ -223,7 +308,13 @@ export async function approveGuest(guestId: string, eventId: string) {
 
   revalidatePath(`/eventos/${eventId}`)
   revalidatePath('/admin/invitados')
-  return { success: true }
+  return { 
+    success: true, 
+    waitlist: isWaitlist,
+    message: isWaitlist 
+      ? 'El cupo está completo. El invitado fue aprobado y añadido a la lista de espera.' 
+      : 'Invitado aprobado con éxito.' 
+  }
 }
 
 export async function rejectGuest(guestId: string, eventId: string) {
@@ -259,6 +350,15 @@ export async function rejectGuest(guestId: string, eventId: string) {
   if (!isAdmin) {
     return { error: 'Solo los administradores del club pueden rechazar invitados' }
   }
+
+  // Check if guest held a confirmed spot
+  const { data: currentGuest } = await supabase
+    .from('event_guests')
+    .select('status, is_overcapacity')
+    .eq('id', guestId)
+    .single()
+
+  const wasConfirmed = currentGuest?.status === 'aprobado' && !currentGuest?.is_overcapacity
 
   const { data: rejectedGuest, error: updateErr } = await supabase
     .from('event_guests')
@@ -303,6 +403,42 @@ export async function rejectGuest(guestId: string, eventId: string) {
       })
     } catch (e) {
       console.error('Push error:', e)
+    }
+  }
+
+  // If was confirmed, promote next in line from unified waitlist
+  if (wasConfirmed) {
+    const { data: promoData } = await supabase.rpc('promote_waitlist', {
+      p_event_id: eventId,
+      p_actor_id: user.id,
+    })
+    const promo = promoData as WaitlistPromotionResult | null
+    if (promo && promo.promoted) {
+      if (promo.kind === 'attendee' && promo.user_id) {
+        try {
+          await sendPushToUser(promo.user_id, {
+            title: `[${clubName}] ¡Subiste de Lista de Espera! 🎉`,
+            body: 'Se liberó un cupo en el partido y quedaste confirmado automáticamente.',
+            url: `/eventos/${eventId}`,
+            type: 'evento',
+            clubId: event.club_id,
+          })
+        } catch (e) {
+          console.error('Push error:', e)
+        }
+      } else if (promo.kind === 'guest' && promo.inviter_id) {
+        try {
+          await sendPushToUser(promo.inviter_id, {
+            title: `[${clubName}] ¡Tu Invitado Subió de Lista de Espera! 🎉`,
+            body: `Se liberó un cupo y tu invitado ${promo.guest_name || ''} quedó confirmado automáticamente.`,
+            url: `/eventos/${eventId}`,
+            type: 'evento',
+            clubId: event.club_id,
+          })
+        } catch (e) {
+          console.error('Push error:', e)
+        }
+      }
     }
   }
 

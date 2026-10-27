@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { updateEventStatus, approveEventAction, rejectEventAction } from '@/app/eventos/actions'
 import { EventStatus, EventType } from '@/types/database.types'
-import { CheckCircle2, Ban, Loader2, Shield, Check, X } from 'lucide-react'
+import { CheckCircle2, Ban, Loader2, Shield, Check, X, Edit3 } from 'lucide-react'
 
 interface EventAdminControlsProps {
   eventId: string
@@ -70,16 +71,23 @@ export function EventAdminControls({ eventId, currentStatus, isAdmin, eventType 
       {currentStatus === 'pendiente_aprobacion' ? (
         <div className="space-y-2">
           {isAdmin ? (
-            <div className="flex gap-2 text-xs">
+            <div className="flex flex-wrap gap-2 text-xs">
               <button
                 type="button"
                 onClick={handleApprove}
                 disabled={loading}
-                className="btn-tactile flex-1 py-2.5 px-3 rounded-xl border-2 border-neutral-900 bg-emerald-500 hover:bg-emerald-600 text-neutral-950 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5 disabled:opacity-50 min-h-[44px]"
+                className="btn-tactile flex-1 min-w-[130px] py-2.5 px-3 rounded-xl border-2 border-neutral-900 bg-emerald-500 hover:bg-emerald-600 text-neutral-950 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5 disabled:opacity-50 min-h-[44px]"
               >
                 {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5 stroke-[2.5]" />}
                 <span>Aprobar Convocatoria</span>
               </button>
+              <Link
+                href={`/eventos/${eventId}/editar`}
+                className="btn-tactile py-2.5 px-3 rounded-xl border-2 border-neutral-900 bg-amber-400 hover:bg-amber-300 text-neutral-950 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5 min-h-[44px]"
+              >
+                <Edit3 className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Editar</span>
+              </Link>
               <button
                 type="button"
                 onClick={handleReject}
@@ -91,13 +99,30 @@ export function EventAdminControls({ eventId, currentStatus, isAdmin, eventType 
               </button>
             </div>
           ) : (
-            <p className="text-xs text-amber-300 bg-amber-950/60 p-3 rounded-2xl border border-amber-800">
-              ⏳ Tu evento está pendiente de aprobación por los administradores del club antes de publicarse.
-            </p>
+            <div className="space-y-2">
+              <p className="text-xs text-amber-300 bg-amber-950/60 p-3 rounded-2xl border border-amber-800">
+                ⏳ Tu evento está pendiente de aprobación por los administradores del club antes de publicarse.
+              </p>
+              <Link
+                href={`/eventos/${eventId}/editar`}
+                className="btn-tactile w-full py-2.5 px-3 rounded-xl border-2 border-neutral-900 bg-amber-400 hover:bg-amber-300 text-neutral-950 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5 min-h-[44px]"
+              >
+                <Edit3 className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Editar Convocatoria</span>
+              </Link>
+            </div>
           )}
         </div>
       ) : (
         <div className="flex flex-wrap gap-2 text-xs">
+          <Link
+            href={`/eventos/${eventId}/editar`}
+            className="btn-tactile py-2.5 px-3 rounded-xl border-2 border-neutral-900 bg-amber-400 hover:bg-amber-300 text-neutral-950 font-display font-bold text-xs uppercase tracking-wider shadow-tactile-sm transition flex items-center justify-center gap-1.5 min-h-[44px]"
+          >
+            <Edit3 className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Editar Convocatoria</span>
+          </Link>
+
           {currentStatus !== 'finalizado' && currentStatus !== 'cancelado' && (
             <button
               type="button"

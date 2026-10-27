@@ -252,7 +252,9 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
             const confirmedAttendeesCount = attendees.filter((a) => a.status === 'confirmado').length
             const approvedGuestsCount = guests.filter((g) => g.status === 'aprobado').length
             const totalConfirmed = confirmedAttendeesCount + approvedGuestsCount
-            const waitlistCount = attendees.filter((a) => a.status === 'lista_espera').length
+            const waitlistCount =
+              attendees.filter((a) => a.status === 'lista_espera').length +
+              guests.filter((g) => g.status === 'lista_espera').length
 
             // Check if current user is registered
             const userAttendee = user
