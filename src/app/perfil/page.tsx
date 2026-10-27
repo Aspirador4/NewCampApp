@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 import { ProfileForm } from '@/components/ProfileForm'
 import { PwaPrompt } from '@/components/PwaPrompt'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { ProfileNotificationCard } from '@/components/ProfileNotificationCard'
 import { Trophy, CalendarCheck, Award, ArrowLeft, Wallet, Shield, Settings2, Lock, TrendingUp, TrendingDown, Minus, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { Database } from '@/types/database.types'
@@ -464,6 +465,9 @@ export default async function PerfilPage() {
         </div>
         <ThemeToggle variant="segmented" />
       </div>
+
+      {/* Notification Management Card */}
+      <ProfileNotificationCard clubId={club.id} isAdmin={membership?.system_role === 'admin'} />
 
       {/* Main Profile Form */}
       <div className="flex-1 bg-white dark:bg-neutral-900 rounded-3xl p-5 border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile">

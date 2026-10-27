@@ -116,3 +116,37 @@ La verificación de recordatorios se ejecuta a través del servicio [`processAut
 
 * Soporta protección mediante cabecera `Authorization: Bearer <CRON_SECRET>`.
 * Marca las banderas `reminder_24h_sent` y `reminder_mvp_sent` en la tabla `events` para garantizar **idempotencia total** (evitando envíos duplicados).
+
+---
+
+## 7. Pestaña de Gestión y Preferencias de Notificaciones
+
+Para evitar la saturación de alertas y permitir que cada socio configure exactamente qué notificaciones desea recibir en su dispositivo, se implementó el panel de preferencias de notificaciones:
+
+### 1. Puntos de Entrada Ergonómicos
+- **Pestaña "Ajustes" en el Centro de Notificaciones ([`NotificationBell.tsx`](../../src/components/NotificationBell.tsx))**:
+  Al abrir la campana, el socio puede alternar entre *"Todas"*, *"Sin leer"* y la nueva pestaña *"Ajustes ⚙️"*, sin salir del modal.
+- **Ficha en Perfil Oficial ([`ProfileNotificationCard.tsx`](../../src/components/ProfileNotificationCard.tsx))**:
+  Ubicada en `/perfil` junto a *Tema y Apariencia*, permite expandir la consola de configuración con un toque.
+
+### 2. Presets Rápidos de 1 Toque
+- **🎯 Esencial**: Convocatorias + Finanzas + Lista de Espera (silencia MVP y recordatorios 24h, ideal para socios que solo necesitan saber cuándo juegan, si entraron y cuánto pagar).
+- **⭐ Completo**: Todas las alertas habilitadas (por defecto).
+- **🔕 Mínimo**: Únicamente avisos de tesorería y cobros de partidos.
+
+### 3. Categorías Granulares Configurables
+1. **Convocatorias Nuevas**: Apertura de listas de partidos y entrenamientos.
+2. **Equipos y Formaciones**: Publicación de escuadras por la capitanía.
+3. **Recordatorios 24 Horas**: Aviso un día antes con hora, cancha y recordatorio de baja.
+4. **Lista de Espera**: Promoción automática inmediata a cupo confirmado.
+5. **Cobros y Pagos (Finanzas)**: Aportes a transferir y validación de pagos recibidos.
+6. **Votaciones y Premios MVP**: Avisos para votar y resultados de la figura del partido.
+7. **Mis Invitados Externos**: Confirmación o rechazo de postulaciones de invitados.
+8. **Capitanía y Administración**: Solicitudes de pases, moderación de invitados y cupos libres (se muestra automáticamente para administradores).
+
+### 4. Filtrado Activo en el Despacho
+Las funciones de envío ([`sendPushToUser`](../../src/app/api/push/actions.ts), [`sendPushToClubMembers`](../../src/app/api/push/actions.ts) y [`processAutomatedReminders`](../../src/app/api/notifications/reminders.ts)) consultan las preferencias efectivas del jugador antes de enviar la alerta; si el socio tiene desactivada esa categoría o el canal Web Push/In-App, el mensaje no se despacha.
+
+### 5. Persistencia Dual
+- Tabla PostgreSQL `public.user_notification_preferences` ([`014_user_notification_preferences.sql`](../../supabase/migrations/014_user_notification_preferences.sql)).
+- Respaldo automático en `profiles.custom_attributes.notification_preferences` para asegurar funcionamiento inmediato sin fricción ni fallos de esquema.

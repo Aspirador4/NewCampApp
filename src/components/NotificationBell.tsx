@@ -14,6 +14,7 @@ import {
   Clock,
   Sparkles,
   ExternalLink,
+  SlidersHorizontal,
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { NotificationType } from '@/types/database.types'
@@ -22,6 +23,7 @@ import {
   markNotificationAsReadAction,
   markAllNotificationsAsReadAction,
 } from '@/app/api/push/actions'
+import { NotificationPreferencesPanel } from '@/components/NotificationPreferencesPanel'
 
 export interface InAppNotificationItem {
   id: string
@@ -43,7 +45,7 @@ interface NotificationBellProps {
 export function NotificationBell({ initialNotifications = [], clubId }: NotificationBellProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [notifications, setNotifications] = useState<InAppNotificationItem[]>(initialNotifications)
-  const [filter, setFilter] = useState<'all' | 'unread'>('all')
+  const [filter, setFilter] = useState<'all' | 'unread' | 'preferences'>('all')
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
@@ -245,7 +247,7 @@ export function NotificationBell({ initialNotifications = [], clubId }: Notifica
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex border-b border-neutral-900/10 dark:border-white/10 px-4 pt-2 bg-white dark:bg-[#12141c]">
+            <div className="flex border-b border-neutral-900/10 dark:border-white/10 px-3 pt-2 bg-white dark:bg-[#12141c]">
               <button
                 type="button"
                 onClick={() => setFilter('all')}
@@ -268,75 +270,93 @@ export function NotificationBell({ initialNotifications = [], clubId }: Notifica
               >
                 Sin leer ({unreadCount})
               </button>
+              <button
+                type="button"
+                onClick={() => setFilter('preferences')}
+                className={`flex-1 py-2 font-display text-xs font-bold uppercase tracking-wider border-b-2 transition flex items-center justify-center gap-1.5 ${
+                  filter === 'preferences'
+                    ? 'border-neutral-950 dark:border-white text-neutral-950 dark:text-white'
+                    : 'border-transparent text-neutral-400 dark:text-neutral-500 hover:text-neutral-700'
+                }`}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5 stroke-[2.2]" />
+                <span>Ajustes</span>
+              </button>
             </div>
 
-            {/* Notification List */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-2 divide-y divide-transparent">
-              {displayedNotifications.length === 0 ? (
-                <div className="py-12 px-4 text-center space-y-2">
-                  <div className="w-12 h-12 rounded-2xl bg-neutral-100 dark:bg-neutral-800/60 border-2 border-dashed border-neutral-300 dark:border-neutral-700 flex items-center justify-center mx-auto text-neutral-400">
-                    <Sparkles className="w-6 h-6 stroke-[1.8]" />
-                  </div>
-                  <h3 className="font-display font-bold text-sm uppercase tracking-wider text-neutral-700 dark:text-neutral-300">
-                    {filter === 'unread' ? 'Sin notificaciones pendientes' : 'No tienes notificaciones aún'}
-                  </h3>
-                  <p className="font-sans text-xs text-neutral-500 dark:text-neutral-400 max-w-xs mx-auto">
-                    {filter === 'unread'
-                      ? 'Has leído todos tus avisos y alertas del club.'
-                      : 'Aquí verás las convocatorias, cierres financieros, votaciones de MVP y avisos oficiales.'}
-                  </p>
-                </div>
-              ) : (
-                displayedNotifications.map((notif) => (
-                  <div
-                    key={notif.id}
-                    onClick={() => handleMarkAsRead(notif)}
-                    className={`cursor-pointer rounded-2xl p-3 border-2 transition active:scale-[0.99] flex items-start gap-3 relative ${
-                      notif.is_read
-                        ? 'bg-neutral-50/60 dark:bg-[#161824]/40 border-neutral-200/80 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 opacity-80 hover:opacity-100'
-                        : 'bg-white dark:bg-[#181a28] border-neutral-900 dark:border-neutral-600 shadow-tactile-sm text-neutral-900 dark:text-white'
-                    }`}
-                  >
-                    {/* Unread indicator dot */}
-                    {!notif.is_read && (
-                      <span className="absolute top-3 right-3 w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 ring-2 ring-emerald-200 dark:ring-emerald-950" />
-                    )}
-
-                    {/* Icon container */}
-                    <div className="w-9 h-9 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 border border-neutral-300 dark:border-neutral-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      {getNotificationIcon(notif.type)}
+            {/* Notification Body: Either Preferences Tab or Notifications List */}
+            {filter === 'preferences' ? (
+              <div className="flex-1 overflow-y-auto p-3.5">
+                <NotificationPreferencesPanel clubId={clubId} />
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto p-3 space-y-2 divide-y divide-transparent">
+                {displayedNotifications.length === 0 ? (
+                  <div className="py-12 px-4 text-center space-y-2">
+                    <div className="w-12 h-12 rounded-2xl bg-neutral-100 dark:bg-neutral-800/60 border-2 border-dashed border-neutral-300 dark:border-neutral-700 flex items-center justify-center mx-auto text-neutral-400">
+                      <Sparkles className="w-6 h-6 stroke-[1.8]" />
                     </div>
+                    <h3 className="font-display font-bold text-sm uppercase tracking-wider text-neutral-700 dark:text-neutral-300">
+                      {filter === 'unread' ? 'Sin notificaciones pendientes' : 'No tienes notificaciones aún'}
+                    </h3>
+                    <p className="font-sans text-xs text-neutral-500 dark:text-neutral-400 max-w-xs mx-auto">
+                      {filter === 'unread'
+                        ? 'Has leído todos tus avisos y alertas del club.'
+                        : 'Aquí verás las convocatorias, cierres financieros, votaciones de MVP y avisos oficiales.'}
+                    </p>
+                  </div>
+                ) : (
+                  displayedNotifications.map((notif) => (
+                    <div
+                      key={notif.id}
+                      onClick={() => handleMarkAsRead(notif)}
+                      className={`cursor-pointer rounded-2xl p-3 border-2 transition active:scale-[0.99] flex items-start gap-3 relative ${
+                        notif.is_read
+                          ? 'bg-neutral-50/60 dark:bg-[#161824]/40 border-neutral-200/80 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 opacity-80 hover:opacity-100'
+                          : 'bg-white dark:bg-[#181a28] border-neutral-900 dark:border-neutral-600 shadow-tactile-sm text-neutral-900 dark:text-white'
+                      }`}
+                    >
+                      {/* Unread indicator dot */}
+                      {!notif.is_read && (
+                        <span className="absolute top-3 right-3 w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 ring-2 ring-emerald-200 dark:ring-emerald-950" />
+                      )}
 
-                    {/* Content */}
-                    <div className="flex-1 min-w-0 pr-3">
-                      <div className="flex items-center justify-between gap-1">
-                        <h4
-                          className={`font-display text-xs uppercase tracking-tight truncate leading-snug ${
-                            notif.is_read ? 'font-semibold' : 'font-bold text-neutral-950 dark:text-white'
-                          }`}
-                        >
-                          {notif.title}
-                        </h4>
+                      {/* Icon container */}
+                      <div className="w-9 h-9 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 border border-neutral-300 dark:border-neutral-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        {getNotificationIcon(notif.type)}
                       </div>
 
-                      <p className="font-sans text-xs text-neutral-600 dark:text-neutral-300 line-clamp-2 mt-0.5 leading-relaxed">
-                        {notif.body}
-                      </p>
+                      {/* Content */}
+                      <div className="flex-1 min-w-0 pr-3">
+                        <div className="flex items-center justify-between gap-1">
+                          <h4
+                            className={`font-display text-xs uppercase tracking-tight truncate leading-snug ${
+                              notif.is_read ? 'font-semibold' : 'font-bold text-neutral-950 dark:text-white'
+                            }`}
+                          >
+                            {notif.title}
+                          </h4>
+                        </div>
 
-                      <div className="flex items-center justify-between mt-1.5 pt-1 border-t border-neutral-900/5 dark:border-white/5 font-mono text-[10px] text-neutral-400 dark:text-neutral-500">
-                        <span>{formatRelativeTime(notif.created_at)}</span>
-                        {notif.url && notif.url !== '/' && (
-                          <span className="flex items-center gap-0.5 text-neutral-500 dark:text-neutral-400 font-sans font-semibold">
-                            <span>Ver</span>
-                            <ExternalLink className="w-2.5 h-2.5 stroke-[2.5]" />
-                          </span>
-                        )}
+                        <p className="font-sans text-xs text-neutral-600 dark:text-neutral-300 line-clamp-2 mt-0.5 leading-relaxed">
+                          {notif.body}
+                        </p>
+
+                        <div className="flex items-center justify-between mt-1.5 pt-1 border-t border-neutral-900/5 dark:border-white/5 font-mono text-[10px] text-neutral-400 dark:text-neutral-500">
+                          <span>{formatRelativeTime(notif.created_at)}</span>
+                          {notif.url && notif.url !== '/' && (
+                            <span className="flex items-center gap-0.5 text-neutral-500 dark:text-neutral-400 font-sans font-semibold">
+                              <span>Ver</span>
+                              <ExternalLink className="w-2.5 h-2.5 stroke-[2.5]" />
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
-              )}
-            </div>
+                  ))
+                )}
+              </div>
+            )}
 
             {/* Footer */}
             <div className="p-3 bg-neutral-50 dark:bg-[#161824] border-t border-neutral-900/10 dark:border-white/10 text-center font-mono text-[10px] text-neutral-400 dark:text-neutral-500">

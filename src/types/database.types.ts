@@ -31,6 +31,16 @@ export type AttendanceAction =
   | 'invitado_rechazado'
 export type FieldType = 'text' | 'number' | 'select' | 'multiselect' | 'boolean'
 export type NotificationType = 'evento' | 'finanzas' | 'membresia' | 'mvp' | 'admin' | 'recordatorio' | 'sistema'
+export type NotificationCategory =
+  | 'convocatorias'
+  | 'equipos'
+  | 'recordatorios'
+  | 'espera'
+  | 'finanzas'
+  | 'mvp'
+  | 'invitados'
+  | 'admin_alertas'
+  | 'sistema'
 
 export interface Database {
   public: {
@@ -693,6 +703,75 @@ export interface Database {
         Relationships: [
           {
             foreignKeyName: "push_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      user_notification_preferences: {
+        Row: {
+          id: string
+          user_id: string
+          club_id: string | null
+          push_enabled: boolean
+          in_app_enabled: boolean
+          convocatorias: boolean
+          equipos: boolean
+          recordatorios: boolean
+          espera: boolean
+          finanzas: boolean
+          mvp: boolean
+          invitados: boolean
+          admin_alertas: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          club_id?: string | null
+          push_enabled?: boolean
+          in_app_enabled?: boolean
+          convocatorias?: boolean
+          equipos?: boolean
+          recordatorios?: boolean
+          espera?: boolean
+          finanzas?: boolean
+          mvp?: boolean
+          invitados?: boolean
+          admin_alertas?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          club_id?: string | null
+          push_enabled?: boolean
+          in_app_enabled?: boolean
+          convocatorias?: boolean
+          equipos?: boolean
+          recordatorios?: boolean
+          espera?: boolean
+          finanzas?: boolean
+          mvp?: boolean
+          invitados?: boolean
+          admin_alertas?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_notification_preferences_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_notification_preferences_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"

@@ -4,6 +4,12 @@ import webpush from 'web-push'
 import { createClient } from '@/utils/supabase/server'
 import { getActiveClub } from '@/utils/club'
 import { NotificationType } from '@/types/database.types'
+import {
+  NotificationCategory,
+  UserNotificationPreferences,
+  DEFAULT_NOTIFICATION_PREFERENCES,
+  inferNotificationCategory,
+} from '@/types/notifications.types'
 
 // Configure VAPID
 const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
@@ -21,6 +27,151 @@ export interface PushPayload {
   icon?: string
   type?: NotificationType
   clubId?: string
+  category?: NotificationCategory
+}
+
+export async function getEffectivePreferencesForUser(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  clubId?: string
+): Promise<UserNotificationPreferences> {
+  // 1. Try querying user_notification_preferences table
+  try {
+    let query = supabase
+      .from('user_notification_preferences')
+      .select('*')
+      .eq('user_id', userId)
+
+    if (clubId) {
+      query = query.or(`club_id.eq.${clubId},club_id.is.null`)
+    }
+
+    const { data, error } = await query
+
+    if (!error && data && data.length > 0) {
+      // Find club-specific match first, else global
+      const match = data.find((p) => p.club_id === clubId) || data.find((p) => !p.club_id) || data[0]
+      return {
+        push_enabled: match.push_enabled ?? true,
+        in_app_enabled: match.in_app_enabled ?? true,
+        convocatorias: match.convocatorias ?? true,
+        equipos: match.equipos ?? true,
+        recordatorios: match.recordatorios ?? true,
+        espera: match.espera ?? true,
+        finanzas: match.finanzas ?? true,
+        mvp: match.mvp ?? true,
+        invitados: match.invitados ?? true,
+        admin_alertas: match.admin_alertas ?? true,
+      }
+    }
+  } catch {}
+
+  // 2. Fallback: check profiles.custom_attributes.notification_preferences
+  try {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('custom_attributes')
+      .eq('id', userId)
+      .maybeSingle()
+
+    const customAttrs = profile?.custom_attributes as Record<string, unknown> | null
+    const savedPrefs = customAttrs?.notification_preferences as Partial<UserNotificationPreferences> | undefined
+
+    if (savedPrefs) {
+      return {
+        ...DEFAULT_NOTIFICATION_PREFERENCES,
+        ...savedPrefs,
+      }
+    }
+  } catch (err) {
+    console.error('Error fetching fallback notification preferences:', err)
+  }
+
+  return { ...DEFAULT_NOTIFICATION_PREFERENCES }
+}
+
+export async function getNotificationPreferencesAction(clubId?: string): Promise<UserNotificationPreferences> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ...DEFAULT_NOTIFICATION_PREFERENCES }
+
+  return getEffectivePreferencesForUser(supabase, user.id, clubId)
+}
+
+export async function updateNotificationPreferencesAction(
+  prefs: Partial<UserNotificationPreferences>,
+  clubId?: string
+) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autorizado' }
+
+  const currentPrefs = await getEffectivePreferencesForUser(supabase, user.id, clubId)
+  const updatedPrefs: UserNotificationPreferences = {
+    ...currentPrefs,
+    ...prefs,
+  }
+
+  let tableSaved = false
+
+  // 1. Try upserting to user_notification_preferences table
+  try {
+    const { error: upsertErr } = await supabase
+      .from('user_notification_preferences')
+      .upsert(
+        {
+          user_id: user.id,
+          club_id: clubId || null,
+          push_enabled: updatedPrefs.push_enabled,
+          in_app_enabled: updatedPrefs.in_app_enabled,
+          convocatorias: updatedPrefs.convocatorias,
+          equipos: updatedPrefs.equipos,
+          recordatorios: updatedPrefs.recordatorios,
+          espera: updatedPrefs.espera,
+          finanzas: updatedPrefs.finanzas,
+          mvp: updatedPrefs.mvp,
+          invitados: updatedPrefs.invitados,
+          admin_alertas: updatedPrefs.admin_alertas,
+          updated_at: new Date().toISOString(),
+        },
+        {
+          onConflict: 'user_id,club_id',
+        }
+      )
+
+    if (!upsertErr) {
+      tableSaved = true
+    }
+  } catch (err) {
+    console.warn('Note: user_notification_preferences table upsert skipped, will persist in profiles fallback', err)
+  }
+
+  // 2. Always persist in profiles.custom_attributes.notification_preferences as dual-layer guarantee
+  try {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('custom_attributes')
+      .eq('id', user.id)
+      .single()
+
+    const existingAttrs = (profile?.custom_attributes as Record<string, unknown>) || {}
+    const newAttrs = {
+      ...existingAttrs,
+      notification_preferences: updatedPrefs,
+    }
+
+    await supabase
+      .from('profiles')
+      .update({ custom_attributes: newAttrs as unknown as Record<string, import('@/types/database.types').Json>, updated_at: new Date().toISOString() })
+      .eq('id', user.id)
+  } catch (profileErr) {
+    console.error('Error saving notification preferences in profile fallback:', profileErr)
+    if (!tableSaved) {
+      return { error: 'No se pudieron guardar las preferencias' }
+    }
+  }
+
+  return { success: true, preferences: updatedPrefs }
 }
 
 export async function savePushSubscription(subscriptionJSON: {
@@ -146,8 +297,17 @@ export async function sendPushToUser(
 ) {
   const supabase = await createClient()
 
-  // 1. Create In-App Notification (always recorded unless explicitly disabled)
-  if (options?.saveInApp !== false) {
+  // 0. Check User Preferences
+  const category = inferNotificationCategory(payload)
+  const prefs = await getEffectivePreferencesForUser(supabase, userId, payload.clubId)
+
+  // If user disabled this specific category, skip both push and in-app
+  if (category !== 'sistema' && prefs[category] === false) {
+    return { sent: 0, suppressed: true, reason: `Category ${category} disabled by user` }
+  }
+
+  // 1. Create In-App Notification (always recorded unless explicitly disabled or in-app turned off)
+  if (options?.saveInApp !== false && prefs.in_app_enabled !== false) {
     try {
       await supabase.rpc('create_in_app_notification', {
         p_user_id: userId,
@@ -160,6 +320,11 @@ export async function sendPushToUser(
     } catch (e) {
       console.error('Error saving in-app notification:', e)
     }
+  }
+
+  // If user disabled Web Push, return without dispatching push
+  if (prefs.push_enabled === false) {
+    return { sent: 0, pushDisabled: true }
   }
 
   // 2. Fetch push tokens via SECURITY DEFINER RPC
@@ -181,8 +346,9 @@ export async function sendPushToClubMembers(
   excludeUserId?: string
 ) {
   const supabase = await createClient()
+  const category = inferNotificationCategory(payload)
 
-  // 1. Record in-app notification for all approved members
+  // 1. Record in-app notification for all approved members who allow this category
   try {
     const { data: memberRows } = await supabase.rpc('get_club_member_user_ids', {
       p_club_id: clubId,
@@ -191,27 +357,54 @@ export async function sendPushToClubMembers(
 
     const userIds = ((memberRows || []) as { user_id: string }[]).map((r) => r.user_id)
     if (userIds.length > 0) {
-      await supabase.rpc('create_bulk_in_app_notifications', {
-        p_user_ids: userIds,
-        p_club_id: clubId,
-        p_title: payload.title,
-        p_body: payload.body,
-        p_url: payload.url || '/',
-        p_type: payload.type || 'evento',
-      })
+      const allowedInAppUserIds: string[] = []
+
+      for (const uid of userIds) {
+        const prefs = await getEffectivePreferencesForUser(supabase, uid, clubId)
+        if (prefs.in_app_enabled !== false && (category === 'sistema' || prefs[category] !== false)) {
+          allowedInAppUserIds.push(uid)
+        }
+      }
+
+      if (allowedInAppUserIds.length > 0) {
+        await supabase.rpc('create_bulk_in_app_notifications', {
+          p_user_ids: allowedInAppUserIds,
+          p_club_id: clubId,
+          p_title: payload.title,
+          p_body: payload.body,
+          p_url: payload.url || '/',
+          p_type: payload.type || 'evento',
+        })
+      }
     }
   } catch (e) {
     console.error('Error recording bulk member in-app notifications:', e)
   }
 
-  // 2. Send Web Push to all devices belonging to approved members of this club
+  // 2. Send Web Push to devices of approved members who have push enabled for this category
   const { data: subsRpc } = await supabase.rpc('get_club_members_push_subscriptions', {
     p_club_id: clubId,
     p_exclude_user_id: excludeUserId || undefined,
   })
 
   const subs = (subsRpc || []) as PushSubscriptionRow[]
-  return dispatchWebPushBatch(supabase, subs, payload)
+  if (subs.length === 0) {
+    return { sent: 0 }
+  }
+
+  const allowedPushSubs: PushSubscriptionRow[] = []
+  for (const sub of subs) {
+    if (sub.user_id) {
+      const prefs = await getEffectivePreferencesForUser(supabase, sub.user_id, clubId)
+      if (prefs.push_enabled !== false && (category === 'sistema' || prefs[category] !== false)) {
+        allowedPushSubs.push(sub)
+      }
+    } else {
+      allowedPushSubs.push(sub)
+    }
+  }
+
+  return dispatchWebPushBatch(supabase, allowedPushSubs, payload)
 }
 
 export async function sendPushToClubAdmins(
@@ -221,7 +414,7 @@ export async function sendPushToClubAdmins(
 ) {
   const supabase = await createClient()
 
-  // 1. Record in-app notification for all admins
+  // 1. Record in-app notification for all admins who allow admin alerts
   try {
     const { data: adminRows } = await supabase.rpc('get_club_admin_user_ids', {
       p_club_id: clubId,
@@ -230,27 +423,54 @@ export async function sendPushToClubAdmins(
 
     const userIds = ((adminRows || []) as { user_id: string }[]).map((r) => r.user_id)
     if (userIds.length > 0) {
-      await supabase.rpc('create_bulk_in_app_notifications', {
-        p_user_ids: userIds,
-        p_club_id: clubId,
-        p_title: payload.title,
-        p_body: payload.body,
-        p_url: payload.url || '/',
-        p_type: payload.type || 'admin',
-      })
+      const allowedAdminUserIds: string[] = []
+
+      for (const uid of userIds) {
+        const prefs = await getEffectivePreferencesForUser(supabase, uid, clubId)
+        if (prefs.in_app_enabled !== false && prefs.admin_alertas !== false) {
+          allowedAdminUserIds.push(uid)
+        }
+      }
+
+      if (allowedAdminUserIds.length > 0) {
+        await supabase.rpc('create_bulk_in_app_notifications', {
+          p_user_ids: allowedAdminUserIds,
+          p_club_id: clubId,
+          p_title: payload.title,
+          p_body: payload.body,
+          p_url: payload.url || '/',
+          p_type: payload.type || 'admin',
+        })
+      }
     }
   } catch (e) {
     console.error('Error recording bulk admin in-app notifications:', e)
   }
 
-  // 2. Send Web Push to all devices belonging to admins of this club
+  // 2. Send Web Push to devices belonging to admins who have push & admin_alertas enabled
   const { data: subsRpc } = await supabase.rpc('get_club_admins_push_subscriptions', {
     p_club_id: clubId,
     p_exclude_user_id: excludeUserId || undefined,
   })
 
   const subs = (subsRpc || []) as PushSubscriptionRow[]
-  return dispatchWebPushBatch(supabase, subs, payload)
+  if (subs.length === 0) {
+    return { sent: 0 }
+  }
+
+  const allowedAdminSubs: PushSubscriptionRow[] = []
+  for (const sub of subs) {
+    if (sub.user_id) {
+      const prefs = await getEffectivePreferencesForUser(supabase, sub.user_id, clubId)
+      if (prefs.push_enabled !== false && prefs.admin_alertas !== false) {
+        allowedAdminSubs.push(sub)
+      }
+    } else {
+      allowedAdminSubs.push(sub)
+    }
+  }
+
+  return dispatchWebPushBatch(supabase, allowedAdminSubs, payload)
 }
 
 export async function sendPushToAll(payload: PushPayload) {
