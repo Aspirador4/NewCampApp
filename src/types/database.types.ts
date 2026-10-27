@@ -26,6 +26,7 @@ export type AttendanceAction =
   | 'invitado_aprobado'
   | 'invitado_rechazado'
 export type FieldType = 'text' | 'number' | 'select' | 'multiselect' | 'boolean'
+export type NotificationType = 'evento' | 'finanzas' | 'membresia' | 'mvp' | 'admin' | 'recordatorio' | 'sistema'
 
 export interface Database {
   public: {
@@ -240,6 +241,8 @@ export interface Database {
           custom_fields: Record<string, Json>
           financial_closed: boolean
           financial_closed_at: string | null
+          reminder_24h_sent: boolean
+          reminder_mvp_sent: boolean
           created_by: string | null
           created_at: string
           updated_at: string
@@ -263,6 +266,8 @@ export interface Database {
           custom_fields?: Record<string, Json>
           financial_closed?: boolean
           financial_closed_at?: string | null
+          reminder_24h_sent?: boolean
+          reminder_mvp_sent?: boolean
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -286,6 +291,8 @@ export interface Database {
           custom_fields?: Record<string, Json>
           financial_closed?: boolean
           financial_closed_at?: string | null
+          reminder_24h_sent?: boolean
+          reminder_mvp_sent?: boolean
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -553,6 +560,50 @@ export interface Database {
           }
         ]
       }
+      in_app_notifications: {
+        Row: {
+          id: string
+          user_id: string
+          club_id: string | null
+          title: string
+          body: string
+          url: string
+          type: NotificationType
+          is_read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          club_id?: string | null
+          title: string
+          body: string
+          url?: string
+          type: NotificationType
+          is_read?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          club_id?: string | null
+          title?: string
+          body?: string
+          url?: string
+          type?: NotificationType
+          is_read?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "in_app_notifications_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       push_subscriptions: {
         Row: {
           id: string
@@ -815,6 +866,78 @@ export interface Database {
           p_custom_debts?: Json
         }
         Returns: Json
+      }
+      get_club_members_push_subscriptions: {
+        Args: {
+          p_club_id: string
+          p_exclude_user_id?: string
+        }
+        Returns: {
+          id: string
+          user_id: string
+          endpoint: string
+          keys_p256dh: string
+          keys_auth: string
+        }[]
+      }
+      get_club_admins_push_subscriptions: {
+        Args: {
+          p_club_id: string
+          p_exclude_user_id?: string
+        }
+        Returns: {
+          id: string
+          user_id: string
+          endpoint: string
+          keys_p256dh: string
+          keys_auth: string
+        }[]
+      }
+      get_club_admin_user_ids: {
+        Args: {
+          p_club_id: string
+          p_exclude_user_id?: string
+        }
+        Returns: {
+          user_id: string
+        }[]
+      }
+      get_club_member_user_ids: {
+        Args: {
+          p_club_id: string
+          p_exclude_user_id?: string
+        }
+        Returns: {
+          user_id: string
+        }[]
+      }
+      create_in_app_notification: {
+        Args: {
+          p_user_id: string
+          p_club_id?: string | null
+          p_title: string
+          p_body: string
+          p_url?: string
+          p_type?: string
+        }
+        Returns: string
+      }
+      create_bulk_in_app_notifications: {
+        Args: {
+          p_user_ids: string[]
+          p_club_id?: string | null
+          p_title: string
+          p_body: string
+          p_url?: string
+          p_type?: string
+        }
+        Returns: number
+      }
+      mark_all_notifications_as_read: {
+        Args: {
+          p_club_id?: string
+        }
+        Returns: void
       }
     }
     Enums: {

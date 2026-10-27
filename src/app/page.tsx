@@ -17,6 +17,7 @@ import { PendingApprovalScreen } from "@/components/PendingApprovalScreen";
 import { ClubSwitcher } from "@/components/ClubSwitcher";
 import { EmptyState } from "@/components/EmptyState";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { NotificationBell } from "@/components/NotificationBell";
 import { getActiveClub } from "@/utils/club";
 import { getClubTheme } from "@/utils/theme";
 
@@ -144,6 +145,7 @@ export default async function Home() {
 
           <div className="flex items-center gap-2">
             <ThemeToggle variant="compact" />
+            {Boolean(user) && <NotificationBell clubId={club.id} />}
             <Link
               href="/club/nuevo"
               className="w-11 h-11 rounded-2xl bg-white dark:bg-neutral-900 border-2 border-neutral-900 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition flex items-center justify-center shadow-tactile-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none min-h-[44px] min-w-[44px]"

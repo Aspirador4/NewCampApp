@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { Database, EventStatus, EventType, GenderCategory, Json } from '@/types/database.types'
-import { sendPushToUser } from '@/app/api/push/actions'
+import { sendPushToUser, sendPushToClubMembers, sendPushToClubAdmins } from '@/app/api/push/actions'
 import { getActiveClub } from '@/utils/club'
 
 export async function createEvent(formData: FormData) {
@@ -81,6 +81,41 @@ export async function createEvent(formData: FormData) {
 
   if (insertError) {
     return { error: `Error al crear el evento: ${insertError.message}` }
+  }
+
+  // Multi-club notifications
+  if (initialStatus === 'convocado') {
+    try {
+      await sendPushToClubMembers(
+        club.id,
+        {
+          title: `[${club.name}] ⚽ Nueva Convocatoria: ${title}`,
+          body: `Se abrió la lista para el encuentro en ${location}. ¡Asegura tu lugar!`,
+          url: `/eventos/${newEvent.id}`,
+          type: 'evento',
+          clubId: club.id,
+        },
+        user.id
+      )
+    } catch (e) {
+      console.error('Error broadcasting new event to club members:', e)
+    }
+  } else if (initialStatus === 'pendiente_aprobacion') {
+    try {
+      await sendPushToClubAdmins(
+        club.id,
+        {
+          title: `[${club.name}] 📝 Nueva Propuesta de Convocatoria`,
+          body: `"${title}" espera tu validación para abrirse a los socios.`,
+          url: `/eventos/${newEvent.id}`,
+          type: 'admin',
+          clubId: club.id,
+        },
+        user.id
+      )
+    } catch (e) {
+      console.error('Error notifying admins of new proposed event:', e)
+    }
   }
 
   revalidatePath('/eventos')
@@ -259,9 +294,30 @@ export async function leaveEvent(eventId: string, reason?: string) {
         title: `[${clubName}] ¡Subiste de Lista de Espera! 🎉`,
         body: 'Se liberó un cupo en el partido y quedaste confirmado automáticamente.',
         url: `/eventos/${eventId}`,
+        type: 'evento',
+        clubId: event?.club_id,
       })
     } catch (e) {
       console.error('Error sending push to promoted user:', e)
+    }
+  } else if (event?.club_id) {
+    // If a confirmed attendee left and no one was in waitlist, alert club admins of the vacant spot
+    try {
+      const { data: userProfile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
+      const leaverName = userProfile?.full_name || 'Un socio'
+      await sendPushToClubAdmins(
+        event.club_id,
+        {
+          title: `[${clubName}] ⚠️ Cupo Libre en Convocatoria`,
+          body: `${leaverName} se dio de baja del partido y no hay lista de espera. Hay un cupo disponible.`,
+          url: `/eventos/${eventId}`,
+          type: 'evento',
+          clubId: event.club_id,
+        },
+        user.id
+      )
+    } catch (e) {
+      console.error('Error alerting admins of vacant slot:', e)
     }
   }
 
@@ -422,9 +478,34 @@ export async function updateEventStatus(eventId: string, newStatus: EventStatus)
           title: `[${clubName}] ¡Vota al MVP del Partido! 🏆`,
           body: 'El partido finalizó. Tienes 24hs para elegir a la figura del encuentro.',
           url: `/eventos/${eventId}`,
+          type: 'mvp',
+          clubId: event.club_id,
         })
       } catch (e) {
         console.error('Push error:', e)
+      }
+    }
+  }
+
+  // If match was cancelled, notify confirmed and waitlist attendees
+  if (newStatus === 'cancelado') {
+    const { data: attendees } = await supabase
+      .from('event_attendees')
+      .select('user_id')
+      .eq('event_id', eventId)
+      .in('status', ['confirmado', 'lista_espera'])
+
+    for (const att of attendees || []) {
+      try {
+        await sendPushToUser(att.user_id, {
+          title: `[${clubName}] ❌ Partido Cancelado`,
+          body: 'El encuentro ha sido cancelado por la administración.',
+          url: '/eventos',
+          type: 'evento',
+          clubId: event.club_id,
+        })
+      } catch (e) {
+        console.error('Push error on cancel:', e)
       }
     }
   }
@@ -482,10 +563,29 @@ export async function approveEventAction(eventId: string) {
         title: `[${clubName}] ¡Tu Convocatoria fue Aprobada! ⚽`,
         body: `"${event.title}" ya está visible y abierta para inscripciones de los socios.`,
         url: `/eventos/${eventId}`,
+        type: 'evento',
+        clubId: event.club_id,
       })
     } catch (e) {
       console.error('Push error:', e)
     }
+  }
+
+  // Broadcast to all club members that this match is open
+  try {
+    await sendPushToClubMembers(
+      event.club_id,
+      {
+        title: `[${clubName}] ⚽ Nueva Convocatoria: ${event.title}`,
+        body: 'Se abrió la lista para este encuentro. ¡Asegura tu lugar en la cancha!',
+        url: `/eventos/${eventId}`,
+        type: 'evento',
+        clubId: event.club_id,
+      },
+      event.created_by || undefined
+    )
+  } catch (e) {
+    console.error('Error broadcasting event approval to members:', e)
   }
 
   revalidatePath('/eventos')
@@ -504,13 +604,15 @@ export async function rejectEventAction(eventId: string) {
 
   const { data: event } = await supabase
     .from('events')
-    .select('club_id')
+    .select('club_id, title, clubs(name)')
     .eq('id', eventId)
     .single()
 
   if (!event) {
     return { error: 'Evento no encontrado' }
   }
+
+  const clubName = (event.clubs as unknown as { name?: string })?.name || 'Club Deportivo'
 
   const { data: member } = await supabase
     .from('club_members')
@@ -523,6 +625,27 @@ export async function rejectEventAction(eventId: string) {
 
   if (!isAdmin) {
     return { error: 'Solo los administradores del club pueden rechazar eventos' }
+  }
+
+  // Notify confirmed & waitlist attendees before deletion
+  const { data: attendees } = await supabase
+    .from('event_attendees')
+    .select('user_id')
+    .eq('event_id', eventId)
+    .in('status', ['confirmado', 'lista_espera'])
+
+  for (const att of attendees || []) {
+    try {
+      await sendPushToUser(att.user_id, {
+        title: `[${clubName}] ❌ Partido Cancelado`,
+        body: `El encuentro "${event.title}" fue suspendido por la administración.`,
+        url: '/eventos',
+        type: 'evento',
+        clubId: event.club_id,
+      })
+    } catch (e) {
+      console.error('Error sending cancellation push:', e)
+    }
   }
 
   const { error } = await supabase
@@ -559,13 +682,15 @@ export async function closeEventFinancesAction(
 
   const { data: event } = await supabase
     .from('events')
-    .select('club_id, created_by')
+    .select('club_id, created_by, title, clubs(name)')
     .eq('id', eventId)
     .single()
 
   if (!event) {
     return { error: 'Evento no encontrado' }
   }
+
+  const clubName = (event.clubs as unknown as { name?: string })?.name || 'Club Deportivo'
 
   const { data: member } = await supabase
     .from('club_members')
@@ -595,6 +720,34 @@ export async function closeEventFinancesAction(
 
   if (error) {
     return { error: error.message }
+  }
+
+  // Notify each debtor with their total balance
+  try {
+    const { data: debts } = await supabase
+      .from('member_debts')
+      .select('user_id, amount')
+      .eq('event_id', eventId)
+      .eq('status', 'pendiente')
+
+    const debtTotals: Record<string, number> = {}
+    for (const d of debts || []) {
+      debtTotals[d.user_id] = (debtTotals[d.user_id] || 0) + d.amount
+    }
+
+    for (const [debtorId, total] of Object.entries(debtTotals)) {
+      if (total > 0) {
+        await sendPushToUser(debtorId, {
+          title: `[${clubName}] 💳 Cobro de Partido: ${event.title}`,
+          body: `Tu aporte a transferir es de $${total.toLocaleString('es-CL')}. Revisa los datos de transferencia en Finanzas.`,
+          url: '/finanzas',
+          type: 'finanzas',
+          clubId: event.club_id,
+        })
+      }
+    }
+  } catch (notifyErr) {
+    console.error('Error sending debts notifications:', notifyErr)
   }
 
   revalidatePath(`/eventos/${eventId}`)

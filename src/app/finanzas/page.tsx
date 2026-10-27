@@ -6,6 +6,7 @@ import { FinanzasMemberView, MemberDebtItem } from '@/components/FinanzasMemberV
 import { Wallet, ArrowLeft } from 'lucide-react'
 import { BankDetails } from './actions'
 import { getActiveClub } from '@/utils/club'
+import { NotificationBell } from '@/components/NotificationBell'
 
 interface FinanzasPageProps {
   searchParams: Promise<{
@@ -199,8 +200,11 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
           </div>
         </div>
 
-        <div className="w-10 h-10 rounded-xl bg-amber-400 text-neutral-950 flex items-center justify-center border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm">
-          <Wallet className="w-5 h-5 stroke-[2.5]" />
+        <div className="flex items-center gap-2">
+          {Boolean(user) && <NotificationBell clubId={club.id} />}
+          <div className="w-10 h-10 rounded-xl bg-amber-400 text-neutral-950 flex items-center justify-center border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm">
+            <Wallet className="w-5 h-5 stroke-[2.5]" />
+          </div>
         </div>
       </div>
 

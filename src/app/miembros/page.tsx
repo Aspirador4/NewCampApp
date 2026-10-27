@@ -4,6 +4,7 @@ import { createClient } from '@/utils/supabase/server'
 import { MembersDirectory, MemberItem } from '@/components/MembersDirectory'
 import { Users, ArrowLeft } from 'lucide-react'
 import { getActiveClub } from '@/utils/club'
+import { NotificationBell } from '@/components/NotificationBell'
 
 export default async function MiembrosPage() {
   const supabase = await createClient()
@@ -119,11 +120,14 @@ export default async function MiembrosPage() {
           </div>
         </div>
 
-        <div
-          className="w-10 h-10 rounded-xl text-white flex items-center justify-center border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm"
-          style={{ backgroundColor: 'var(--club-primary, #059669)' }}
-        >
-          <Users className="w-5 h-5 stroke-[2.5]" />
+        <div className="flex items-center gap-2">
+          {Boolean(user) && <NotificationBell clubId={club.id} />}
+          <div
+            className="w-10 h-10 rounded-xl text-white flex items-center justify-center border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm"
+            style={{ backgroundColor: 'var(--club-primary, #059669)' }}
+          >
+            <Users className="w-5 h-5 stroke-[2.5]" />
+          </div>
         </div>
       </div>
 

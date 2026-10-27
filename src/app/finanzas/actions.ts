@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
 import { getActiveClub } from '@/utils/club'
+import { sendPushToUser } from '@/app/api/push/actions'
 import { Json } from '@/types/database.types'
 
 export async function settleMemberDebtsAction(targetUserId: string, debtIds?: string[], targetClubId?: string) {
@@ -39,6 +40,18 @@ export async function settleMemberDebtsAction(targetUserId: string, debtIds?: st
 
   if (error) {
     return { error: `Error al sanear deudas: ${error.message}` }
+  }
+
+  try {
+    await sendPushToUser(targetUserId, {
+      title: `[${club.name}] ✅ Pago Registrado`,
+      body: `Tus cuotas pendientes fueron saldadas por la administración. ¡Estás al día con el club!`,
+      url: '/finanzas',
+      type: 'finanzas',
+      clubId: clubId,
+    })
+  } catch (pushErr) {
+    console.error('Error sending settle debts push:', pushErr)
   }
 
   revalidatePath('/finanzas')
@@ -107,6 +120,43 @@ export async function generateEventDebtsAction(eventId: string, costPerPlayer?: 
 
   if (error) {
     return { error: error.message }
+  }
+
+  // Notify debtors of their pending debt amount
+  try {
+    const { data: debts } = await supabase
+      .from('member_debts')
+      .select('user_id, amount')
+      .eq('event_id', eventId)
+      .eq('status', 'pendiente')
+
+    const debtTotals: Record<string, number> = {}
+    for (const d of debts || []) {
+      debtTotals[d.user_id] = (debtTotals[d.user_id] || 0) + d.amount
+    }
+
+    const { data: eventDetails } = await supabase
+      .from('events')
+      .select('title, club_id, clubs(name)')
+      .eq('id', eventId)
+      .single()
+
+    const clubName = (eventDetails?.clubs as unknown as { name?: string })?.name || 'Club Deportivo'
+    const eventTitle = eventDetails?.title || 'Partido'
+
+    for (const [debtorId, total] of Object.entries(debtTotals)) {
+      if (total > 0) {
+        await sendPushToUser(debtorId, {
+          title: `[${clubName}] 💳 Cobro de Partido: ${eventTitle}`,
+          body: `Tu aporte a transferir es de $${total.toLocaleString('es-CL')}. Revisa los datos de transferencia en Finanzas.`,
+          url: '/finanzas',
+          type: 'finanzas',
+          clubId: eventDetails?.club_id,
+        })
+      }
+    }
+  } catch (notifyErr) {
+    console.error('Error sending debts notifications in generateEventDebtsAction:', notifyErr)
   }
 
   revalidatePath('/finanzas')

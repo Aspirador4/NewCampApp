@@ -1,6 +1,6 @@
-# 08. Progressive Web App (PWA) y Notificaciones Web Push
+# 08. Progressive Web App (PWA) y Sistema Unificado de Notificaciones
 
-Documentación técnica del soporte PWA standalone, Service Worker y entrega de notificaciones Web Push firmadas con VAPID.
+Documentación técnica del soporte PWA standalone, Service Worker, buzón In-App y entrega de notificaciones Web Push segmentadas por club con VAPID.
 
 ---
 
@@ -8,7 +8,7 @@ Documentación técnica del soporte PWA standalone, Service Worker y entrega de 
 
 1. **Manifest Standalone (`public/manifest.json`)**:
    - `display: standalone`: Oculta la barra de navegación del navegador (Safari / Chrome), ejecutando la aplicación a pantalla completa como una app nativa.
-   - `theme_color: #059669`: Tinte de barra de estado móvil.
+   - `theme_color: #059669`: Tinte de barra de estado móvil reactivo a la paleta activa del club.
    - Iconos PWA: Generados en 192x192 y 512x512 maskable en `public/icons/`.
 2. **Instalación Ergonómica**:
    - Componente [`PwaPrompt.tsx`](../../src/components/PwaPrompt.tsx):
@@ -35,11 +35,11 @@ Un error común en PWAs compartidas o al probar múltiples perfiles en un mismo 
 ```mermaid
 sequenceDiagram
     actor Usuario
-    participant App as PWA (Browser)
+    participant App as PWA (Browser / Bell)
     participant SW as Service Worker (sw.js)
     participant Server as Next.js Server Actions
-    participant DB as Supabase (push_subscriptions)
-    participant PushService as Web Push Service (Google FCM / Apple APNs)
+    participant DB as Supabase (in_app & push_subs)
+    participant PushService as Web Push Service (FCM / APNs)
 
     Usuario->>App: Clic en "Activar Notificaciones"
     App->>App: Notification.requestPermission()
@@ -48,27 +48,71 @@ sequenceDiagram
     PushService-->>SW: Retorna Endpoint + Keys (p256dh, auth)
     App->>Server: savePushSubscription()
     Server->>DB: UPSERT push_subscriptions (user_id, endpoint)
-    Note over Server,PushService: DISPARADORES AUTOMÁTICOS
+    Note over Server,PushService: DISPARADORES UNIFICADOS
+    Server->>DB: INSERT in_app_notifications (buzón in-app)
     Server->>PushService: webpush.sendNotification()
     PushService->>SW: Dispara evento 'push'
-    SW-->>Usuario: Muestra notificación con vibración y sonido
+    SW-->>Usuario: Muestra banner con vibración y sonido
+    DB-->>App: Supabase Realtime actualiza contador de campana
 ```
 
 ---
 
-## 3. Disparadores Automáticos Implementados
+## 3. Arquitectura de Notificaciones In-App (Buzón Oficial)
 
-1. **Auto-Promoción de Lista de Espera**:
-   - Al liberarse un cupo y ascender el primer socio en espera, se despacha:
-     - **Título**: *¡Subiste de Lista de Espera! 🎉*
-     - **Mensaje**: *Se liberó un cupo en el partido y quedaste confirmado automáticamente.*
-2. **Aprobación de Invitados**:
-   - Al aprobar un administrador a un invitado externo:
-     - **Título**: *¡Invitado Aprobado! ✅*
-     - **Mensaje**: *Tu invitado [Nombre] fue aprobado y confirmado para el partido.*
-3. **Apertura de Votación MVP**:
-   - Al finalizar el encuentro:
-     - **Título**: *¡Vota al MVP del Partido! 🏆*
-     - **Mensaje**: *El partido finalizó. Tienes 24hs para elegir a la figura del encuentro.*
-4. **Depuración Automática de Suscripciones**:
-   - Si un dispositivo desinstala la app o revoca permisos (código HTTP 404/410), el servidor elimina automáticamente el registro de `push_subscriptions`.
+Para garantizar que los socios que no hayan instalado la PWA o tengan los permisos bloqueados en el sistema operativo no pierdan mensajes vitales, se implementó el **Buzón In-App**:
+
+1. **Tabla `in_app_notifications`**:
+   - `id`: UUID único.
+   - `user_id`: Destinatario de la alerta.
+   - `club_id`: Identificador del club (aislamiento multi-tenant).
+   - `title` & `body`: Contenido de la alerta.
+   - `url`: Enlace de redirección al pulsar la notificación.
+   - `type`: Categoría tipada (`evento`, `finanzas`, `membresia`, `mvp`, `admin`, `recordatorio`, `sistema`).
+   - `is_read`: Estado de lectura booleano.
+   - `created_at`: Marca temporal.
+2. **Componente [`NotificationBell.tsx`](../../src/components/NotificationBell.tsx)**:
+   - Campana táctil ubicada en las cabeceras principales (`/`, `/eventos`, `/miembros`, `/finanzas`).
+   - Insignia (*badge*) con conteo en vivo de notificaciones no leídas.
+   - Modal deslizable (*slide-over sheet*) con filtros "Todas" y "Sin leer", botón "Marcar todas como leídas", enlaces directos y tiempos relativos ergonómicos.
+   - **Suscripción Realtime**: Escucha eventos `INSERT` y `UPDATE` en tiempo real vía WebSocket de Supabase, actualizando la campana sin necesidad de recargar la página.
+
+---
+
+## 4. Segmentación Multi-Club
+
+Para prevenir fugas de notificaciones entre clubes distintos alojados en la misma base de datos, los helpers de despacho operan con aislamiento estricto:
+
+* **`sendPushToClubMembers(clubId, payload, excludeUserId?)`**:
+  Obtiene los dispositivos de socios aprobados pertenecientes exclusivamente a `clubId` mediante la función PostgreSQL `get_club_members_push_subscriptions` y registra en bloque las alertas en `in_app_notifications`.
+* **`sendPushToClubAdmins(clubId, payload, excludeUserId?)`**:
+  Filtra únicamente a los usuarios con rol `'admin'` dentro de `clubId` mediante `get_club_admins_push_subscriptions`.
+* **Prefijo Dinámico de Contexto**:
+  Todas las alertas anteponen `[Nombre del Club]` en su título para que socios con membresías en múltiples clubes identifiquen el origen al instante.
+
+---
+
+## 5. Mapeo Completo de los 11 Disparadores
+
+| # | Canal / Disparador | Destinatario | Título y Resumen | Módulo / Archivo |
+|---|---|---|---|---|
+| **1** | **Nueva Convocatoria Abierta** | Socios del club | `[Club] ⚽ Nueva Convocatoria: [Partido]`<br>Lista abierta para confirmar asistencia. | [`approveEventAction` / `createEvent`](../../src/app/eventos/actions.ts) |
+| **2** | **Emisión de Cobro / Cierre Financiero** | Confirmados con saldo | `[Club] 💳 Cobro de Partido: [Título]`<br>Aporte a transferir según cierre de tesorería. | [`closeEventFinancesAction` / `generateEventDebtsAction`](../../src/app/eventos/actions.ts) |
+| **3** | **Confirmación de Pago (Saneamiento)** | Socio saldado | `[Club] ✅ Pago Registrado`<br>Aviso de cuenta al día tras revisión del tesorero. | [`settleMemberDebtsAction`](../../src/app/finanzas/actions.ts) |
+| **4** | **Anuncio del Ganador del MVP** | Ganador(es) y plantel | `[Club] 🌟 ¡Elegido MVP del Partido!` / `🏆 Resultado MVP`<br>Reconocimiento a la figura votada. | [`closeMvpVoting`](../../src/app/eventos/mvp-actions.ts) |
+| **5** | **Aviso de Nueva Solicitud de Pase** | Administradores | `[Club] 📋 Nueva Solicitud de Pase` / `📨 Solicitud Reenviada`<br>Alerta de socio pendiente de admisión. | [`joinClubAction` / `submitMotivationAction`](../../src/app/club/actions.ts) |
+| **6** | **Aviso de Solicitud de Invitado Externo** | Administradores | `[Club] 👤 Solicitud de Invitado`<br>Un socio propone un invitado para el partido. | [`requestGuest`](../../src/app/eventos/guest-actions.ts) |
+| **7** | **Baja y Alerta de Cupo Libre** | Administradores | `[Club] ⚠️ Cupo Libre en Convocatoria`<br>Baja sin lista de espera para cubrir el cupo. | [`leaveEvent`](../../src/app/eventos/actions.ts) |
+| **8** | **Cancelación o Reprogramación** | Confirmados y Espera | `[Club] ❌ Partido Cancelado`<br>Aviso formal de suspensión del evento. | [`rejectEventAction` / `updateEventStatus`](../../src/app/eventos/actions.ts) |
+| **9** | **Recordatorio 24h Previas** | Confirmados | `[Club] ⏰ Recordatorio: Partido próximo`<br>Aviso de hora y lugar con opción de liberarse. | [`/api/cron/reminders`](../../src/app/api/cron/reminders/route.ts) |
+| **10** | **Recordatorio de Votación MVP por Vencer** | Confirmados sin votar | `[Club] ⏳ ¡Últimas horas para votar al MVP!`<br>Alerta a 4 horas del vencimiento. | [`/api/cron/reminders`](../../src/app/api/cron/reminders/route.ts) |
+| **11** | **Ascenso a Administrador / Capitán** | Socio promovido | `[Club] 🛡️ Ahora eres Administrador`<br>Confirmación de asignación de rol directivo. | [`updateMemberRoleAction`](../../src/app/miembros/actions.ts) |
+
+---
+
+## 6. Automatizaciones y Endpoint Cron
+
+La verificación de recordatorios se ejecuta a través del servicio [`processAutomatedReminders`](../../src/app/api/notifications/reminders.ts) expuesto en `/api/cron/reminders`:
+
+* Soporta protección mediante cabecera `Authorization: Bearer <CRON_SECRET>`.
+* Marca las banderas `reminder_24h_sent` y `reminder_mvp_sent` en la tabla `events` para garantizar **idempotencia total** (evitando envíos duplicados).

@@ -150,6 +150,9 @@ Métricas consolidadas de rendimiento y asistencia por jugador.
 ### `push_subscriptions`
 Endpoints y credenciales criptográficas de dispositivos móviles para Web Push vinculadas a cada cuenta de usuario (`user_id`).
 
+### `in_app_notifications`
+Buzón oficial de notificaciones dentro de la app para todos los socios. Registra `user_id`, `club_id` (aislamiento multi-club), `title`, `body`, `url`, `type` (`evento`, `finanzas`, `membresia`, `mvp`, `admin`, `recordatorio`, `sistema`), `is_read` y `created_at`. Publicado en Supabase Realtime para actualización instantánea de la campana.
+
 ---
 
 ## 3. Funciones Almacenadas Atómicas (RPCs)
@@ -175,6 +178,12 @@ Para evitar condiciones de carrera (*race conditions*) con múltiples usuarios c
 5. **`is_admin(user_id)`**:
    Función con atributo `SECURITY DEFINER` que consulta el rol del usuario sin disparar recursiones infinitas dentro de las políticas de RLS.
 
+6. **RPCs de Notificaciones y Segmentación Multi-Club**:
+   - `get_club_members_push_subscriptions(p_club_id, p_exclude_user_id)`: Obtiene credenciales de suscripciones push de miembros aprobados de un club específico.
+   - `get_club_admins_push_subscriptions(p_club_id, p_exclude_user_id)`: Obtiene credenciales push exclusivas de administradores del club.
+   - `create_in_app_notification(...)` y `create_bulk_in_app_notifications(...)`: Inserción segura `SECURITY DEFINER` de alertas en el buzón.
+   - `mark_all_notifications_as_read(p_club_id)`: Marca en lote como leídas las alertas del socio activo.
+
 ---
 
 ## 4. Registro de Migraciones en Supabase
@@ -185,3 +194,5 @@ Las migraciones se ejecutan ordenadamente en el SQL Editor de Supabase:
 2. **[`002_finances_and_realtime.sql`](../../supabase/migrations/002_finances_and_realtime.sql)**: Modelo de deudas en `member_debts`, soporte de invitados a cargo y publicaciones Realtime.
 3. **[`003_event_approval_and_member_admission.sql`](../../supabase/migrations/003_event_approval_and_member_admission.sql)**: Admisión con `approval_status`, carta de motivación, RPC `close_event_finances` y políticas de eliminación.
 4. **[`004_event_gender_category_and_profile_gender.sql`](../../supabase/migrations/004_event_gender_category_and_profile_gender.sql)**: Incorporación de `gender` en `profiles` y `gender_category` en `events`.
+5. **[`004_multiclub_architecture.sql`](../../supabase/migrations/004_multiclub_architecture.sql)**: Multi-tenancy multi-club con `clubs`, `club_members`, dynamic fields y migración de datos.
+6. **[`005_notifications_and_reminders.sql`](../../supabase/migrations/005_notifications_and_reminders.sql)**: Buzón `in_app_notifications`, RPCs de push segmentadas por club, banderas de recordatorio `reminder_24h_sent` y `reminder_mvp_sent`, y publicación Realtime.

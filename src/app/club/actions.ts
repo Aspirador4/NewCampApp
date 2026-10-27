@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 import { ACTIVE_CLUB_COOKIE } from '@/types/club.types'
+import { sendPushToClubAdmins } from '@/app/api/push/actions'
 
 export async function createClubAction(formData: FormData) {
   const supabase = await createClient()
@@ -265,6 +266,28 @@ export async function joinClubAction(clubId: string, motivationText?: string) {
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
   })
+
+  // Notify club admins of new membership application
+  try {
+    const { data: targetClub } = await supabase.from('clubs').select('name').eq('id', clubId).single()
+    const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
+    const clubName = targetClub?.name || 'Club Deportivo'
+    const applicantName = profile?.full_name || 'Un socio'
+
+    await sendPushToClubAdmins(
+      clubId,
+      {
+        title: `[${clubName}] 📋 Nueva Solicitud de Pase`,
+        body: `${applicantName} ha solicitado ingresar al club. Revisa su postulación en Miembros.`,
+        url: '/miembros',
+        type: 'admin',
+        clubId,
+      },
+      user.id
+    )
+  } catch (pushErr) {
+    console.error('Error notifying admins on joinClubAction:', pushErr)
+  }
 
   revalidatePath('/', 'layout')
   return { success: true, data }

@@ -5,6 +5,7 @@ import { Plus, Calendar, MapPin, Users, ArrowLeft, Clock, ArrowRight } from 'luc
 import { EventType, GenderCategory } from '@/types/database.types'
 import { getActiveClub } from '@/utils/club'
 import { EmptyState } from '@/components/EmptyState'
+import { NotificationBell } from '@/components/NotificationBell'
 
 interface AttendeeSummary {
   id: string
@@ -141,14 +142,17 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
           </div>
         </div>
 
-        <Link
-          href="/eventos/nuevo"
-          className="btn-tactile min-h-[42px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-white font-display font-bold text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm"
-          style={{ backgroundColor: 'var(--club-primary, #059669)' }}
-        >
-          <Plus className="w-4 h-4 stroke-[3]" />
-          <span>Convocar</span>
-        </Link>
+        <div className="flex items-center gap-2">
+          {Boolean(user) && <NotificationBell clubId={club.id} />}
+          <Link
+            href="/eventos/nuevo"
+            className="btn-tactile min-h-[42px] flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-white font-display font-bold text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm"
+            style={{ backgroundColor: 'var(--club-primary, #059669)' }}
+          >
+            <Plus className="w-4 h-4 stroke-[3]" />
+            <span>Convocar</span>
+          </Link>
+        </div>
       </div>
 
       {/* Filter Tabs (Segmented Locker Navigation) */}

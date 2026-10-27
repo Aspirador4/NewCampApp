@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { Database } from '@/types/database.types'
+import { sendPushToUser } from '@/app/api/push/actions'
 
 export async function castMvpVote(eventId: string, votedPlayerId: string) {
   const supabase = await createClient()
@@ -132,6 +133,9 @@ export async function closeMvpVoting(eventId: string) {
     return fallbackCloseMvp(supabase, eventId, event.club_id)
   }
 
+  const winnerIds = ((rpcRes as unknown as { winner_ids?: string[] })?.winner_ids || []) as string[]
+  await dispatchMvpWinnerNotifications(supabase, eventId, event.club_id, winnerIds)
+
   revalidatePath(`/eventos/${eventId}`)
   revalidatePath('/ranking')
   revalidatePath('/perfil')
@@ -239,7 +243,71 @@ async function fallbackCloseMvp(supabase: SupabaseClient<Database>, eventId: str
       )
   }
 
+  await dispatchMvpWinnerNotifications(supabase, eventId, clubId, winners)
+
   revalidatePath(`/eventos/${eventId}`)
   revalidatePath('/ranking')
   return { success: true, error: null }
+}
+
+async function dispatchMvpWinnerNotifications(
+  supabase: SupabaseClient<Database>,
+  eventId: string,
+  clubId: string,
+  winnerIds: string[]
+) {
+  if (!winnerIds || winnerIds.length === 0) return
+
+  try {
+    const { data: event } = await supabase
+      .from('events')
+      .select('title, clubs(name)')
+      .eq('id', eventId)
+      .single()
+
+    const clubName = (event?.clubs as unknown as { name?: string })?.name || 'Club Deportivo'
+    const eventTitle = event?.title || 'Partido'
+
+    // Fetch winner profiles
+    const { data: winners } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', winnerIds)
+
+    const winnerMap = new Map((winners || []).map((w) => [w.id, w.full_name]))
+    const winnerNames = winnerIds.map((id) => winnerMap.get(id) || 'Jugador').join(' y ')
+
+    // 1. Notify winners
+    for (const winnerId of winnerIds) {
+      await sendPushToUser(winnerId, {
+        title: `[${clubName}] 🌟 ¡Elegido MVP del Partido!`,
+        body: `¡Felicitaciones! Fuiste votado como el Jugador Más Valioso de "${eventTitle}".`,
+        url: `/eventos/${eventId}`,
+        type: 'mvp',
+        clubId,
+      })
+    }
+
+    // 2. Notify other confirmed attendees
+    const { data: attendees } = await supabase
+      .from('event_attendees')
+      .select('user_id')
+      .eq('event_id', eventId)
+      .eq('status', 'confirmado')
+
+    const winnerSet = new Set(winnerIds)
+    const otherAttendees = (attendees || []).filter((a) => !winnerSet.has(a.user_id))
+
+    for (const att of otherAttendees) {
+      await sendPushToUser(att.user_id, {
+        title: `[${clubName}] 🏆 Resultado MVP: ${winnerNames}`,
+        body: `${winnerNames} fue elegido como la figura del encuentro en "${eventTitle}".`,
+        url: `/eventos/${eventId}`,
+        type: 'mvp',
+        clubId,
+      })
+    }
+  } catch (err) {
+    console.error('Error dispatching MVP winner notifications:', err)
+  }
 }

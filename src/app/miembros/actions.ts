@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
-import { sendPushToUser } from '@/app/api/push/actions'
+import { sendPushToUser, sendPushToClubAdmins } from '@/app/api/push/actions'
 import { SystemRole } from '@/types/database.types'
 import { getActiveClub } from '@/utils/club'
 
@@ -60,6 +60,8 @@ export async function approveMemberAction(targetUserId: string, targetClubId?: s
       title: `[${club.name}] ¡Bienvenido al Club! 🎉`,
       body: `Tu cuenta ha sido admitida en ${club.name}. Ya puedes inscribirte a partidos y eventos.`,
       url: '/eventos',
+      type: 'membresia',
+      clubId,
     })
   } catch (e) {
     console.error('Error sending push notification:', e)
@@ -104,6 +106,18 @@ export async function rejectMemberAction(targetUserId: string, targetClubId?: st
 
   if (error) {
     return { error: error.message }
+  }
+
+  try {
+    await sendPushToUser(targetUserId, {
+      title: `[${club.name}] Solicitud de Membresía`,
+      body: `Tu solicitud de ingreso a ${club.name} fue revisada por los capitanes y no fue admitida en esta ocasión.`,
+      url: '/club/unirse',
+      type: 'membresia',
+      clubId,
+    })
+  } catch (pushErr) {
+    console.error('Error sending push on member reject:', pushErr)
   }
 
   revalidatePath('/miembros')
@@ -204,6 +218,20 @@ export async function updateMemberRoleAction(targetUserId: string, newRole: Syst
     return { error: error.message }
   }
 
+  if (newRole === 'admin') {
+    try {
+      await sendPushToUser(targetUserId, {
+        title: `[${club.name}] 🛡️ Ahora eres Administrador`,
+        body: `Se te han otorgado permisos de administrador en ${club.name}. Puedes gestionar convocatorias y miembros.`,
+        url: '/miembros',
+        type: 'admin',
+        clubId,
+      })
+    } catch (e) {
+      console.error('Error sending push on role update:', e)
+    }
+  }
+
   revalidatePath('/miembros')
   revalidatePath('/perfil')
   return { success: true }
@@ -293,6 +321,30 @@ export async function submitMotivationAction(motivationText: string, targetClubI
       updated_at: new Date().toISOString(),
     })
     .eq('id', user.id)
+
+  // Notify club admins of updated motivation / reconsideration
+  try {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', user.id)
+      .single()
+
+    const applicantName = profile?.full_name || 'Un socio'
+    await sendPushToClubAdmins(
+      clubId,
+      {
+        title: `[${club.name}] 📨 Solicitud Reenviada`,
+        body: `${applicantName} ha actualizado su carta de presentación para unirse al club.`,
+        url: '/miembros',
+        type: 'admin',
+        clubId,
+      },
+      user.id
+    )
+  } catch (pushErr) {
+    console.error('Error notifying admins on submitMotivationAction:', pushErr)
+  }
 
   revalidatePath('/')
   revalidatePath('/miembros')

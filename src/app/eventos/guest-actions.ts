@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
-import { sendPushToUser } from '@/app/api/push/actions'
+import { sendPushToUser, sendPushToClubAdmins } from '@/app/api/push/actions'
 
 export async function requestGuest(formData: FormData) {
   const supabase = await createClient()
@@ -60,6 +60,32 @@ export async function requestGuest(formData: FormData) {
     action: 'solicito_invitado',
     reason: `Invitado solicitado: ${guestName}`,
   })
+
+  // Notify club admins of new guest request
+  try {
+    const { data: eventWithClub } = await supabase
+      .from('events')
+      .select('title, clubs(name)')
+      .eq('id', eventId)
+      .single()
+    const clubName = (eventWithClub?.clubs as unknown as { name?: string })?.name || 'Club Deportivo'
+    const { data: userProfile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
+    const requesterName = userProfile?.full_name || 'Un socio'
+
+    await sendPushToClubAdmins(
+      event.club_id,
+      {
+        title: `[${clubName}] 👤 Solicitud de Invitado`,
+        body: `${requesterName} propuso a "${guestName}" para el encuentro. Requiere tu validación.`,
+        url: '/admin/invitados',
+        type: 'admin',
+        clubId: event.club_id,
+      },
+      user.id
+    )
+  } catch (pushErr) {
+    console.error('Error notifying admins of guest request:', pushErr)
+  }
 
   revalidatePath(`/eventos/${eventId}`)
   revalidatePath('/admin/invitados')
@@ -180,6 +206,8 @@ export async function approveGuest(guestId: string, eventId: string) {
         title: `[${clubName}] ¡Invitado Aprobado! ✅`,
         body: `Tu invitado ${updatedGuest.guest_name} fue aprobado y confirmado para el partido.`,
         url: `/eventos/${eventId}`,
+        type: 'evento',
+        clubId: event.club_id,
       })
     } catch (e) {
       console.error('Push error:', e)
@@ -256,6 +284,8 @@ export async function rejectGuest(guestId: string, eventId: string) {
         title: `[${clubName}] Solicitud de Invitado ❌`,
         body: `La postulación de ${rejectedGuest.guest_name} no pudo ser aprobada.`,
         url: `/eventos/${eventId}`,
+        type: 'evento',
+        clubId: event.club_id,
       })
     } catch (e) {
       console.error('Push error:', e)
