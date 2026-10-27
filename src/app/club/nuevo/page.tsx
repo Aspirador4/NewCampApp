@@ -13,6 +13,8 @@ import {
   Link2,
   Trash2,
   Image as ImageIcon,
+  Globe,
+  Lock,
 } from 'lucide-react'
 import { createClubAction, uploadClubLogoAction } from '@/app/club/actions'
 import { PalettePicker } from '@/components/PalettePicker'
@@ -81,6 +83,7 @@ export default function NuevoClubPage() {
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [paletteId, setPaletteId] = useState('emerald')
+  const [isPrivate, setIsPrivate] = useState(false)
   const [isManualSlug, setIsManualSlug] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -140,6 +143,7 @@ export default function NuevoClubPage() {
     formData.append('slug', slug)
     formData.append('description', description)
     formData.append('palette_id', paletteId)
+    formData.append('is_private', isPrivate ? 'true' : 'false')
     if (logoUrl) formData.append('logo_url', logoUrl)
 
     const res = await createClubAction(formData)
@@ -202,9 +206,21 @@ export default function NuevoClubPage() {
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="font-mono text-[9px] font-bold text-neutral-400 uppercase tracking-widest">
-            Vista Previa de Escudo
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="font-mono text-[9px] font-bold text-neutral-400 uppercase tracking-widest">
+              Vista Previa de Escudo
+            </p>
+            <span
+              className={`font-mono text-[9px] font-bold uppercase px-1.5 py-0.2 rounded border inline-flex items-center gap-1 ${
+                isPrivate
+                  ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800'
+                  : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
+              }`}
+            >
+              {isPrivate ? <Lock className="w-2.5 h-2.5" /> : <Globe className="w-2.5 h-2.5" />}
+              {isPrivate ? 'Privado' : 'Público'}
+            </span>
+          </div>
           <h3 className="font-display font-bold text-xl uppercase tracking-tight text-neutral-950 dark:text-white truncate">
             {name.trim() || 'Nombre de tu Club'}
           </h3>
@@ -436,6 +452,65 @@ export default function NuevoClubPage() {
             placeholder="Grupo de fútbol y asados de los jueves por la noche..."
             className="input-tactile w-full px-3.5 py-2.5 text-xs font-medium placeholder-neutral-400 dark:placeholder-neutral-500"
           />
+        </div>
+
+        {/* Club Visibility (Public vs Private) */}
+        <div className="space-y-2 pt-1">
+          <label className="font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white flex items-center gap-1.5">
+            {isPrivate ? (
+              <Lock className="w-3.5 h-3.5 text-amber-500 stroke-[2.5]" />
+            ) : (
+              <Globe className="w-3.5 h-3.5 text-emerald-500 stroke-[2.5]" />
+            )}
+            Visibilidad del Club
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setIsPrivate(false)}
+              className={`btn-tactile p-3 rounded-2xl border-2 text-left flex flex-col gap-1 transition ${
+                !isPrivate
+                  ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-600 dark:border-emerald-500 shadow-tactile-sm'
+                  : 'bg-white dark:bg-[#14161f] border-neutral-300 dark:border-neutral-700 opacity-60 hover:opacity-100'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  Público
+                </span>
+                {!isPrivate && (
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                )}
+              </div>
+              <p className="text-[11px] text-neutral-600 dark:text-neutral-400 font-sans leading-tight">
+                Visible en el buscador. Nuevos socios pueden encontrarlo y solicitar unirse.
+              </p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsPrivate(true)}
+              className={`btn-tactile p-3 rounded-2xl border-2 text-left flex flex-col gap-1 transition ${
+                isPrivate
+                  ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-600 dark:border-amber-500 shadow-tactile-sm'
+                  : 'bg-white dark:bg-[#14161f] border-neutral-300 dark:border-neutral-700 opacity-60 hover:opacity-100'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-display font-bold text-xs uppercase tracking-wider text-neutral-900 dark:text-white flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                  Privado
+                </span>
+                {isPrivate && (
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                )}
+              </div>
+              <p className="text-[11px] text-neutral-600 dark:text-neutral-400 font-sans leading-tight">
+                Oculto del buscador. Solo accesible con enlace de invitación directo.
+              </p>
+            </button>
+          </div>
         </div>
 
         <div className="p-4 rounded-2xl bg-neutral-100 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700 text-xs text-neutral-800 dark:text-neutral-200 space-y-1">

@@ -18,6 +18,7 @@ const FALLBACK_CLUB: Club = {
   slug: 'club-principal',
   logo_url: null,
   description: 'Club Deportivo Principal',
+  is_private: false,
   settings: {
     bank_details: {
       banco: 'Banco Santander',
@@ -65,6 +66,7 @@ export async function getActiveClub(client?: SupabaseClient<Database>): Promise<
           slug,
           logo_url,
           description,
+          is_private,
           settings,
           created_by,
           created_at,

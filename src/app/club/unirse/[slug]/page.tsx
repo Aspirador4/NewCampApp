@@ -24,6 +24,7 @@ export default async function UnirseClubPage({ params }: UnirseClubPageProps) {
       slug,
       logo_url,
       description,
+      is_private,
       created_at,
       created_by,
       creator:created_by (
@@ -47,6 +48,7 @@ export default async function UnirseClubPage({ params }: UnirseClubPageProps) {
     slug: string
     logo_url: string | null
     description: string | null
+    is_private?: boolean
     creator: { full_name: string } | null
     club_members: { id: string; approval_status: string }[] | null
   }
@@ -91,9 +93,20 @@ export default async function UnirseClubPage({ params }: UnirseClubPageProps) {
       {/* Club Matchday Ticket Pass */}
       <div className="mt-4 bg-white dark:bg-[#14161f] border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile rounded-3xl overflow-hidden relative">
         <div className="bg-neutral-950 text-white p-4 border-b-2 border-neutral-900 dark:border-neutral-700 flex items-center justify-between">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-400">
-            FICHA OFICIAL DE CLUB
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+              FICHA OFICIAL DE CLUB
+            </span>
+            <span
+              className={`font-mono text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border inline-flex items-center gap-1 ${
+                club.is_private
+                  ? 'bg-amber-950/80 text-amber-300 border-amber-800'
+                  : 'bg-emerald-950/80 text-emerald-300 border-emerald-800'
+              }`}
+            >
+              {club.is_private ? '🔒 Privado' : '🌐 Público'}
+            </span>
+          </div>
           <span className="font-mono text-[10px] font-bold text-neutral-400 bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">
             /{club.slug}
           </span>

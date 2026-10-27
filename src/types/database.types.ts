@@ -42,6 +42,7 @@ export interface Database {
           slug: string
           logo_url: string | null
           description: string | null
+          is_private: boolean
           settings: Record<string, Json>
           created_by: string | null
           created_at: string
@@ -53,6 +54,7 @@ export interface Database {
           slug: string
           logo_url?: string | null
           description?: string | null
+          is_private?: boolean
           settings?: Record<string, Json>
           created_by?: string | null
           created_at?: string
@@ -64,6 +66,7 @@ export interface Database {
           slug?: string
           logo_url?: string | null
           description?: string | null
+          is_private?: boolean
           settings?: Record<string, Json>
           created_by?: string | null
           created_at?: string

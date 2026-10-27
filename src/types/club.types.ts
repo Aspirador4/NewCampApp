@@ -25,6 +25,7 @@ export interface Club {
   slug: string
   logo_url: string | null
   description: string | null
+  is_private: boolean
   settings: ClubSettings
   created_by: string | null
   created_at: string

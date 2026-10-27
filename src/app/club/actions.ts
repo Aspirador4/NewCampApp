@@ -23,6 +23,7 @@ export async function createClubAction(formData: FormData) {
   const description = (formData.get('description') as string)?.trim() || null
   const logoUrl = (formData.get('logo_url') as string)?.trim() || null
   const paletteId = (formData.get('palette_id') as string)?.trim() || 'emerald'
+  const isPrivate = formData.get('is_private') === 'true'
 
   if (!name || !slugRaw) {
     return { error: 'El nombre y el identificador (slug) son obligatorios' }
@@ -40,13 +41,32 @@ export async function createClubAction(formData: FormData) {
     return { error: 'El slug debe tener al menos 3 caracteres válidos' }
   }
 
-  // Use atomic RPC create_new_club
-  const { data, error } = await supabase.rpc('create_new_club', {
+  // Use atomic RPC create_new_club with fallback
+  let { data, error } = await supabase.rpc('create_new_club', {
     p_name: name,
     p_slug: slug,
     p_description: description || undefined,
     p_logo_url: logoUrl || undefined,
-  })
+    p_is_private: isPrivate,
+  } as unknown as { p_name: string; p_slug: string; p_description?: string; p_logo_url?: string; p_is_private?: boolean })
+
+  if (error && error.message?.includes('p_is_private')) {
+    // Retry with old signature if DB has not applied new signature yet
+    const retry = await supabase.rpc('create_new_club', {
+      p_name: name,
+      p_slug: slug,
+      p_description: description || undefined,
+      p_logo_url: logoUrl || undefined,
+    } as unknown as { p_name: string; p_slug: string; p_description?: string; p_logo_url?: string })
+    data = retry.data
+    error = retry.error
+    if (!error && (data as { club_id?: string })?.club_id) {
+      await supabase
+        .from('clubs')
+        .update({ is_private: isPrivate })
+        .eq('id', (data as { club_id: string }).club_id)
+    }
+  }
 
   let finalClubId: string | null = null
 
@@ -69,6 +89,7 @@ export async function createClubAction(formData: FormData) {
         slug,
         description,
         logo_url: logoUrl,
+        is_private: isPrivate,
         created_by: user.id,
         settings: {
           palette: paletteId,
@@ -233,6 +254,7 @@ export async function updateClubAction(formData: FormData) {
   const description = (formData.get('description') as string)?.trim() || null
   const logoUrl = (formData.get('logo_url') as string)?.trim() || null
   const paletteId = (formData.get('palette_id') as string)?.trim() || 'emerald'
+  const isPrivate = formData.get('is_private') === 'true'
 
   if (!clubId) {
     return { error: 'Identificador del club faltante' }
@@ -270,6 +292,7 @@ export async function updateClubAction(formData: FormData) {
     name,
     description,
     logo_url: logoUrl,
+    is_private: isPrivate,
     settings: {
       ...currentSettings,
       palette: paletteId,
