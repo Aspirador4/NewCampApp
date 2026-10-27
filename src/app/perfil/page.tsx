@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 import { ProfileForm } from '@/components/ProfileForm'
 import { PwaPrompt } from '@/components/PwaPrompt'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { Trophy, CalendarCheck, Award, ArrowLeft, Wallet } from 'lucide-react'
+import { Trophy, CalendarCheck, Award, ArrowLeft, Wallet, Shield, Settings2 } from 'lucide-react'
 import Link from 'next/link'
 import { Database } from '@/types/database.types'
 import { getActiveClub } from '@/utils/club'
@@ -209,6 +209,32 @@ export default async function PerfilPage() {
           </span>
         </div>
       </div>
+
+      {/* Club Admin Management Card */}
+      {membership?.system_role === 'admin' && (
+        <div className="bg-white dark:bg-neutral-900 p-4 rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile mb-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-amber-400 text-neutral-950 flex items-center justify-center border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex-shrink-0">
+              <Shield className="w-5 h-5 stroke-[2.5]" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-display font-bold text-sm uppercase tracking-wider text-neutral-950 dark:text-white truncate">
+                Administración de {club.name}
+              </h3>
+              <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 truncate mt-0.5">
+                Editar nombre, escudo y colores institucionales
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/club/editar"
+            className="btn-tactile py-2 px-3 rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 font-display font-bold text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex items-center gap-1.5 flex-shrink-0 transition active:scale-95"
+          >
+            <Settings2 className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Editar</span>
+          </Link>
+        </div>
+      )}
 
       {/* Theme Appearance Mode Picker */}
       <div className="bg-white dark:bg-neutral-900 p-4 rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile mb-4">

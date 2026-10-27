@@ -103,7 +103,8 @@ Ubicado en la pestaña `/finanzas?tab=admin`:
    - Botón de reversión individual por si se cometió un error.
 4. **Configuración de Cuenta Bancaria**:
    - Modal para actualizar banco, tipo de cuenta, número, titular, RUT y correo sin acceder a consolas de base de datos.
-   - Los datos se guardan en `club_settings` con la clave `bank_details`.
+   - Los datos se guardan en `club_settings` o en `clubs.settings.bank_details`.
+   - **Desacoplamiento Visual**: La selección de paletas y colores institucionales fue trasladada desde este panel a la nueva interfaz de edición de club ([`/club/editar`](../../src/app/club/editar/page.tsx)), manteniendo el módulo financiero enfocado 100% en tesorería y cuentas bancarias.
 
 ---
 

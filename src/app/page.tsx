@@ -9,6 +9,7 @@ import {
   Wallet,
   Trophy,
   Clock,
+  Settings2,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -146,6 +147,16 @@ export default async function Home() {
           <div className="flex items-center gap-2">
             <ThemeToggle variant="compact" />
             {Boolean(user) && <NotificationBell clubId={club.id} />}
+            {isAdmin && (
+              <Link
+                href="/club/editar"
+                className="w-11 h-11 rounded-2xl bg-white dark:bg-neutral-900 border-2 border-neutral-900 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition flex items-center justify-center shadow-tactile-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none min-h-[44px] min-w-[44px]"
+                title="Editar identidad y colores del club"
+                aria-label="Editar club"
+              >
+                <Settings2 className="w-5 h-5 stroke-[2.5]" />
+              </Link>
+            )}
             <Link
               href="/club/nuevo"
               className="w-11 h-11 rounded-2xl bg-white dark:bg-neutral-900 border-2 border-neutral-900 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition flex items-center justify-center shadow-tactile-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none min-h-[44px] min-w-[44px]"

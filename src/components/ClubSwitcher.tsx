@@ -13,7 +13,8 @@ import {
   Check,
   Flame,
   Loader2,
-  X
+  X,
+  Settings2
 } from 'lucide-react'
 import type { Club, UserClubItem } from '@/types/club.types'
 import { switchClubAction } from '@/app/club/actions'
@@ -244,6 +245,17 @@ export function ClubSwitcher({
 
             {/* Actions */}
             <div className="p-3 border-t-2 border-neutral-900/10 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/90 flex flex-col gap-2">
+              {currentRole === 'admin' && (
+                <Link
+                  href="/club/editar"
+                  onClick={() => setIsOpen(false)}
+                  className="btn-tactile w-full min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-950 hover:bg-neutral-800 dark:hover:bg-neutral-100 font-display font-bold text-xs uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm transition"
+                >
+                  <Settings2 className="w-4 h-4 stroke-[2.5]" />
+                  Editar Identidad del Club
+                </Link>
+              )}
+
               <Link
                 href="/club/nuevo"
                 onClick={() => setIsOpen(false)}

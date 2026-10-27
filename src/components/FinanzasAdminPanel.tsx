@@ -3,10 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { settleMemberDebtsAction, revertDebtAction, updateBankDetailsAction, BankDetails } from '@/app/finanzas/actions'
-import { updateClubThemeAction } from '@/app/club/actions'
-import { PalettePicker } from '@/components/PalettePicker'
 import { EmptyState } from '@/components/EmptyState'
-import { CheckCircle2, ChevronDown, ChevronUp, ChevronRight, Loader2, AlertCircle, RefreshCw, UserCheck, Settings2, X, Save, Palette } from 'lucide-react'
+import { CheckCircle2, ChevronDown, ChevronUp, ChevronRight, Loader2, AlertCircle, RefreshCw, UserCheck, X, Save, Landmark } from 'lucide-react'
 
 export interface PendingClosureEventItem {
   id: string
@@ -55,7 +53,6 @@ interface FinanzasAdminPanelProps {
   initialBankDetails: BankDetails
   pendingClosureEvents?: PendingClosureEventItem[]
   clubId?: string
-  currentPalette?: string
 }
 
 export function FinanzasAdminPanel({
@@ -63,7 +60,6 @@ export function FinanzasAdminPanel({
   initialBankDetails,
   pendingClosureEvents = [],
   clubId,
-  currentPalette = 'emerald',
 }: FinanzasAdminPanelProps) {
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null)
   const [loadingDebtId, setLoadingDebtId] = useState<string | null>(null)
@@ -71,10 +67,9 @@ export function FinanzasAdminPanel({
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
-  // Bank & Theme settings modal state
+  // Bank settings modal state
   const [isEditingSettings, setIsEditingSettings] = useState(false)
   const [bankForm, setBankForm] = useState<BankDetails>(initialBankDetails)
-  const [selectedPalette, setSelectedPalette] = useState<string>(currentPalette)
   const [savingSettings, setSavingSettings] = useState(false)
 
   // Filter pending debts
@@ -168,19 +163,9 @@ export function FinanzasAdminPanel({
       return
     }
 
-    // 2. Update theme palette if clubId is provided
-    if (clubId && selectedPalette !== currentPalette) {
-      const themeRes = await updateClubThemeAction(clubId, selectedPalette)
-      if (themeRes?.error) {
-        setError(themeRes.error)
-        setSavingSettings(false)
-        return
-      }
-    }
-
     setSavingSettings(false)
     setIsEditingSettings(false)
-    setSuccessMsg('Configuración del club guardada exitosamente.')
+    setSuccessMsg('Datos bancarios de tesorería guardados exitosamente.')
     setTimeout(() => setSuccessMsg(null), 3500)
   }
 
@@ -234,8 +219,8 @@ export function FinanzasAdminPanel({
             onClick={() => setIsEditingSettings(true)}
             className="btn-tactile min-h-[44px] text-xs font-display font-bold uppercase tracking-wider text-neutral-900 dark:text-white bg-white dark:bg-[#1a1d28] hover:bg-neutral-100 dark:hover:bg-white/10 py-2 px-3.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex items-center gap-1.5 transition active:scale-95"
           >
-            <Settings2 className="w-4 h-4 text-emerald-600 stroke-[2.5]" />
-            <span>Configuración & Colores del Club</span>
+            <Landmark className="w-4 h-4 text-emerald-600 stroke-[2.5]" />
+            <span>Datos Bancarios de Tesorería</span>
           </button>
         </div>
       </div>
@@ -282,13 +267,13 @@ export function FinanzasAdminPanel({
         </div>
       )}
 
-      {/* Settings Modal (Bank details + Palette Picker) */}
+      {/* Settings Modal (Bank details) */}
       {isEditingSettings && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4">
           <div className="bg-white dark:bg-[#14161f] w-full max-w-md rounded-t-3xl sm:rounded-3xl border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile p-6 space-y-4 max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
             <div className="flex items-center justify-between border-b-2 border-neutral-900/10 dark:border-white/10 pb-3">
               <h3 className="font-display font-bold text-xl text-neutral-950 dark:text-white uppercase tracking-tight">
-                Ajustes & Finanzas del Club
+                Datos Bancarios de Tesorería
               </h3>
               <button
                 type="button"
@@ -300,25 +285,26 @@ export function FinanzasAdminPanel({
               </button>
             </div>
 
-            <form onSubmit={handleSaveSettings} className="space-y-4 text-xs">
-              {/* 10-Color Palette Customizer */}
-              {clubId && (
-                <div className="p-3.5 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700 space-y-2">
-                  <label className="font-display font-bold text-xs text-neutral-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
-                    <Palette className="w-3.5 h-3.5 text-neutral-600 dark:text-neutral-400" />
-                    Color Institucional del Club (10 Paletas)
-                  </label>
-                  <p className="text-[11px] text-neutral-500 dark:text-neutral-400 font-sans">
-                    Cambia la personalidad de los botones, medallas y navegación de todos los miembros.
-                  </p>
-                  <PalettePicker
-                    selectedId={selectedPalette}
-                    onSelect={(id) => setSelectedPalette(id)}
-                    disabled={savingSettings}
-                  />
-                </div>
-              )}
+            {/* Hint to Club Identity & Colors */}
+            <div className="p-3.5 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700 flex items-center justify-between gap-2.5">
+              <div className="min-w-0">
+                <p className="font-display font-bold text-xs text-neutral-900 dark:text-white uppercase tracking-wider">
+                  ¿Logo, Nombre o Colores?
+                </p>
+                <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">
+                  La identidad institucional y paleta se editan en la configuración del club.
+                </p>
+              </div>
+              <Link
+                href="/club/editar"
+                onClick={() => setIsEditingSettings(false)}
+                className="btn-tactile px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-neutral-950 font-display font-bold text-[11px] uppercase tracking-wider border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile-sm flex-shrink-0 transition"
+              >
+                Editar Club
+              </Link>
+            </div>
 
+            <form onSubmit={handleSaveSettings} className="space-y-4 text-xs">
               {/* Bank Details */}
               <div className="space-y-2.5">
                 <h4 className="font-display font-bold text-xs text-neutral-900 dark:text-white uppercase tracking-wider">

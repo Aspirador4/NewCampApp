@@ -72,6 +72,12 @@ CREATE TABLE public.club_members (
     - Compresión optimizada en el cliente antes de la subida para ahorrar ancho de banda.
     - Soporte híbrido para enlazar una URL web externa si el escudo ya se encuentra alojado online.
     - Tarjeta táctil de vista previa en tiempo real con las iniciales o el logo sobre el degradado de la paleta seleccionada.
+  - **Edición y Personalización de Clubes (`/club/editar`)**:
+    - Interfaz con pestañas táctiles: **"Identidad & Escudo"** y **"Colores del Club"**.
+    - Permite a los administradores actualizar el Nombre Oficial, Identificador (Slug), Lema/Descripción y el Escudo (subida a Storage o URL web).
+    - Selector dinámico de las 10 paletas de color institucionales (desacopladas de Finanzas y centralizadas en la gestión del club).
+    - Tarjeta de Vista Previa de Marca (*Brand Preview*) con degradado dinámico e insignias en tiempo real.
+    - Puntos de entrada para administradores en `ClubSwitcher`, ficha del socio (`/perfil`), barra superior del Home (`/`) y modal de finanzas.
   - Exploración y admisión en `/club/unirse` y `/club/unirse/[slug]`.
 
 ---

@@ -6,6 +6,9 @@ import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 import { ACTIVE_CLUB_COOKIE } from '@/types/club.types'
 import { sendPushToClubAdmins } from '@/app/api/push/actions'
+import type { Database, Json } from '@/types/database.types'
+
+type ClubUpdate = Database['public']['Tables']['clubs']['Update']
 
 export async function createClubAction(formData: FormData) {
   const supabase = await createClient()
@@ -213,6 +216,107 @@ export async function updateClubThemeAction(clubId: string, paletteId: string) {
   }
 
   revalidatePath('/', 'layout')
+  return { success: true }
+}
+
+export async function updateClubAction(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: 'Debes iniciar sesión para editar el club' }
+  }
+
+  const clubId = (formData.get('club_id') as string)?.trim()
+  const name = (formData.get('name') as string)?.trim()
+  const slugRaw = (formData.get('slug') as string)?.trim()
+  const description = (formData.get('description') as string)?.trim() || null
+  const logoUrl = (formData.get('logo_url') as string)?.trim() || null
+  const paletteId = (formData.get('palette_id') as string)?.trim() || 'emerald'
+
+  if (!clubId) {
+    return { error: 'Identificador del club faltante' }
+  }
+
+  if (!name || name.length < 2) {
+    return { error: 'El nombre del club debe tener al menos 2 caracteres' }
+  }
+
+  // Verify admin permissions in club
+  const { data: membership, error: memErr } = await supabase
+    .from('club_members')
+    .select('system_role, approval_status')
+    .eq('club_id', clubId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (memErr || membership?.system_role !== 'admin' || membership?.approval_status !== 'aprobado') {
+    return { error: 'Solo los administradores del club pueden modificar sus datos.' }
+  }
+
+  // Fetch current club
+  const { data: currentClub, error: fetchErr } = await supabase
+    .from('clubs')
+    .select('slug, settings')
+    .eq('id', clubId)
+    .single()
+
+  if (fetchErr || !currentClub) {
+    return { error: `Error al obtener información del club: ${fetchErr?.message || 'Club no encontrado'}` }
+  }
+
+  const currentSettings = (currentClub.settings as Record<string, Json>) || {}
+  const updatePayload: ClubUpdate = {
+    name,
+    description,
+    logo_url: logoUrl,
+    settings: {
+      ...currentSettings,
+      palette: paletteId,
+    },
+    updated_at: new Date().toISOString(),
+  }
+
+  // Handle slug change if provided and different
+  if (slugRaw) {
+    const cleanSlug = slugRaw
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\-]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+
+    if (cleanSlug.length >= 3 && cleanSlug !== currentClub.slug) {
+      const { data: existing } = await supabase
+        .from('clubs')
+        .select('id')
+        .eq('slug', cleanSlug)
+        .neq('id', clubId)
+        .maybeSingle()
+
+      if (existing) {
+        return { error: `El identificador "/${cleanSlug}" ya está en uso por otro club.` }
+      }
+      updatePayload.slug = cleanSlug
+    }
+  }
+
+  const { error: updateErr } = await supabase
+    .from('clubs')
+    .update(updatePayload)
+    .eq('id', clubId)
+
+  if (updateErr) {
+    return { error: `Error al actualizar club: ${updateErr.message}` }
+  }
+
+  revalidatePath('/', 'layout')
+  revalidatePath('/club/editar')
+  revalidatePath('/finanzas')
+  revalidatePath('/perfil')
+  revalidatePath('/miembros')
+
   return { success: true }
 }
 

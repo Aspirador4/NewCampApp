@@ -242,7 +242,6 @@ export default async function FinanzasPage({ searchParams }: FinanzasPageProps) 
             initialBankDetails={bankDetails}
             pendingClosureEvents={pendingClosureEvents}
             clubId={club.id}
-            currentPalette={(club.settings as { palette?: string })?.palette || 'emerald'}
           />
         ) : (
           <FinanzasMemberView
