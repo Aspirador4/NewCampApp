@@ -842,7 +842,8 @@ export interface Database {
           id: string
           event_id: string
           team_id: string
-          user_id: string
+          user_id: string | null
+          guest_id: string | null
           assigned_position: string
           goals: number
           assists: number
@@ -854,7 +855,8 @@ export interface Database {
           id?: string
           event_id: string
           team_id: string
-          user_id: string
+          user_id?: string | null
+          guest_id?: string | null
           assigned_position?: string
           goals?: number
           assists?: number
@@ -866,7 +868,8 @@ export interface Database {
           id?: string
           event_id?: string
           team_id?: string
-          user_id?: string
+          user_id?: string | null
+          guest_id?: string | null
           assigned_position?: string
           goals?: number
           assists?: number

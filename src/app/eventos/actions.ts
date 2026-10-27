@@ -228,6 +228,12 @@ async function fallbackJoinEvent(
   if (attendanceType === 'espectador') {
     targetStatus = 'confirmado'
     action = 'confirmo_espectador'
+    // Remove from team roster since spectators do not play
+    await supabase
+      .from('event_team_players')
+      .delete()
+      .eq('event_id', eventId)
+      .eq('user_id', userId)
   } else {
     // Count confirmed players
     const { count: confirmedCount } = await supabase
@@ -373,6 +379,13 @@ async function fallbackLeaveEvent(
   await supabase
     .from('event_attendees')
     .update({ status: 'cancelado' })
+    .eq('event_id', eventId)
+    .eq('user_id', userId)
+
+  // Remove from team roster if they were assigned
+  await supabase
+    .from('event_team_players')
+    .delete()
     .eq('event_id', eventId)
     .eq('user_id', userId)
 

@@ -92,7 +92,7 @@ export function AddToCalendarButton({
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-[#14161f] border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile z-50 p-2 text-xs animate-in fade-in zoom-in-95 duration-100">
+          <div className="absolute left-0 mt-2 w-56 rounded-2xl bg-white dark:bg-[#14161f] border-2 border-neutral-900 dark:border-neutral-700 shadow-tactile z-50 p-2 text-xs animate-in fade-in zoom-in-95 duration-100">
             <a
               href={googleCalUrl}
               target="_blank"

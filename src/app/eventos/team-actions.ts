@@ -75,12 +75,16 @@ export async function saveTeamsAction(
     }
 
     if (t.players && t.players.length > 0) {
-      const playerRows = t.players.map((p) => ({
-        event_id: eventId,
-        team_id: insertedTeam.id,
-        user_id: p.userId,
-        assigned_position: p.position || 'Jugador',
-      }))
+      const playerRows = t.players.map((p) => {
+        const isGuest = p.userId.startsWith('guest_')
+        return {
+          event_id: eventId,
+          team_id: insertedTeam.id,
+          user_id: isGuest ? null : p.userId,
+          guest_id: isGuest ? p.userId.replace('guest_', '') : null,
+          assigned_position: p.position || 'Jugador',
+        }
+      })
 
       const { error: playersErr } = await supabase
         .from('event_team_players')
@@ -185,16 +189,31 @@ export async function recordMatchResultAction(
 
   // 2. Update player stats on event_team_players
   for (const ps of playerStats) {
-    await supabase
-      .from('event_team_players')
-      .update({
-        goals: ps.goals || 0,
-        assists: ps.assists || 0,
-        saves: ps.saves || 0,
-        own_goals: ps.ownGoals || 0,
-      })
-      .eq('event_id', eventId)
-      .eq('user_id', ps.userId)
+    const isGuest = ps.userId.startsWith('guest_')
+    if (isGuest) {
+      const guestId = ps.userId.replace('guest_', '')
+      await supabase
+        .from('event_team_players')
+        .update({
+          goals: ps.goals || 0,
+          assists: ps.assists || 0,
+          saves: ps.saves || 0,
+          own_goals: ps.ownGoals || 0,
+        })
+        .eq('event_id', eventId)
+        .eq('guest_id', guestId)
+    } else {
+      await supabase
+        .from('event_team_players')
+        .update({
+          goals: ps.goals || 0,
+          assists: ps.assists || 0,
+          saves: ps.saves || 0,
+          own_goals: ps.ownGoals || 0,
+        })
+        .eq('event_id', eventId)
+        .eq('user_id', ps.userId)
+    }
   }
 
   // 3. Mark result recorded and ensure finalized + mvp voting open
@@ -225,8 +244,12 @@ export async function recordMatchResultAction(
     }
   }
 
-  // 5. Update user_stats for each participant
+  // 5. Update user_stats for each participant (skip guests who do not have member profiles)
   for (const ps of playerStats) {
+    if (ps.userId.startsWith('guest_')) {
+      continue
+    }
+
     const isWinner = winningTeamId && ps.teamId === winningTeamId
     const isLoser = winningTeamId && ps.teamId !== winningTeamId
 

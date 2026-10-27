@@ -190,6 +190,13 @@ export async function approveGuest(guestId: string, eventId: string) {
     return { error: updateErr.message }
   }
 
+  // Remove rejected guest from event_team_players if they were assigned to a team
+  await supabase
+    .from('event_team_players')
+    .delete()
+    .eq('event_id', eventId)
+    .eq('guest_id', guestId)
+
   // Insert audit log
   await supabase.from('event_attendance_logs').insert({
     event_id: eventId,
@@ -267,6 +274,13 @@ export async function rejectGuest(guestId: string, eventId: string) {
   if (updateErr) {
     return { error: updateErr.message }
   }
+
+  // Remove rejected guest from event_team_players if they were assigned to a team
+  await supabase
+    .from('event_team_players')
+    .delete()
+    .eq('event_id', eventId)
+    .eq('guest_id', guestId)
 
   // Insert audit log
   await supabase.from('event_attendance_logs').insert({

@@ -230,7 +230,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
   const statsByUser = new Map((candidateStatsRaw || []).map((s) => [s.user_id, s]))
 
-  const teamCandidates: TeamCandidatePlayer[] = confirmedPlayers.map((a) => {
+  const memberCandidates: TeamCandidatePlayer[] = confirmedPlayers.map((a) => {
     const s = statsByUser.get(a.user_id)
     const p = a.profiles
     const custom = (p?.custom_attributes as Record<string, unknown>) || {}
@@ -252,6 +252,21 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
     }
   })
 
+  const guestCandidates: TeamCandidatePlayer[] = regularApprovedGuests.map((g) => {
+    return {
+      id: `guest_${g.id}`,
+      fullName: `${g.guest_name} (Invitado)`,
+      avatarUrl: null,
+      posicion: 'Jugador',
+      averageRating: null,
+      matchesWon: 0,
+      matchesLost: 0,
+      matchesPlayed: 0,
+    }
+  })
+
+  const teamCandidates: TeamCandidatePlayer[] = [...memberCandidates, ...guestCandidates]
+
   // Fetch event teams and team players
   const { data: teamsRaw } = await supabase
     .from('event_teams')
@@ -262,6 +277,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       score,
       event_team_players (
         user_id,
+        guest_id,
         assigned_position,
         goals,
         assists,
@@ -270,6 +286,10 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         profiles:user_id (
           full_name,
           avatar_url
+        ),
+        event_guests:guest_id (
+          id,
+          guest_name
         )
       )
     `)
@@ -277,7 +297,8 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
     .order('created_at', { ascending: true })
 
   interface TeamPlayerRow {
-    user_id: string
+    user_id: string | null
+    guest_id: string | null
     assigned_position: string | null
     goals: number | null
     assists: number | null
@@ -287,23 +308,43 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       full_name: string | null
       avatar_url: string | null
     } | null
+    event_guests: {
+      id: string
+      guest_name: string
+    } | null
   }
+
+  // Active confirmed user IDs & approved guest IDs
+  const activeConfirmedUserIds = new Set(confirmedPlayers.map((cp) => cp.user_id))
+  const activeApprovedGuestIds = new Set(regularApprovedGuests.map((rg) => rg.id))
 
   const formattedTeams = (teamsRaw || []).map((t) => ({
     id: t.id,
     name: t.name,
     color: t.color,
     score: t.score,
-    players: ((t.event_team_players as unknown as TeamPlayerRow[]) || []).map((p) => ({
-      userId: p.user_id,
-      fullName: p.profiles?.full_name || 'Jugador',
-      avatarUrl: p.profiles?.avatar_url || null,
-      position: p.assigned_position || 'Jugador',
-      goals: p.goals || 0,
-      assists: p.assists || 0,
-      saves: p.saves || 0,
-      ownGoals: p.own_goals || 0,
-    })),
+    players: ((t.event_team_players as unknown as TeamPlayerRow[]) || [])
+      // Filter out any player who is no longer confirmed (left, cancelled, or switched to spectator)
+      .filter((p) => {
+        if (p.user_id) return activeConfirmedUserIds.has(p.user_id)
+        if (p.guest_id) return activeApprovedGuestIds.has(p.guest_id)
+        return false
+      })
+      .map((p) => {
+        const isGuest = Boolean(p.guest_id)
+        return {
+          userId: isGuest ? `guest_${p.guest_id}` : (p.user_id || ''),
+          fullName: isGuest
+            ? `${p.event_guests?.guest_name || 'Invitado'} (Invitado)`
+            : (p.profiles?.full_name || 'Jugador'),
+          avatarUrl: isGuest ? null : (p.profiles?.avatar_url || null),
+          position: p.assigned_position || 'Jugador',
+          goals: p.goals || 0,
+          assists: p.assists || 0,
+          saves: p.saves || 0,
+          ownGoals: p.own_goals || 0,
+        }
+      }),
   }))
 
   // User's cast votes for awards
