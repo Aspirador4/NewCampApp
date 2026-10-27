@@ -49,6 +49,7 @@ interface MatchTeamsViewProps {
   eventLocation?: string
   clubName?: string
   clubLogo?: string | null
+  clubPrimaryColor?: string
 }
 
 export function MatchTeamsView({
@@ -64,6 +65,7 @@ export function MatchTeamsView({
   eventLocation,
   clubName = "CAMPANARIO'S OLD BOYS",
   clubLogo,
+  clubPrimaryColor = '#059669',
 }: MatchTeamsViewProps) {
   const [isBuilderOpen, setIsBuilderOpen] = useState(false)
   const [isResultOpen, setIsResultOpen] = useState(false)
@@ -345,41 +347,41 @@ export function MatchTeamsView({
             </div>
 
             <div className="divide-y divide-neutral-800/80">
-              {team.players.map((player) => (
-                <div key={player.userId} className="py-1.5 flex items-center justify-between text-xs gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-6 h-6 rounded-lg overflow-hidden bg-neutral-800 relative flex items-center justify-center flex-shrink-0">
-                      {player.avatarUrl ? (
-                        <Image src={player.avatarUrl} alt={player.fullName} fill className="object-cover" />
-                      ) : (
-                        <User className="w-3.5 h-3.5 text-neutral-400" />
+              {team.players.map((player) => {
+                const isGK =
+                  player.position?.toLowerCase().includes('arquer') ||
+                  player.position?.toLowerCase().includes('porter') ||
+                  player.position?.toLowerCase().includes('gk')
+                const conceded = idx === 0 ? score2 : score1
+
+                return (
+                  <div key={player.userId} className="py-2 flex items-center justify-between text-xs gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 rounded-lg overflow-hidden bg-neutral-800 relative flex items-center justify-center flex-shrink-0">
+                        {player.avatarUrl ? (
+                          <Image src={player.avatarUrl} alt={player.fullName} fill className="object-cover" />
+                        ) : (
+                          <User className="w-3.5 h-3.5 text-neutral-400" />
+                        )}
+                      </div>
+                      <span className="font-semibold text-white truncate text-xs">{player.fullName}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {(player.goals || 0) > 0 && (
+                        <span className="font-mono text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                          ⚽ {player.goals}
+                        </span>
+                      )}
+                      {isGK && (
+                        <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded-md bg-neutral-800 text-neutral-300 border border-neutral-700 flex items-center gap-1" title="Goles recibidos">
+                          🧤 {conceded} rec.
+                        </span>
                       )}
                     </div>
-                    <span className="font-bold text-white truncate">{player.fullName}</span>
                   </div>
-
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <span className="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-300 border border-neutral-700">
-                      {player.position}
-                    </span>
-                    {(player.goals || 0) > 0 && (
-                      <span className="font-mono text-[9px] font-bold text-emerald-400">
-                        ⚽ {player.goals}
-                      </span>
-                    )}
-                    {(player.assists || 0) > 0 && (
-                      <span className="font-mono text-[9px] font-bold text-blue-400">
-                        👟 {player.assists}
-                      </span>
-                    )}
-                    {(player.saves || 0) > 0 && (
-                      <span className="font-mono text-[9px] font-bold text-amber-400">
-                        🧤 {player.saves}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         ))}
@@ -423,6 +425,7 @@ export function MatchTeamsView({
         eventLocation={eventLocation}
         clubName={clubName}
         clubLogo={clubLogo}
+        clubPrimaryColor={clubPrimaryColor}
         teams={teamsWithPlayers}
         resultRecorded={resultRecorded}
       />

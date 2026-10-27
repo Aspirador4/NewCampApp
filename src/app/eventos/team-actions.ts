@@ -366,8 +366,28 @@ export async function recordMatchResultAction(
     const currentLost = existingStats?.matches_lost || 0
     const currentTied = existingStats?.matches_tied || 0
     const currentGoals = existingStats?.goals || 0
-    const currentAssists = existingStats?.assists || 0
-    const currentSaves = existingStats?.saves || 0
+
+    // Fetch assigned_position to check if player is goalkeeper
+    const { data: teamPlayerInfo } = await supabase
+      .from('event_team_players')
+      .select('assigned_position')
+      .eq('event_id', eventId)
+      .eq('user_id', ps.userId)
+      .maybeSingle()
+
+    const pos = teamPlayerInfo?.assigned_position?.toLowerCase() || ''
+    const isGK = pos.includes('arquer') || pos.includes('porter') || pos.includes('gk')
+
+    // Find rival team score for goals conceded
+    const rivalTeam = teamScores.find((ts) => ts.teamId !== ps.teamId)
+    const goalsConcededInMatch = isGK ? (rivalTeam?.score || 0) : 0
+
+    const currentMutable = (existingStats?.mutable_stats as Record<string, unknown>) || {}
+    const currentConceded = typeof currentMutable.goals_conceded === 'number' ? (currentMutable.goals_conceded as number) : 0
+    const updatedMutable = {
+      ...currentMutable,
+      ...(isGK ? { goals_conceded: currentConceded + goalsConcededInMatch } : {}),
+    }
 
     await supabase
       .from('user_stats')
@@ -378,8 +398,7 @@ export async function recordMatchResultAction(
         matches_lost: isLoser ? currentLost + 1 : currentLost,
         matches_tied: isTie ? currentTied + 1 : currentTied,
         goals: currentGoals + (ps.goals || 0),
-        assists: currentAssists + (ps.assists || 0),
-        saves: currentSaves + (ps.saves || 0),
+        mutable_stats: updatedMutable,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id,club_id' })
   }

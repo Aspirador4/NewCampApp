@@ -88,30 +88,48 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
   // Filter out profiles with no name or deleted
   const validStats = allStats.filter((s) => s.profiles?.full_name)
 
+  let effectiveTab = tab
+  if (effectiveTab === 'asistencias') {
+    effectiveTab = 'arqueros'
+  }
+
   // Sort based on active tab
   let sortedStats: UserStatItem[] = []
-  if (tab === 'presencias') {
+  if (effectiveTab === 'presencias') {
     sortedStats = [...validStats].sort((a, b) => {
       if (b.matches_played !== a.matches_played) {
         return b.matches_played - a.matches_played
       }
       return (b.matches_won || 0) - (a.matches_won || 0)
     })
-  } else if (tab === 'goleadores') {
+  } else if (effectiveTab === 'goleadores') {
     sortedStats = [...validStats].sort((a, b) => {
       const gB = b.goals || 0
       const gA = a.goals || 0
       if (gB !== gA) return gB - gA
-      return (b.assists || 0) - (a.assists || 0)
+      return (b.matches_played || 0) - (a.matches_played || 0)
     })
-  } else if (tab === 'asistencias') {
-    sortedStats = [...validStats].sort((a, b) => {
-      const aB = b.assists || 0
-      const aA = a.assists || 0
-      if (aB !== aA) return aB - aA
-      return (b.goals || 0) - (a.goals || 0)
+  } else if (effectiveTab === 'arqueros') {
+    const gkStats = validStats.filter((s) => {
+      const posVal = s.profiles?.custom_attributes?.posicion
+      const roleVal = s.profiles?.sports_role
+      const hasConceded = s.mutable_stats && (s.mutable_stats as Record<string, unknown>).goals_conceded !== undefined
+      const isGk =
+        (typeof roleVal === 'string' && (roleVal.toLowerCase().includes('arquero') || roleVal.toLowerCase().includes('portero'))) ||
+        (Array.isArray(posVal) && posVal.some((p) => String(p).toLowerCase().includes('arquero') || String(p).toLowerCase().includes('portero'))) ||
+        (typeof posVal === 'string' && (posVal.toLowerCase().includes('arquero') || posVal.toLowerCase().includes('portero'))) ||
+        hasConceded
+      return isGk
     })
-  } else if (tab === 'premios') {
+    sortedStats = [...gkStats].sort((a, b) => {
+      const concededA = Number((a.mutable_stats as Record<string, unknown> | null)?.goals_conceded || 0)
+      const concededB = Number((b.mutable_stats as Record<string, unknown> | null)?.goals_conceded || 0)
+      const avgA = a.matches_played > 0 ? concededA / a.matches_played : concededA
+      const avgB = b.matches_played > 0 ? concededB / b.matches_played : concededB
+      if (avgA !== avgB) return avgA - avgB
+      return (b.matches_played || 0) - (a.matches_played || 0)
+    })
+  } else if (effectiveTab === 'premios') {
     sortedStats = [...validStats].sort((a, b) => {
       const scoreB = (b.best_teammate_count || 0) + (b.surprise_player_count || 0) + (b.mvp_count || 0)
       const scoreA = (a.best_teammate_count || 0) + (a.surprise_player_count || 0) + (a.mvp_count || 0)
@@ -139,22 +157,25 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
   // Club summary aggregates
   const totalMvpsAwarded = allStats.reduce((acc, curr) => acc + (curr.mvp_count || 0), 0)
   const totalGoals = allStats.reduce((acc, curr) => acc + (curr.goals || 0), 0)
-  const totalAssists = allStats.reduce((acc, curr) => acc + (curr.assists || 0), 0)
+  const totalMatches = allStats.reduce((acc, curr) => acc + (curr.matches_played || 0), 0)
 
   const getMetricDisplay = (item: UserStatItem) => {
-    switch (tab) {
+    switch (effectiveTab) {
       case 'goleadores':
         return {
           main: `${item.goals || 0} ⚽`,
-          sub: `${item.assists || 0} asistencias • ${item.matches_played} PJ`,
+          sub: `${item.matches_played} PJ • ${item.matches_played > 0 ? ((item.goals || 0) / item.matches_played).toFixed(2) : '0.00'} gol/PJ`,
           podium: `${item.goals || 0} Goles`,
         }
-      case 'asistencias':
+      case 'arqueros': {
+        const conceded = Number((item.mutable_stats as Record<string, unknown> | null)?.goals_conceded || 0)
+        const avg = item.matches_played > 0 ? (conceded / item.matches_played).toFixed(2) : conceded.toString()
         return {
-          main: `${item.assists || 0} 👟`,
-          sub: `${item.goals || 0} goles • ${item.matches_played} PJ`,
-          podium: `${item.assists || 0} Asist.`,
+          main: `${conceded} 🧤`,
+          sub: `${avg} goles rec./PJ • ${item.matches_played} PJ`,
+          podium: `${conceded} Recibidos`,
         }
+      }
       case 'premios':
         return {
           main: `${(item.best_teammate_count || 0) + (item.surprise_player_count || 0)} 🎖️`,
@@ -208,7 +229,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
         <Link
           href="/ranking?tab=mvps"
           className={`btn-tactile flex-shrink-0 py-2 px-3 rounded-xl text-center flex items-center gap-1.5 font-display font-bold text-xs uppercase tracking-wider border-2 ${
-            tab === 'mvps'
+            effectiveTab === 'mvps'
               ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
               : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
           }`}
@@ -220,7 +241,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
         <Link
           href="/ranking?tab=goleadores"
           className={`btn-tactile flex-shrink-0 py-2 px-3 rounded-xl text-center flex items-center gap-1.5 font-display font-bold text-xs uppercase tracking-wider border-2 ${
-            tab === 'goleadores'
+            effectiveTab === 'goleadores'
               ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
               : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
           }`}
@@ -229,20 +250,20 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
         </Link>
 
         <Link
-          href="/ranking?tab=asistencias"
+          href="/ranking?tab=arqueros"
           className={`btn-tactile flex-shrink-0 py-2 px-3 rounded-xl text-center flex items-center gap-1.5 font-display font-bold text-xs uppercase tracking-wider border-2 ${
-            tab === 'asistencias'
+            effectiveTab === 'arqueros'
               ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
               : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
           }`}
         >
-          <span>👟 Asistencias</span>
+          <span>🧤 Arqueros</span>
         </Link>
 
         <Link
           href="/ranking?tab=premios"
           className={`btn-tactile flex-shrink-0 py-2 px-3 rounded-xl text-center flex items-center gap-1.5 font-display font-bold text-xs uppercase tracking-wider border-2 ${
-            tab === 'premios'
+            effectiveTab === 'premios'
               ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
               : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
           }`}
@@ -254,7 +275,7 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
         <Link
           href="/ranking?tab=presencias"
           className={`btn-tactile flex-shrink-0 py-2 px-3 rounded-xl text-center flex items-center gap-1.5 font-display font-bold text-xs uppercase tracking-wider border-2 ${
-            tab === 'presencias'
+            effectiveTab === 'presencias'
               ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 border-neutral-900 dark:border-white shadow-tactile-sm'
               : 'bg-white dark:bg-[#14161f] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 border-neutral-900 dark:border-neutral-700'
           }`}
@@ -272,13 +293,13 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
           <div className="relative flex items-center justify-between font-mono text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-4 border-b border-white/10 pb-2">
             <span>PODIO OFICIAL</span>
             <span>
-              {tab === 'mvps'
+              {effectiveTab === 'mvps'
                 ? 'GALARDONES MVP'
-                : tab === 'goleadores'
+                : effectiveTab === 'goleadores'
                 ? 'PICHICHI DE ORO'
-                : tab === 'asistencias'
-                ? 'MÁXIMOS ASISTIDORES'
-                : tab === 'premios'
+                : effectiveTab === 'arqueros'
+                ? 'VALLA MENOS BATIDA'
+                : effectiveTab === 'premios'
                 ? 'DISTINCIONES DEL CLUB'
                 : 'PARTIDOS JUGADOS'}
             </span>
@@ -502,10 +523,10 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
 
         <div className="border-l-2 border-neutral-200 dark:border-neutral-800">
           <span className="font-display font-bold text-xl sm:text-2xl text-neutral-950 dark:text-white block leading-tight">
-            {totalAssists}
+            {totalMatches}
           </span>
           <span className="font-mono text-[9px] uppercase text-neutral-500 dark:text-neutral-400 font-bold">
-            Asistencias
+            Partidos PJ
           </span>
         </div>
 

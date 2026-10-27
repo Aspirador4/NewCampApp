@@ -44,7 +44,7 @@ interface MatchEventLog {
   id: string
   sec: number
   desc: string
-  type: 'goal' | 'goal_minus' | 'assist' | 'assist_minus' | 'save' | 'save_minus'
+  type: 'goal' | 'goal_minus'
   teamId: string
   playerId: string
   playerName: string
@@ -309,14 +309,14 @@ export function LiveMatchTrackerModal({
     []
   )
 
-  // Quick Stat handler
+  // Quick Goal handler
   const handleStatChange = (
     team: LiveMatchTeam,
     player: LiveMatchPlayer,
-    stat: 'goals' | 'assists' | 'saves',
+    stat: 'goals',
     delta: number
   ) => {
-    const currentVal = stats[player.userId]?.[stat] || 0
+    const currentVal = stats[player.userId]?.goals || 0
     const nextVal = Math.max(0, currentVal + delta)
     const diff = nextVal - currentVal
     if (diff === 0) return
@@ -326,24 +326,21 @@ export function LiveMatchTrackerModal({
       ...stats,
       [player.userId]: {
         ...(stats[player.userId] || { goals: 0, assists: 0, saves: 0, ownGoals: 0 }),
-        [stat]: nextVal,
+        goals: nextVal,
       },
     }
     setStats(updatedStats)
 
-    // 2. If Goal, update Score and Broadcast
-    let updatedScores = { ...scores }
-    if (stat === 'goals') {
-      const curScore = scores[team.id] ?? 0
-      const nextScore = Math.max(0, curScore + delta)
-      updatedScores = { ...scores, [team.id]: nextScore }
-      setScores(updatedScores)
-      broadcastScore(updatedScores)
+    // 2. Update Score and Broadcast
+    const curScore = scores[team.id] ?? 0
+    const nextScore = Math.max(0, curScore + delta)
+    const updatedScores = { ...scores, [team.id]: nextScore }
+    setScores(updatedScores)
+    broadcastScore(updatedScores)
 
-      // Light haptic feedback if available on device
-      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-        navigator.vibrate?.([60, 40, 60])
-      }
+    // Light haptic feedback if available on device
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate?.([60, 40, 60])
     }
 
     // Auto-sync immediately to database so any spectator sees it
@@ -351,28 +348,10 @@ export function LiveMatchTrackerModal({
 
     // 3. Add to event log
     const logId = 'log_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5)
-    const logType: MatchEventLog['type'] =
-      stat === 'goals'
-        ? (delta > 0 ? 'goal' : 'goal_minus')
-        : stat === 'assists'
-        ? (delta > 0 ? 'assist' : 'assist_minus')
-        : (delta > 0 ? 'save' : 'save_minus')
-
-    let icon = '⚽'
-    let label = 'Gol'
-    if (stat === 'assists') {
-      icon = '🎯'
-      label = 'Asistencia'
-    } else if (stat === 'saves') {
-      icon = '🧤'
-      label = 'Atajada'
-    }
-
-    if (delta < 0) {
-      label = `${label} anulado`
-    }
-
-    const logDesc = `${icon} ${label} de ${player.fullName} (${team.name})`
+    const logType: MatchEventLog['type'] = delta > 0 ? 'goal' : 'goal_minus'
+    const logDesc = delta > 0
+      ? `⚽ Gol de ${player.fullName} (${team.name})`
+      : `⚽ Gol anulado de ${player.fullName} (${team.name})`
 
     setEventLog((prev) => [
       {
@@ -402,36 +381,26 @@ export function LiveMatchTrackerModal({
     const remainingEvents = eventLog.slice(1)
     setEventLog(remainingEvents)
 
-    // Revert stat
-    const statKey = lastEvent.type.startsWith('goal')
-      ? 'goals'
-      : lastEvent.type.startsWith('assist')
-      ? 'assists'
-      : 'saves'
-
     const isMinus = lastEvent.type.endsWith('_minus')
     const revertDelta = isMinus ? 1 : -1
 
-    const curVal = stats[lastEvent.playerId]?.[statKey] || 0
+    const curVal = stats[lastEvent.playerId]?.goals || 0
     const updatedStats = {
       ...stats,
       [lastEvent.playerId]: {
         ...(stats[lastEvent.playerId] || { goals: 0, assists: 0, saves: 0, ownGoals: 0 }),
-        [statKey]: Math.max(0, curVal + revertDelta),
+        goals: Math.max(0, curVal + revertDelta),
       },
     }
     setStats(updatedStats)
 
-    let updatedScores = { ...scores }
-    if (statKey === 'goals') {
-      const curScore = scores[lastEvent.teamId] || 0
-      updatedScores = {
-        ...scores,
-        [lastEvent.teamId]: Math.max(0, curScore + revertDelta),
-      }
-      setScores(updatedScores)
-      broadcastScore(updatedScores)
+    const curScore = scores[lastEvent.teamId] || 0
+    const updatedScores = {
+      ...scores,
+      [lastEvent.teamId]: Math.max(0, curScore + revertDelta),
     }
+    setScores(updatedScores)
+    broadcastScore(updatedScores)
 
     autoSyncDatabase(updatedScores, updatedStats)
 
@@ -538,29 +507,20 @@ export function LiveMatchTrackerModal({
 
     const scorersList = Object.values(scorersMap).sort((a, b) => b.count - a.count)
 
-    // Assists breakdown
-    const assistersMap: Record<string, { name: string; count: number }> = {}
-    teams.forEach((t) => {
+    // Goalkeepers & goals conceded
+    const gkLines: string[] = []
+    teams.forEach((t, tIdx) => {
+      const oppScore = tIdx === 0 ? s2 : s1
       t.players.forEach((p) => {
-        const a = stats[p.userId]?.assists || 0
-        if (a > 0) {
-          assistersMap[p.userId] = { name: p.fullName, count: a }
+        const isGk =
+          p.position?.toLowerCase().includes('arquer') ||
+          p.position?.toLowerCase().includes('porter') ||
+          p.position?.toLowerCase().includes('gk')
+        if (isGk) {
+          gkLines.push(`• ${p.fullName} (${t.name}): ${oppScore} recibido(s)`)
         }
       })
     })
-    const assistersList = Object.values(assistersMap).sort((a, b) => b.count - a.count)
-
-    // Saves breakdown
-    const savesMap: Record<string, { name: string; count: number }> = {}
-    teams.forEach((t) => {
-      t.players.forEach((p) => {
-        const s = stats[p.userId]?.saves || 0
-        if (s > 0) {
-          savesMap[p.userId] = { name: p.fullName, count: s }
-        }
-      })
-    })
-    const savesList = Object.values(savesMap).sort((a, b) => b.count - a.count)
 
     const lines: string[] = [
       `🏆 *INFORME DE PARTIDO — ${eventTitle.toUpperCase()}*`,
@@ -574,16 +534,7 @@ export function LiveMatchTrackerModal({
       ...(scorersList.length > 0
         ? scorersList.map((sc) => `• ${sc.name} (${sc.team}): ${sc.count} gol(es)`)
         : ['• Sin goles registrados']),
-      '',
-      '🎯 *ASISTENCIAS:*',
-      ...(assistersList.length > 0
-        ? assistersList.map((asst) => `• ${asst.name}: ${asst.count}`)
-        : ['• Sin asistencias']),
-      '',
-      '🧤 *ATAJADAS:*',
-      ...(savesList.length > 0
-        ? savesList.map((sv) => `• ${sv.name}: ${sv.count}`)
-        : ['• Sin atajadas registradas']),
+      ...(gkLines.length > 0 ? ['', '🧤 *ARQUEROS (Goles Recibidos):*', ...gkLines] : []),
       '',
       '📱 *Registrado en vivo desde CampApp*',
     ]
@@ -836,17 +787,18 @@ export function LiveMatchTrackerModal({
           {activeTeam?.players.map((p) => {
             const curStats = stats[p.userId] || { goals: 0, assists: 0, saves: 0, ownGoals: 0 }
             const isGoalkeeper =
-              p.position.toLowerCase().includes('arquer') ||
-              p.position.toLowerCase().includes('porter') ||
-              p.position.toLowerCase().includes('gk')
+              p.position?.toLowerCase().includes('arquer') ||
+              p.position?.toLowerCase().includes('porter') ||
+              p.position?.toLowerCase().includes('gk')
+            const rivalScore = activeTeamTab === 'a' ? score2 : score1
 
             return (
               <div
                 key={p.userId}
-                className="pt-2 first:pt-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 py-2"
+                className="pt-2 first:pt-0 flex items-center justify-between gap-2.5 py-2"
               >
-                {/* Player info */}
-                <div className="flex items-center gap-2 min-w-0">
+                {/* Player info (No positions) */}
+                <div className="flex items-center gap-2.5 min-w-0">
                   <div className="w-8 h-8 rounded-xl overflow-hidden bg-neutral-800 relative flex items-center justify-center flex-shrink-0 border border-neutral-700">
                     {p.avatarUrl ? (
                       <Image src={p.avatarUrl} alt={p.fullName} fill className="object-cover" />
@@ -858,97 +810,38 @@ export function LiveMatchTrackerModal({
                   </div>
                   <div className="min-w-0">
                     <p className="font-bold text-sm text-white truncate">{p.fullName}</p>
-                    <span className="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 border border-neutral-700 inline-block">
-                      {p.position || 'Jugador'}
-                    </span>
+                    {isGoalkeeper && (
+                      <span className="font-mono text-[10px] text-amber-300 font-bold flex items-center gap-1 mt-0.5">
+                        🧤 Arquero · {rivalScore} recibidos
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                {/* Stat Counters & Touch Buttons */}
-                <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
-                  {/* GOL */}
-                  <div className="flex items-center gap-1 bg-neutral-900 border border-neutral-800 rounded-xl p-1">
-                    <div className="flex flex-col items-center px-1">
-                      <span className="font-mono text-[8px] uppercase text-emerald-400 font-bold">
-                        GOL
-                      </span>
-                      <span className="font-mono font-bold text-sm text-emerald-300">
-                        {curStats.goals}
-                      </span>
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <button
-                        type="button"
-                        onClick={() => handleStatChange(activeTeam, p, 'goals', 1)}
-                        className="w-7 h-6 rounded-lg bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-neutral-950 font-bold text-xs flex items-center justify-center transition active:scale-95"
-                      >
-                        +
-                      </button>
+                {/* Only GOL Counter (+ / -) */}
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <div className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 rounded-xl px-2.5 py-1">
+                    <span className="font-mono text-[10px] uppercase text-emerald-400 font-bold">
+                      Goles:
+                    </span>
+                    <span className="font-mono font-extrabold text-base text-emerald-300 min-w-[20px] text-center">
+                      {curStats.goals}
+                    </span>
+                    <div className="flex items-center gap-1 ml-1">
                       <button
                         type="button"
                         onClick={() => handleStatChange(activeTeam, p, 'goals', -1)}
                         disabled={curStats.goals <= 0}
-                        className="w-7 h-5 rounded-lg bg-neutral-800 hover:bg-neutral-700 disabled:opacity-30 disabled:pointer-events-none text-neutral-400 text-xs flex items-center justify-center transition active:scale-95"
+                        className="w-7 h-7 rounded-lg bg-neutral-800 hover:bg-neutral-700 disabled:opacity-30 disabled:pointer-events-none text-neutral-300 font-bold text-sm flex items-center justify-center transition active:scale-95"
                       >
                         −
                       </button>
-                    </div>
-                  </div>
-
-                  {/* ASISTENCIA */}
-                  <div className="flex items-center gap-1 bg-neutral-900 border border-neutral-800 rounded-xl p-1">
-                    <div className="flex flex-col items-center px-1">
-                      <span className="font-mono text-[8px] uppercase text-blue-400 font-bold">
-                        ASIST
-                      </span>
-                      <span className="font-mono font-bold text-sm text-blue-300">
-                        {curStats.assists}
-                      </span>
-                    </div>
-                    <div className="flex flex-col gap-0.5">
                       <button
                         type="button"
-                        onClick={() => handleStatChange(activeTeam, p, 'assists', 1)}
-                        className="w-7 h-6 rounded-lg bg-blue-500/20 hover:bg-blue-500 text-blue-300 hover:text-neutral-950 font-bold text-xs flex items-center justify-center transition active:scale-95"
+                        onClick={() => handleStatChange(activeTeam, p, 'goals', 1)}
+                        className="w-8 h-7 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-neutral-950 font-extrabold text-sm flex items-center justify-center transition active:scale-95 shadow-tactile-sm"
                       >
                         +
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleStatChange(activeTeam, p, 'assists', -1)}
-                        disabled={curStats.assists <= 0}
-                        className="w-7 h-5 rounded-lg bg-neutral-800 hover:bg-neutral-700 disabled:opacity-30 disabled:pointer-events-none text-neutral-400 text-xs flex items-center justify-center transition active:scale-95"
-                      >
-                        −
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* ATAJADA (highlighted for GK) */}
-                  <div className={`flex items-center gap-1 bg-neutral-900 border border-neutral-800 rounded-xl p-1 ${isGoalkeeper ? 'ring-1 ring-amber-500/40 bg-amber-500/5' : ''}`}>
-                    <div className="flex flex-col items-center px-1">
-                      <span className="font-mono text-[8px] uppercase text-amber-400 font-bold">
-                        ATAJ
-                      </span>
-                      <span className="font-mono font-bold text-sm text-amber-300">
-                        {curStats.saves}
-                      </span>
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <button
-                        type="button"
-                        onClick={() => handleStatChange(activeTeam, p, 'saves', 1)}
-                        className="w-7 h-6 rounded-lg bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-neutral-950 font-bold text-xs flex items-center justify-center transition active:scale-95"
-                      >
-                        +
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleStatChange(activeTeam, p, 'saves', -1)}
-                        disabled={curStats.saves <= 0}
-                        className="w-7 h-5 rounded-lg bg-neutral-800 hover:bg-neutral-700 disabled:opacity-30 disabled:pointer-events-none text-neutral-400 text-xs flex items-center justify-center transition active:scale-95"
-                      >
-                        −
                       </button>
                     </div>
                   </div>
@@ -1002,7 +895,7 @@ export function LiveMatchTrackerModal({
               </h3>
               <p className="text-xs text-neutral-400 mt-1 font-sans">
                 Marcador final: <strong className="text-white">{team1?.name} {score1} — {score2} {team2?.name}</strong>.
-                Se actualizarán los goles, asistencias y rankings individuales del club, y se abrirá la votación de MVP.
+                Se actualizarán los goles y rankings individuales del club, y se abrirá la votación de MVP.
               </p>
             </div>
 

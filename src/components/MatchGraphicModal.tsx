@@ -19,6 +19,7 @@ interface MatchGraphicModalProps {
   eventLocation?: string
   clubName?: string
   clubLogo?: string | null
+  clubPrimaryColor?: string
   teams: LiveMatchTeam[]
   resultRecorded?: boolean
 }
@@ -32,8 +33,9 @@ export function MatchGraphicModal({
   eventTitle,
   eventDate,
   eventLocation,
-  clubName = "CAMPANARIO'S OLD BOYS",
+  clubName = 'CLUB DEPORTIVO',
   clubLogo,
+  clubPrimaryColor = '#059669',
   teams,
   resultRecorded = false,
 }: MatchGraphicModalProps) {
@@ -65,76 +67,52 @@ export function MatchGraphicModal({
     canvas.width = W
     canvas.height = H
 
-    // Wait for fonts if available
+    // Wait for fonts to be ready
     if (typeof document !== 'undefined' && document.fonts) {
       try {
         await document.fonts.ready
       } catch {}
     }
 
-    // 1. Background Gradient (Campanario Deep Wine / Gold aesthetic)
-    const bgGrad = ctx.createLinearGradient(0, 0, W, H)
-    bgGrad.addColorStop(0, '#2d0c15')
-    bgGrad.addColorStop(0.4, '#17060b')
-    bgGrad.addColorStop(1, '#0e0306')
-    ctx.fillStyle = bgGrad
+    const primary = clubPrimaryColor || '#059669'
+
+    // Helper to truncate text safely within bounds
+    const fitText = (text: string, maxWidth: number) => {
+      if (ctx.measureText(text).width <= maxWidth) return text
+      let t = text
+      while (t.length > 3 && ctx.measureText(t + '...').width > maxWidth) {
+        t = t.slice(0, -1)
+      }
+      return t + '...'
+    }
+
+    // 1. Background: Deep modern dark with subtle club color gradient
+    const bg = ctx.createLinearGradient(0, 0, 0, H)
+    bg.addColorStop(0, '#090a0f')
+    bg.addColorStop(0.5, '#10121a')
+    bg.addColorStop(1, '#08090d')
+    ctx.fillStyle = bg
     ctx.fillRect(0, 0, W, H)
 
-    // Subtle tactical field grid lines
-    ctx.strokeStyle = 'rgba(201, 168, 76, 0.06)'
-    ctx.lineWidth = 1.5
-    const gridSize = 60
-    for (let x = 0; x < W; x += gridSize) {
-      ctx.beginPath()
-      ctx.moveTo(x, 0)
-      ctx.lineTo(x, H)
-      ctx.stroke()
-    }
-    for (let y = 0; y < H; y += gridSize) {
-      ctx.beginPath()
-      ctx.moveTo(0, y)
-      ctx.lineTo(W, y)
-      ctx.stroke()
-    }
+    // Soft subtle radial glow in the upper-center matching the club primary color
+    const glow = ctx.createRadialGradient(W / 2, isStory ? 520 : 380, 50, W / 2, isStory ? 520 : 380, 600)
+    glow.addColorStop(0, `${primary}22`) // ~13% opacity
+    glow.addColorStop(1, 'rgba(0, 0, 0, 0)')
+    ctx.fillStyle = glow
+    ctx.fillRect(0, 0, W, H)
 
-    // Outer framing border
-    ctx.strokeStyle = 'rgba(201, 168, 76, 0.35)'
-    ctx.lineWidth = 4
-    ctx.strokeRect(36, 36, W - 72, H - 72)
-
-    // Corner decorative accents
-    const cornerSize = 24
-    ctx.strokeStyle = '#C9A84C'
-    ctx.lineWidth = 6
-    // Top-left
+    // Sleek outer border with rounded corners
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)'
+    ctx.lineWidth = 3
     ctx.beginPath()
-    ctx.moveTo(36, 36 + cornerSize)
-    ctx.lineTo(36, 36)
-    ctx.lineTo(36 + cornerSize, 36)
-    ctx.stroke()
-    // Top-right
-    ctx.beginPath()
-    ctx.moveTo(W - 36 - cornerSize, 36)
-    ctx.lineTo(W - 36, 36)
-    ctx.lineTo(W - 36, 36 + cornerSize)
-    ctx.stroke()
-    // Bottom-left
-    ctx.beginPath()
-    ctx.moveTo(36, H - 36 - cornerSize)
-    ctx.lineTo(36, H - 36)
-    ctx.lineTo(36 + cornerSize, H - 36)
-    ctx.stroke()
-    // Bottom-right
-    ctx.beginPath()
-    ctx.moveTo(W - 36 - cornerSize, H - 36)
-    ctx.lineTo(W - 36, H - 36)
-    ctx.lineTo(W - 36, H - 36 - cornerSize)
+    ctx.roundRect(40, 40, W - 80, H - 80, 36)
     ctx.stroke()
 
     // 2. Club Header
     let curY = isStory ? 120 : 80
     ctx.textAlign = 'center'
 
+    // Logo (if available)
     if (clubLogo) {
       try {
         const logoImg = new window.Image()
@@ -145,235 +123,279 @@ export function MatchGraphicModal({
           logoImg.onerror = resolve
         })
         if (logoImg.complete && logoImg.naturalWidth > 0) {
-          const logoSize = 64
+          const logoSize = isStory ? 90 : 70
+          ctx.save()
+          ctx.beginPath()
+          ctx.arc(W / 2, curY + logoSize / 2, logoSize / 2, 0, Math.PI * 2)
+          ctx.clip()
           ctx.drawImage(logoImg, W / 2 - logoSize / 2, curY, logoSize, logoSize)
-          curY += 75
+          ctx.restore()
+          curY += logoSize + 20
         }
       } catch {}
     }
 
     // Club Name
-    ctx.font = 'bold 38px "Barlow", sans-serif'
-    ctx.fillStyle = '#C9A84C'
-    ctx.fillText(clubName.toUpperCase(), W / 2, curY)
-
-    curY += 46
-    ctx.font = '800 52px "Bebas Neue", "Barlow Condensed", sans-serif'
+    ctx.font = 'bold 36px "Barlow", -apple-system, sans-serif'
     ctx.fillStyle = '#ffffff'
-    const mainTitle = mode === 'nomina' ? 'CONVOCATORIA OFICIAL' : 'RESULTADO FINAL'
-    ctx.fillText(mainTitle, W / 2, curY)
+    ctx.fillText(fitText(clubName.toUpperCase(), W - 160), W / 2, curY)
 
-    // Event title / info pill
-    curY += 44
-    ctx.font = '600 24px "Barlow", sans-serif'
-    ctx.fillStyle = 'rgba(240, 230, 208, 0.75)'
-    const detailsText = [
-      eventTitle,
-      eventDate ? `• ${eventDate}` : null,
-      eventLocation ? `• ${eventLocation}` : null,
-    ]
-      .filter(Boolean)
-      .join(' ')
-    ctx.fillText(detailsText, W / 2, curY)
+    // Mode Pill Badge (e.g. "RESULTADO FINAL" / "NÓMINA OFICIAL")
+    curY += 34
+    const pillText = mode === 'nomina' ? 'NÓMINA OFICIAL' : 'RESULTADO FINAL'
+    ctx.font = '800 22px "Barlow", sans-serif'
+    const pillW = ctx.measureText(pillText).width + 36
+    const pillH = 38
+    ctx.fillStyle = `${primary}28`
+    ctx.strokeStyle = primary
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.roundRect(W / 2 - pillW / 2, curY, pillW, pillH, 19)
+    ctx.fill()
+    ctx.stroke()
 
-    // Divider bar
-    curY += 30
-    const divGrad = ctx.createLinearGradient(W / 2 - 200, 0, W / 2 + 200, 0)
-    divGrad.addColorStop(0, 'rgba(201, 168, 76, 0)')
-    divGrad.addColorStop(0.5, '#C9A84C')
-    divGrad.addColorStop(1, 'rgba(201, 168, 76, 0)')
-    ctx.fillStyle = divGrad
-    ctx.fillRect(W / 2 - 220, curY, 440, 3)
+    ctx.fillStyle = '#ffffff'
+    ctx.fillText(pillText, W / 2, curY + 26)
 
-    // 3. Render specific mode content
+    // Match Title
+    curY += pillH + (isStory ? 45 : 30)
+    ctx.font = 'bold 32px "Barlow", sans-serif'
+    ctx.fillStyle = '#ffffff'
+    ctx.fillText(fitText(eventTitle, W - 160), W / 2, curY)
+
+    // Match Details (Date & Venue cleanly on two separate lines, never overflowing!)
+    curY += 36
+    ctx.font = '500 22px "Barlow", sans-serif'
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.65)'
+
+    if (eventDate) {
+      ctx.fillText(fitText(`📅 ${eventDate}`, W - 160), W / 2, curY)
+      curY += 30
+    }
+    if (eventLocation) {
+      ctx.fillText(fitText(`📍 ${eventLocation}`, W - 160), W / 2, curY)
+      curY += 25
+    }
+
+    // Horizontal Accent Line
+    curY += 15
+    const lineGrad = ctx.createLinearGradient(W / 2 - 180, 0, W / 2 + 180, 0)
+    lineGrad.addColorStop(0, 'rgba(255, 255, 255, 0)')
+    lineGrad.addColorStop(0.5, primary)
+    lineGrad.addColorStop(1, 'rgba(255, 255, 255, 0)')
+    ctx.fillStyle = lineGrad
+    ctx.fillRect(W / 2 - 180, curY, 360, 2)
+
+    // 3. Mode Content
     if (mode === 'resultado') {
       // --- RESULT MODE ---
-      curY += isStory ? 90 : 60
+      curY += isStory ? 80 : 45
 
       const score1 = team1?.score ?? 0
       const score2 = team2?.score ?? 0
 
       // Match Scoreboard Center Box
-      const boxW = 860
-      const boxH = isStory ? 230 : 190
-      const boxX = (W - boxW) / 2
-      const boxY = curY
+      const cardW = 900
+      const cardH = isStory ? 260 : 200
+      const cardX = (W - cardW) / 2
+      const cardY = curY
 
-      ctx.fillStyle = 'rgba(34, 14, 21, 0.85)'
-      ctx.strokeStyle = 'rgba(201, 168, 76, 0.4)'
+      // Card Background
+      ctx.fillStyle = '#141620'
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'
       ctx.lineWidth = 2
       ctx.beginPath()
-      ctx.roundRect(boxX, boxY, boxW, boxH, 24)
+      ctx.roundRect(cardX, cardY, cardW, cardH, 28)
       ctx.fill()
       ctx.stroke()
 
-      // Team 1 Name & Score
-      ctx.textAlign = 'center'
-      ctx.font = 'bold 36px "Barlow", sans-serif'
-      ctx.fillStyle = '#f0e6d0'
-      ctx.fillText(team1?.name?.toUpperCase() || 'EQUIPO A', boxX + boxW * 0.25, boxY + 65)
+      // Team 1 (Left)
+      const t1CenterX = cardX + cardW * 0.26
+      // Color Dot + Name
+      ctx.fillStyle = team1?.color || '#ffffff'
+      ctx.beginPath()
+      ctx.arc(t1CenterX - ctx.measureText(team1?.name || '').width / 2 - 14, cardY + 55, 7, 0, Math.PI * 2)
+      ctx.fill()
 
-      ctx.font = '900 110px "Bebas Neue", sans-serif'
-      ctx.fillStyle = '#C9A84C'
-      ctx.fillText(String(score1), boxX + boxW * 0.25, boxY + boxH - 45)
+      ctx.font = 'bold 32px "Barlow", sans-serif'
+      ctx.fillStyle = '#ffffff'
+      ctx.fillText(fitText(team1?.name || 'Equipo A', 280), t1CenterX, cardY + 65)
 
-      // VS
-      ctx.font = 'bold 30px "Barlow Condensed", sans-serif'
-      ctx.fillStyle = 'rgba(201, 168, 76, 0.6)'
-      ctx.fillText('VS', W / 2, boxY + boxH / 2 + 10)
+      // Score 1
+      ctx.font = '900 120px -apple-system, "Barlow", sans-serif'
+      ctx.fillStyle = '#ffffff'
+      ctx.fillText(String(score1), t1CenterX, cardY + cardH - 35)
 
-      // Team 2 Name & Score
-      ctx.font = 'bold 36px "Barlow", sans-serif'
-      ctx.fillStyle = '#f0e6d0'
-      ctx.fillText(team2?.name?.toUpperCase() || 'EQUIPO B', boxX + boxW * 0.75, boxY + 65)
+      // Center VS
+      ctx.font = 'bold 24px "Barlow", sans-serif'
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.35)'
+      ctx.fillText('VS', W / 2, cardY + cardH / 2 + 8)
 
-      ctx.font = '900 110px "Bebas Neue", sans-serif'
-      ctx.fillStyle = '#C9A84C'
-      ctx.fillText(String(score2), boxX + boxW * 0.75, boxY + boxH - 45)
+      // Team 2 (Right)
+      const t2CenterX = cardX + cardW * 0.74
+      ctx.fillStyle = team2?.color || '#333333'
+      ctx.beginPath()
+      ctx.arc(t2CenterX - ctx.measureText(team2?.name || '').width / 2 - 14, cardY + 55, 7, 0, Math.PI * 2)
+      ctx.fill()
 
-      // Goals Breakdown Card
-      curY += boxH + (isStory ? 60 : 35)
+      ctx.font = 'bold 32px "Barlow", sans-serif'
+      ctx.fillStyle = '#ffffff'
+      ctx.fillText(fitText(team2?.name || 'Equipo B', 280), t2CenterX, cardY + 65)
+
+      // Score 2
+      ctx.font = '900 120px -apple-system, "Barlow", sans-serif'
+      ctx.fillStyle = '#ffffff'
+      ctx.fillText(String(score2), t2CenterX, cardY + cardH - 35)
+
+      // Scorers Card (Goleadores)
+      curY += cardH + (isStory ? 55 : 30)
 
       const scorersT1 = (team1?.players || []).filter((p) => (p.goals || 0) > 0)
       const scorersT2 = (team2?.players || []).filter((p) => (p.goals || 0) > 0)
+      const hasAnyGoals = scorersT1.length > 0 || scorersT2.length > 0
 
-      const scorCardW = 860
-      const scorCardH = isStory ? 600 : 380
-      const scorCardX = (W - scorCardW) / 2
+      const gCardW = 900
+      const gCardH = isStory ? 560 : 340
+      const gCardX = (W - gCardW) / 2
 
-      ctx.fillStyle = 'rgba(20, 7, 12, 0.75)'
-      ctx.strokeStyle = 'rgba(201, 168, 76, 0.25)'
+      ctx.fillStyle = '#11131a'
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)'
       ctx.lineWidth = 1.5
       ctx.beginPath()
-      ctx.roundRect(scorCardX, curY, scorCardW, scorCardH, 20)
+      ctx.roundRect(gCardX, curY, gCardW, gCardH, 24)
       ctx.fill()
       ctx.stroke()
 
-      // Header inside card
-      ctx.font = 'bold 24px "Barlow Condensed", sans-serif'
-      ctx.fillStyle = '#C9A84C'
-      ctx.fillText('⚽ GOLEADORES DEL PARTIDO', W / 2, curY + 45)
+      // Header inside Goleadores
+      ctx.font = 'bold 22px "Barlow", sans-serif'
+      ctx.fillStyle = primary
+      ctx.fillText('⚽ GOLEADORES', W / 2, curY + 45)
 
-      let listY = curY + 95
-
-      // Left Column: Team 1 Scorers
-      ctx.textAlign = 'left'
-      ctx.font = '600 22px "Barlow", sans-serif'
-      ctx.fillStyle = 'rgba(240, 230, 208, 0.9)'
-
-      if (scorersT1.length > 0) {
-        scorersT1.forEach((p) => {
-          ctx.fillText(`• ${p.fullName}: ${p.goals} gol(es)`, scorCardX + 45, listY)
-          listY += 36
-        })
+      let listY = curY + 105
+      if (!hasAnyGoals) {
+        ctx.font = '500 24px "Barlow", sans-serif'
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'
+        ctx.fillText('Sin goles registrados', W / 2, curY + gCardH / 2)
       } else {
-        ctx.fillStyle = 'rgba(240, 230, 208, 0.4)'
-        ctx.fillText(`• ${team1?.name}: Sin goles`, scorCardX + 45, listY)
-      }
+        // Left Column (Team 1)
+        ctx.textAlign = 'left'
+        ctx.font = '600 24px "Barlow", sans-serif'
+        ctx.fillStyle = '#ffffff'
 
-      // Right Column: Team 2 Scorers
-      listY = curY + 95
-      ctx.fillStyle = 'rgba(240, 230, 208, 0.9)'
-      if (scorersT2.length > 0) {
-        scorersT2.forEach((p) => {
-          ctx.fillText(`• ${p.fullName}: ${p.goals} gol(es)`, scorCardX + scorCardW / 2 + 30, listY)
-          listY += 36
-        })
-      } else {
-        ctx.fillStyle = 'rgba(240, 230, 208, 0.4)'
-        ctx.fillText(`• ${team2?.name}: Sin goles`, scorCardX + scorCardW / 2 + 30, listY)
+        if (scorersT1.length > 0) {
+          scorersT1.forEach((p) => {
+            if (listY > curY + gCardH - 40) return
+            ctx.fillText(fitText(`• ${p.fullName}: ${p.goals} gol(es)`, 380), gCardX + 50, listY)
+            listY += 40
+          })
+        } else {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.35)'
+          ctx.fillText(`• ${team1?.name}: Sin goles`, gCardX + 50, listY)
+        }
+
+        // Right Column (Team 2)
+        listY = curY + 105
+        ctx.fillStyle = '#ffffff'
+        if (scorersT2.length > 0) {
+          scorersT2.forEach((p) => {
+            if (listY > curY + gCardH - 40) return
+            ctx.fillText(fitText(`• ${p.fullName}: ${p.goals} gol(es)`, 380), gCardX + gCardW / 2 + 30, listY)
+            listY += 40
+          })
+        } else {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.35)'
+          ctx.fillText(`• ${team2?.name}: Sin goles`, gCardX + gCardW / 2 + 30, listY)
+        }
       }
     } else {
       // --- NOMINA (LINEUP) MODE ---
-      curY += isStory ? 60 : 35
+      curY += isStory ? 55 : 25
 
-      const colW = 440
-      const colH = isStory ? 1220 : 660
+      const colW = 430
+      const colH = isStory ? 1160 : 640
       const gap = 36
       const startX = (W - (colW * 2 + gap)) / 2
 
-      // Team 1 Column
-      ctx.fillStyle = 'rgba(34, 14, 21, 0.8)'
-      ctx.strokeStyle = 'rgba(201, 168, 76, 0.35)'
+      // Team 1 Card
+      ctx.fillStyle = '#141620'
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'
       ctx.lineWidth = 2
       ctx.beginPath()
-      ctx.roundRect(startX, curY, colW, colH, 20)
+      ctx.roundRect(startX, curY, colW, colH, 24)
       ctx.fill()
       ctx.stroke()
 
       // Header Team 1
       ctx.textAlign = 'center'
-      ctx.font = 'bold 30px "Barlow", sans-serif'
-      ctx.fillStyle = '#C9A84C'
-      ctx.fillText(team1?.name?.toUpperCase() || 'EQUIPO 1', startX + colW / 2, curY + 50)
+      ctx.font = 'bold 28px "Barlow", sans-serif'
+      ctx.fillStyle = '#ffffff'
+      ctx.fillText(fitText(team1?.name?.toUpperCase() || 'EQUIPO 1', colW - 60), startX + colW / 2, curY + 50)
 
-      let pY = curY + 100
+      // Team 1 line
+      ctx.fillStyle = team1?.color || '#ffffff'
+      ctx.fillRect(startX + colW / 2 - 30, curY + 65, 60, 4)
+
+      let pY = curY + 115
       ctx.textAlign = 'left'
       ;(team1?.players || []).forEach((p, i) => {
         if (pY > curY + colH - 40) return
-        ctx.font = 'bold 22px "Barlow Condensed", sans-serif'
-        ctx.fillStyle = 'rgba(201, 168, 76, 0.8)'
+        ctx.font = 'bold 22px "Barlow", sans-serif'
+        ctx.fillStyle = primary
         ctx.fillText(`${i + 1}.`, startX + 30, pY)
 
         ctx.font = '600 22px "Barlow", sans-serif'
         ctx.fillStyle = '#ffffff'
-        ctx.fillText(p.fullName, startX + 65, pY)
+        // Strictly only player name, NO positions!
+        ctx.fillText(fitText(p.fullName, colW - 90), startX + 65, pY)
 
-        ctx.font = 'italic 16px "Barlow", sans-serif'
-        ctx.fillStyle = 'rgba(240, 230, 208, 0.5)'
-        ctx.fillText(p.position || 'Jugador', startX + colW - 130, pY)
-
-        pY += isStory ? 52 : 38
+        pY += isStory ? 48 : 36
       })
 
-      // Team 2 Column
+      // Team 2 Card
       const startX2 = startX + colW + gap
-      ctx.fillStyle = 'rgba(34, 14, 21, 0.8)'
-      ctx.strokeStyle = 'rgba(201, 168, 76, 0.35)'
+      ctx.fillStyle = '#141620'
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'
       ctx.lineWidth = 2
       ctx.beginPath()
-      ctx.roundRect(startX2, curY, colW, colH, 20)
+      ctx.roundRect(startX2, curY, colW, colH, 24)
       ctx.fill()
       ctx.stroke()
 
       // Header Team 2
       ctx.textAlign = 'center'
-      ctx.font = 'bold 30px "Barlow", sans-serif'
-      ctx.fillStyle = '#C9A84C'
-      ctx.fillText(team2?.name?.toUpperCase() || 'EQUIPO 2', startX2 + colW / 2, curY + 50)
+      ctx.font = 'bold 28px "Barlow", sans-serif'
+      ctx.fillStyle = '#ffffff'
+      ctx.fillText(fitText(team2?.name?.toUpperCase() || 'EQUIPO 2', colW - 60), startX2 + colW / 2, curY + 50)
 
-      pY = curY + 100
+      // Team 2 line
+      ctx.fillStyle = team2?.color || '#111111'
+      ctx.fillRect(startX2 + colW / 2 - 30, curY + 65, 60, 4)
+
+      pY = curY + 115
       ctx.textAlign = 'left'
       ;(team2?.players || []).forEach((p, i) => {
         if (pY > curY + colH - 40) return
-        ctx.font = 'bold 22px "Barlow Condensed", sans-serif'
-        ctx.fillStyle = 'rgba(201, 168, 76, 0.8)'
+        ctx.font = 'bold 22px "Barlow", sans-serif'
+        ctx.fillStyle = primary
         ctx.fillText(`${i + 1}.`, startX2 + 30, pY)
 
         ctx.font = '600 22px "Barlow", sans-serif'
         ctx.fillStyle = '#ffffff'
-        ctx.fillText(p.fullName, startX2 + 65, pY)
+        // Strictly only player name, NO positions!
+        ctx.fillText(fitText(p.fullName, colW - 90), startX2 + 65, pY)
 
-        ctx.font = 'italic 16px "Barlow", sans-serif'
-        ctx.fillStyle = 'rgba(240, 230, 208, 0.5)'
-        ctx.fillText(p.position || 'Jugador', startX2 + colW - 130, pY)
-
-        pY += isStory ? 52 : 38
+        pY += isStory ? 48 : 36
       })
     }
 
-    // 4. Footer Branding & Mantra
+    // 4. Footer Branding
     ctx.textAlign = 'center'
-    ctx.font = 'bold 22px "Barlow Condensed", sans-serif'
-    ctx.fillStyle = 'rgba(201, 168, 76, 0.7)'
-    ctx.fillText('★ NADIE ES MÁS QUE EL CLUB ★', W / 2, H - 75)
-
-    ctx.font = '14px "Barlow", sans-serif'
-    ctx.fillStyle = 'rgba(240, 230, 208, 0.35)'
-    ctx.fillText('CampApp • Gestión Oficial de Clubes', W / 2, H - 50)
+    ctx.font = '600 20px "Barlow", sans-serif'
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
+    ctx.fillText(`${clubName.toUpperCase()} • CAMPAPP`, W / 2, H - 65)
 
     setIsGenerating(false)
-  }, [clubLogo, clubName, eventDate, eventLocation, eventTitle, format, mode, team1, team2])
+  }, [clubLogo, clubName, clubPrimaryColor, eventDate, eventLocation, eventTitle, format, mode, team1, team2])
 
   // Re-draw when options change or modal opens
   useEffect(() => {

@@ -14,6 +14,8 @@ import { MatchTeamsView } from '@/components/MatchTeamsView'
 import { TeamCandidatePlayer } from '@/components/TeamBuilderModal'
 import { TrainingOvercapacitySection } from '@/components/TrainingOvercapacitySection'
 import { AwardType } from '@/types/database.types'
+import { getClubTheme } from '@/utils/theme'
+import { Club } from '@/types/club.types'
 import { ArrowLeft, Calendar, MapPin, Users, History, Clock, User, UserCheck, CircleDollarSign, Eye, Edit3 } from 'lucide-react'
 import { formatTime, formatLogTimestamp, DEFAULT_CLUB_TIMEZONE } from '@/utils/date'
 
@@ -110,6 +112,8 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
     .select('id, name, logo_url, settings')
     .eq('id', event.club_id)
     .maybeSingle()
+
+  const clubTheme = getClubTheme(eventClub as Club | undefined)
 
   const clubTimezone =
     ((eventClub?.settings as Record<string, unknown>)?.timezone as string) || DEFAULT_CLUB_TIMEZONE
@@ -881,6 +885,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             eventLocation={event.location}
             clubName={eventClub?.name || "CAMPANARIO'S OLD BOYS"}
             clubLogo={eventClub?.logo_url || null}
+            clubPrimaryColor={clubTheme.primary}
           />
         </div>
       )}

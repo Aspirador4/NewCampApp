@@ -361,40 +361,63 @@ export default async function PerfilPage() {
         )}
 
         {/* Extended Stats: Record & Match Metrics */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-neutral-200 dark:border-neutral-800">
-          <div className="p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 text-center">
-            <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase font-bold block">
-              Récord (V-E-D)
-            </span>
-            <span className="font-display font-bold text-sm text-neutral-950 dark:text-white mt-0.5 block">
-              {userStats.matches_won}V - {userStats.matches_tied}E - {userStats.matches_lost}D
-            </span>
-          </div>
-          <div className="p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 text-center">
-            <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase font-bold block">
-              Goles Marcados
-            </span>
-            <span className="font-display font-bold text-sm text-emerald-600 dark:text-emerald-400 mt-0.5 block">
-              ⚽ {userStats.goals}
-            </span>
-          </div>
-          <div className="p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 text-center">
-            <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase font-bold block">
-              Asistencias
-            </span>
-            <span className="font-display font-bold text-sm text-blue-600 dark:text-blue-400 mt-0.5 block">
-              👟 {userStats.assists}
-            </span>
-          </div>
-          <div className="p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 text-center">
-            <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase font-bold block">
-              Atajadas Clave
-            </span>
-            <span className="font-display font-bold text-sm text-amber-600 dark:text-amber-400 mt-0.5 block">
-              🧤 {userStats.saves}
-            </span>
-          </div>
-        </div>
+        {(() => {
+          const concededGoals = Number((userStats.mutable_stats as Record<string, unknown> | null)?.goals_conceded || 0)
+          const posVal = profile?.custom_attributes?.posicion
+          const isGoalkeeper = Array.isArray(posVal)
+            ? posVal.some((p) => String(p).toLowerCase().includes('arquero') || String(p).toLowerCase().includes('portero'))
+            : typeof posVal === 'string'
+              ? posVal.toLowerCase().includes('arquero') || posVal.toLowerCase().includes('portero')
+              : concededGoals > 0
+
+          return (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-neutral-200 dark:border-neutral-800">
+              <div className="p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 text-center">
+                <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase font-bold block">
+                  Récord (V-E-D)
+                </span>
+                <span className="font-display font-bold text-sm text-neutral-950 dark:text-white mt-0.5 block">
+                  {userStats.matches_won}V - {userStats.matches_tied}E - {userStats.matches_lost}D
+                </span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 text-center">
+                <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase font-bold block">
+                  Partidos
+                </span>
+                <span className="font-display font-bold text-sm text-neutral-900 dark:text-neutral-100 mt-0.5 block">
+                  🏟️ {userStats.matches_played} PJ
+                </span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 text-center">
+                <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase font-bold block">
+                  Goles Marcados
+                </span>
+                <span className="font-display font-bold text-sm text-emerald-600 dark:text-emerald-400 mt-0.5 block">
+                  ⚽ {userStats.goals}
+                </span>
+              </div>
+              {isGoalkeeper ? (
+                <div className="p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 text-center">
+                  <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase font-bold block">
+                    Goles Recibidos
+                  </span>
+                  <span className="font-display font-bold text-sm text-amber-600 dark:text-amber-400 mt-0.5 block">
+                    🧤 {concededGoals}
+                  </span>
+                </div>
+              ) : (
+                <div className="p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 text-center">
+                  <span className="font-mono text-[9px] text-neutral-500 dark:text-neutral-400 uppercase font-bold block">
+                    Promedio Goles
+                  </span>
+                  <span className="font-display font-bold text-sm text-blue-600 dark:text-blue-400 mt-0.5 block">
+                    ⚡ {userStats.matches_played > 0 ? (userStats.goals / userStats.matches_played).toFixed(2) : '0.00'} / PJ
+                  </span>
+                </div>
+              )}
+            </div>
+          )
+        })()}
 
         {/* Accolades & Distinctions Showcase */}
         <div className="grid grid-cols-3 gap-2 mt-2">

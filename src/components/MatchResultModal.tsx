@@ -62,15 +62,15 @@ export function MatchResultModal({
 
   if (!isOpen || !team1 || !team2) return null
 
-  const updateStat = (userId: string, field: 'goals' | 'assists' | 'saves' | 'ownGoals', delta: number) => {
+  const updateStat = (userId: string, delta: number) => {
     setStatsMap((prev) => {
       const current = prev[userId] || { goals: 0, assists: 0, saves: 0, ownGoals: 0 }
-      const newVal = Math.max(0, (current[field] || 0) + delta)
+      const newVal = Math.max(0, (current.goals || 0) + delta)
       return {
         ...prev,
         [userId]: {
           ...current,
-          [field]: newVal,
+          goals: newVal,
         },
       }
     })
@@ -179,134 +179,76 @@ export function MatchResultModal({
 
           {/* Player stats input for each team */}
           <div className="space-y-4">
-            {teams.map((team) => (
-              <div key={team.id} className="bg-neutral-900/90 rounded-2xl border border-neutral-800 p-3.5 space-y-2.5">
-                <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
-                  <h3 className="font-display font-bold text-xs uppercase tracking-wider text-neutral-300">
-                    Estadísticas: {team.name}
-                  </h3>
-                  <div className="hidden sm:flex items-center gap-6 text-[10px] font-mono text-neutral-400 uppercase pr-3">
-                    <span className="w-16 text-center">⚽ Goles</span>
-                    <span className="w-16 text-center">👟 Asist.</span>
-                    <span className="w-16 text-center">🧤 Atajadas</span>
-                    <span className="w-16 text-center">🤦 Autogol</span>
+            {teams.map((team, tIdx) => {
+              const rivalScore = tIdx === 0 ? Number(score2) : Number(score1)
+
+              return (
+                <div key={team.id} className="bg-neutral-900/90 rounded-2xl border border-neutral-800 p-3.5 space-y-2.5">
+                  <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
+                    <h3 className="font-display font-bold text-xs uppercase tracking-wider text-neutral-300">
+                      Goleadores: {team.name}
+                    </h3>
+                    <span className="text-[10px] font-mono text-neutral-400 uppercase">
+                      ⚽ Goles individuales
+                    </span>
                   </div>
-                </div>
 
-                <div className="divide-y divide-neutral-800/80">
-                  {team.players.map((player) => {
-                    const s = statsMap[player.userId] || { goals: 0, assists: 0, saves: 0, ownGoals: 0 }
+                  <div className="divide-y divide-neutral-800/80">
+                    {team.players.map((player) => {
+                      const s = statsMap[player.userId] || { goals: 0, assists: 0, saves: 0, ownGoals: 0 }
+                      const isGK =
+                        player.position?.toLowerCase().includes('arquer') ||
+                        player.position?.toLowerCase().includes('porter') ||
+                        player.position?.toLowerCase().includes('gk')
 
-                    return (
-                      <div key={player.userId} className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-6 h-6 rounded-lg overflow-hidden bg-neutral-800 relative flex items-center justify-center flex-shrink-0">
-                            {player.avatarUrl ? (
-                              <Image src={player.avatarUrl} alt={player.fullName} fill className="object-cover" />
-                            ) : (
-                              <User className="w-3.5 h-3.5 text-neutral-400" />
-                            )}
+                      return (
+                        <div key={player.userId} className="py-2.5 flex items-center justify-between gap-2 text-xs">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-7 h-7 rounded-lg overflow-hidden bg-neutral-800 relative flex items-center justify-center flex-shrink-0">
+                              {player.avatarUrl ? (
+                                <Image src={player.avatarUrl} alt={player.fullName} fill className="object-cover" />
+                              ) : (
+                                <User className="w-3.5 h-3.5 text-neutral-400" />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <span className="font-semibold text-white truncate text-xs block">{player.fullName}</span>
+                              {isGK && (
+                                <span className="font-mono text-[10px] text-amber-300 font-bold block mt-0.5">
+                                  🧤 Arquero · {rivalScore} recibidos
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <span className="font-bold text-white truncate">{player.fullName}</span>
-                          <span className="font-mono text-[9px] text-neutral-500 uppercase">({player.position})</span>
-                        </div>
 
-                        {/* Counters */}
-                        <div className="flex items-center justify-between sm:justify-end gap-3 text-xs pt-1 sm:pt-0">
-                          {/* Goles */}
-                          <div className="flex items-center gap-1">
-                            <span className="text-[10px] text-neutral-500 sm:hidden">Goles:</span>
+                          {/* Goles Counter */}
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
                             <button
                               type="button"
-                              onClick={() => updateStat(player.userId, 'goals', -1)}
-                              className="w-6 h-6 rounded-md bg-neutral-800 hover:bg-neutral-700 flex items-center justify-center text-neutral-400 hover:text-white"
+                              onClick={() => updateStat(player.userId, -1)}
+                              disabled={s.goals <= 0}
+                              className="w-7 h-7 rounded-lg bg-neutral-800 hover:bg-neutral-700 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center text-neutral-300 hover:text-white"
                             >
-                              <Minus className="w-3 h-3" />
+                              <Minus className="w-3.5 h-3.5" />
                             </button>
-                            <span className="w-6 text-center font-mono font-bold text-emerald-400">
+                            <span className="w-7 text-center font-mono font-bold text-sm text-emerald-400">
                               {s.goals}
                             </span>
                             <button
                               type="button"
-                              onClick={() => updateStat(player.userId, 'goals', 1)}
-                              className="w-6 h-6 rounded-md bg-neutral-800 hover:bg-neutral-700 flex items-center justify-center text-neutral-400 hover:text-white"
+                              onClick={() => updateStat(player.userId, 1)}
+                              className="w-7 h-7 rounded-lg bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-neutral-950 flex items-center justify-center transition active:scale-95 font-bold"
                             >
-                              <Plus className="w-3 h-3" />
-                            </button>
-                          </div>
-
-                          {/* Asistencias */}
-                          <div className="flex items-center gap-1">
-                            <span className="text-[10px] text-neutral-500 sm:hidden">Asist:</span>
-                            <button
-                              type="button"
-                              onClick={() => updateStat(player.userId, 'assists', -1)}
-                              className="w-6 h-6 rounded-md bg-neutral-800 hover:bg-neutral-700 flex items-center justify-center text-neutral-400 hover:text-white"
-                            >
-                              <Minus className="w-3 h-3" />
-                            </button>
-                            <span className="w-6 text-center font-mono font-bold text-blue-400">
-                              {s.assists}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => updateStat(player.userId, 'assists', 1)}
-                              className="w-6 h-6 rounded-md bg-neutral-800 hover:bg-neutral-700 flex items-center justify-center text-neutral-400 hover:text-white"
-                            >
-                              <Plus className="w-3 h-3" />
-                            </button>
-                          </div>
-
-                          {/* Atajadas */}
-                          <div className="flex items-center gap-1">
-                            <span className="text-[10px] text-neutral-500 sm:hidden">Atajadas:</span>
-                            <button
-                              type="button"
-                              onClick={() => updateStat(player.userId, 'saves', -1)}
-                              className="w-6 h-6 rounded-md bg-neutral-800 hover:bg-neutral-700 flex items-center justify-center text-neutral-400 hover:text-white"
-                            >
-                              <Minus className="w-3 h-3" />
-                            </button>
-                            <span className="w-6 text-center font-mono font-bold text-amber-400">
-                              {s.saves}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => updateStat(player.userId, 'saves', 1)}
-                              className="w-6 h-6 rounded-md bg-neutral-800 hover:bg-neutral-700 flex items-center justify-center text-neutral-400 hover:text-white"
-                            >
-                              <Plus className="w-3 h-3" />
-                            </button>
-                          </div>
-
-                          {/* Autogoles */}
-                          <div className="flex items-center gap-1">
-                            <span className="text-[10px] text-neutral-500 sm:hidden">Autogol:</span>
-                            <button
-                              type="button"
-                              onClick={() => updateStat(player.userId, 'ownGoals', -1)}
-                              className="w-6 h-6 rounded-md bg-neutral-800 hover:bg-neutral-700 flex items-center justify-center text-neutral-400 hover:text-white"
-                            >
-                              <Minus className="w-3 h-3" />
-                            </button>
-                            <span className="w-6 text-center font-mono font-bold text-rose-400">
-                              {s.ownGoals}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => updateStat(player.userId, 'ownGoals', 1)}
-                              className="w-6 h-6 rounded-md bg-neutral-800 hover:bg-neutral-700 flex items-center justify-center text-neutral-400 hover:text-white"
-                            >
-                              <Plus className="w-3 h-3" />
+                              <Plus className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </div>
-                      </div>
-                    )
-                  })}
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
 
           <div className="flex items-center justify-between pt-2 border-t border-neutral-800">
