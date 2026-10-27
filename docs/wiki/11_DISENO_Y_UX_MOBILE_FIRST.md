@@ -11,16 +11,17 @@ El sistema fusiona la estética física de los vestuarios, dorsales y credencial
 ```mermaid
 graph TD
     A["Athletic Clubhouse Design System"] --> B["Neo-Brutalismo Táctil"]
-    A --> C["Tipografía Triádica"]
+    A --> C["Tipografía Triádica (Auditada Impeccable)"]
     A --> D["Metáforas Físicas"]
     A --> E["Multi-Tenancy Cromático"]
+    A --> F["Dual-Theme Atlético (Light & Dark Mode)"]
 
-    B --> B1["Bordes sólidos de 2px (#171717)"]
+    B --> B1["Bordes sólidos de 2px (#171717 / #374151)"]
     B --> B2["Sombras físicas sin blur (3px 3px 0px)"]
     B --> B3["Micro-interacciones con desplazamiento real"]
 
-    C --> C1["Display: Barlow Condensed (Titulares)"]
-    C --> C2["Sans: Geist Sans (Lectura)"]
+    C --> C1["Display: Barlow Condensed (Titulares 700)"]
+    C --> C2["Sans: Plus Jakarta Sans (Lectura)"]
     C --> C3["Mono: JetBrains Mono (Finanzas, Dorsales)"]
 
     D --> D1["Pase Provisional / Credencial de Admisión"]
@@ -29,37 +30,46 @@ graph TD
 
     E --> E1["10 Paletas Oficiales Dinámicas"]
     E --> E2["Inyección runtime por variables CSS"]
+
+    F --> F1["Dark Mode sin parpadeo (Anti-flash SSR + Cookie)"]
+    F --> F2["Fondos Oled/Slate con color-mix dinámico"]
 ```
 
-1. **Light Mode Atlético de Alto Contraste**:
-   - Fondo principal de la aplicación en gris hueso/cancha (`bg-neutral-50`), garantizando legibilidad total bajo la luz solar directa en campos de juego y complejos deportivos.
-   - Contenedor móvil enmarcado (`max-w-md mx-auto min-h-screen relative flex flex-col shadow-2xl border-x-2 border-neutral-900`).
+1. **Light & Dark Mode Atlético de Alto Contraste**:
+   - **Light Mode**: Fondo principal en gris hueso/cancha (`bg-neutral-50`), garantizando legibilidad total bajo luz solar directa en campos de juego y complejos deportivos.
+   - **Dark Mode**: Fondo atlético carbón/noche (`bg-[#090a0f]`), tarjetas sólidas en `#14161f` con bordes `#374151`, sombras físicas negras netas (`--tactile-shadow-color: #000000`) y tintes oscuros automáticos para las 10 paletas mediante CSS `color-mix`.
+   - Contenedor móvil enmarcado (`max-w-md mx-auto min-h-screen relative flex flex-col shadow-2xl`).
 
 2. **Sensación Física y Masa**:
-   - Cada botón, selector, tarjeta o modal transmite peso y textura física mediante bordes negros sólidos (`border-2 border-neutral-900`) y sombras de desplazamiento neto sin difuminado (`shadow-tactile`).
+   - Cada botón, selector, tarjeta o modal transmite peso y textura física mediante bordes sólidos de 2px (`border-2 border-neutral-900 dark:border-neutral-700`) y sombras de desplazamiento neto sin difuminado (`shadow-tactile`).
    - Al pulsar un botón táctil (`.btn-tactile`), el elemento se traslada físicamente 2 píxeles (`active:translate-x-[2px] active:translate-y-[2px] active:shadow-none`), emulando la pulsación de un botón mecánico.
 
 ---
 
-## 2. Sistema Tipográfico Triádico
+## 2. Sistema Tipográfico Triádico (Calibración Impeccable)
 
-La tipografía refuerza la identidad deportiva y la claridad funcional mediante tres familias de fuentes con responsabilidades diferenciadas:
+La tipografía refuerza la identidad deportiva y la claridad funcional mediante tres familias de fuentes con responsabilidades diferenciadas y una estricta jerarquía de pesos basada en las directrices de diseño **Impeccable**:
 
 | Familia Tipográfica | Variable CSS / Clase | Aplicación | Justificación de Diseño |
 | :--- | :--- | :--- | :--- |
-| **Barlow Condensed** (Google Font, 700 / 900) | `var(--font-display)` / `font-display` | Encabezados globales (`h1, h2, h3, h4, th`), insignias, botones y pestañas. | Estética deportiva atlética de póster y camisetas. Impacto visual inmediato y compacto. |
-| **Geist Sans** (Vercel Font) | `var(--font-sans)` / `font-sans` | Textos de cuerpo, notas explicativas, subtítulos y descripciones. | Máxima legibilidad neutral en pantallas móviles de 390px a 430px. |
-| **JetBrains Mono** (Google Font) | `var(--font-mono)` / `font-mono` | Importes monetarios (`$`), dorsales deportivos, horas, contadores y códigos de club. | Espaciado tabular exacto que evita saltos visuales al actualizar saldos o conteos. |
+| **Barlow Condensed** (Google Font, 600 / 700 / 800) | `var(--font-display)` / `font-display` | Encabezados globales (`h1, h2, h3, h4, th`), insignias, botones y pestañas. | Estética deportiva atlética de póster y camisetas. Impacto visual inmediato y compacto. Se utiliza peso 700 (`font-bold`) en lugar de 900 (`font-black`) para preservar los contraespacios interiores de las letras. |
+| **Plus Jakarta Sans** (Google Font, 400 / 500 / 600) | `var(--font-sans)` / `font-sans` | Textos de cuerpo, notas explicativas, subtítulos y descripciones. | Máxima legibilidad neutral en pantallas móviles de 390px a 430px. |
+| **JetBrains Mono** (Google Font, 500 / 600 / 700) | `var(--font-mono)` / `font-mono` | Importes monetarios (`$`), dorsales deportivos, horas, contadores y códigos de club. | Espaciado tabular exacto que evita saltos visuales al actualizar saldos o conteos. |
 
-### Regla de Tipografía Global en CSS (`globals.css`)
-Para evitar que componentes secundarios o modales caigan en tipografías genéricas, todos los encabezados heredan automáticamente la fuente atlética condensada:
+### Regla de Tipografía Global en CSS (`globals.css`) y Tracking Positivo
+Para garantizar que los títulos condensados en mayúsculas respiren y no colisionen sus glifos, se eliminó el tracking negativo previo y se fijó una separación limpia:
 
 ```css
 h1, h2, h3, h4, th {
   font-family: var(--font-display), var(--font-sans), sans-serif;
-  letter-spacing: -0.015em;
+  letter-spacing: 0.01em;
 }
 ```
+
+### Principios de Tipografía sin "Visual Slop" (Auditoría Impeccable)
+1. **Jerarquía sin saturación de negritas**: Se eliminó el uso indiscriminado de `font-black` (peso 900) en micro-textos, inputs y etiquetas secundarias. Se estandarizó `font-bold` (700) para titulares principales y `font-semibold` (600) para insignias y botones.
+2. **Mayúsculas con tracking abierto (`0.05em - 0.12em`)**: Todas las etiquetas en mayúsculas (`UPPERCASE`) utilizan clases como `tracking-wider` o `tracking-widest` para asegurar que las palabras cortas no se perciban como bloques compactos.
+3. **Microtextos accesibles**: Las etiquetas de estadísticas de jugadores y badges usan un tamaño mínimo de `text-[10px]` con peso `font-semibold`, garantizando lectura cómoda a la intemperie.
 
 ---
 
@@ -157,3 +167,33 @@ Las variables CSS (`--club-primary`, `--club-primary-light`, `--club-gradient-fr
 
 4. **Teclados Numéricos Especializados**:
    - En campos de importes de cancha, montos de transferencia, dorsales o RUT, se implementa `inputMode="numeric"` para desplegar inmediatamente el teclado de dígitos.
+
+---
+
+## 7. Arquitectura de Modo Oscuro Atlético (Dual-Theme)
+
+CampApp cuenta con un motor de Modo Oscuro nativo sin dependencias externas pesadas, diseñado para eliminar por completo el parpadeo blanco inicial (*Flash of Unstyled Theme - FOUT*):
+
+```mermaid
+flowchart TD
+    Req["Petición HTTP a la PWA"] --> SSR["Server-Side Rendering (layout.tsx)"]
+    SSR --> Cookie{"¿Existe cookie 'campapp_theme'?"}
+    Cookie -- Sí --> ApplySSR["Inyecta clase 'dark' o 'light' en HTML inicial"]
+    Cookie -- No --> DefaultSSR["Aplica tema por defecto (dark)"]
+    ApplySSR --> Script["Inline Script en `<head>` evalúa localStorage o prefers-color-scheme"]
+    Script --> Mount["Monta ThemeProvider (React Context)"]
+    Mount --> Switch["Sincroniza ThemeToggle (Header o Perfil)"]
+```
+
+### Componentes de la Arquitectura
+1. **Contexto Liviano ([`ThemeProvider.tsx`](../../src/components/ThemeProvider.tsx))**:
+   - Controla 3 modos: `'light' | 'dark' | 'system'`.
+   - Escucha dinámicamente eventos del sistema operativo (`window.matchMedia('(prefers-color-scheme: dark)')`).
+   - Sincroniza la selección tanto en `localStorage` como en una cookie persistente `campapp_theme` (duración 1 año) para que el servidor Next.js renderice el HTML con la clase correcta antes de enviar el stream al cliente.
+2. **Switch Atlético Dual ([`ThemeToggle.tsx`](../../src/components/ThemeToggle.tsx))**:
+   - **Variante `icon`**: Botón compacto con iconos `<Sun />` y `<Moon />` ubicado en la cabecera del dashboard.
+   - **Variante `segmented`**: Selector táctil de 3 segmentos (*Claro, Oscuro, Sistema*) integrado en la pantalla de `/perfil`.
+3. **Tailwind CSS v4 `@custom-variant dark`**:
+   - Configurado en `globals.css` mediante `@custom-variant dark (&:where(.dark, .dark *));`.
+   - Permite aplicar variantes `dark:bg-[#14161f]`, `dark:border-neutral-700`, `dark:text-white` de manera predecible y sin conflictos con clases Tailwind v4 en TurboPack.
+

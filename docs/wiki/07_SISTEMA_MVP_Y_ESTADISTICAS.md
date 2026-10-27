@@ -26,13 +26,15 @@ Especificación funcional del flujo post-partido para la elección democrática 
      ```
 4. **Anonimato**:
    - Durante la ventana abierta, los votos son anónimos. Ningún usuario ni administrador puede ver el desglose en vivo para evitar sesgos.
-5. **Cierre y Computación Atómica (`finalize_event_mvp`)**:
+5. **Cierre y Computación Atómica (`finalize_event_mvp` / `close_event_and_elect_mvp`)**:
    - Al cumplirse el plazo o cerrarse manualmente por un admin:
      - Se calcula el jugador o jugadores con la mayor cantidad de votos (`max_votes`).
      - **Empates**: Si dos o más jugadores empatan en el primer puesto, ambos reciben el galardón y comparten el MVP.
      - Se incrementa `mvp_count = mvp_count + 1` en `user_stats`.
      - Se incrementa `mvp_votes_received` por los votos recibidos por cada candidato.
-     - Se incrementa `matches_played = matches_played + 1` a todos los jugadores confirmados.
+     - **Cómputo de Presencias y Juntadas**:
+       - Si el evento es de tipo **`partido`** o **`torneo`**: Se incrementa `matches_played = matches_played + 1` a todos los jugadores confirmados.
+       - Si el evento es de tipo **`asado`**, **`entrenamiento`** u **`otro`**: Se incrementa `social_events_attended = social_events_attended + 1` (**Juntadas**) para reconocer la vida social e institucional del club.
      - Los resultados y el desglose de votos se hacen públicos en el resumen del partido.
 
 ---

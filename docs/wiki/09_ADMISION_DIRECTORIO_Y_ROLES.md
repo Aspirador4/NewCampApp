@@ -8,16 +8,20 @@ Documentación técnica del directorio de socios, perfil deportivo individual, c
 
 El directorio reúne la plantilla activa del club deportivo, optimizado para consulta rápida desde smartphones:
 
-- **Buscador Reactivo**: Filtrado instantáneo por nombre o apodo.
-- **Filtro por Posición / Rol Deportivo**: Pestañas de acceso directo para *Arqueros*, *Defensores*, *Mediocampistas* y *Delanteros*.
-- **Insignias de Jerarquía**: Distintivo visual en negro y esmeralda para socios con privilegio de `Admin`.
-- **Ficha Modal de Socio**: Al pulsar sobre cualquier miembro, se despliega una ficha con sus datos:
-  - Avatar optimizado.
-  - Rol en el club (`jugador`, `hincha`, `ambos`).
-  - Género configurado (`masculino`, `femenino`, `otro`).
-  - Posición habitual y dorsal preferido (extraído de `custom_attributes` JSONB).
+- **Buscador Reactivo**: Filtrado instantáneo por nombre o correo electrónico.
+- **Selector de Posición Deportivo (Combo Box Táctil)**: Control dropdown accesible con icono de filtro que reemplaza las antiguas barras horizontales de botones, permitiendo filtrar limpiamente por *Todas las posiciones*, *Arquero*, *Defensor*, *Mediocampista* o *Delantero*.
+- **Enfoque Exclusivo en Jugadores**: Toda la comunidad se conforma por jugadores activos (se eliminó la antigua distinción entre *jugador, hincha o ambos*). La identidad deportiva se rige por su posición en cancha (`posicion` en `custom_attributes`) y su categoría (`gender`).
+- **Insignias de Jerarquía**: Distintivo visual en negro y blanco/esmeralda para socios con privilegio de `Admin`.
+- **Ficha Modal de Socio**: Al pulsar sobre cualquier miembro, se despliega una ficha táctil con sus datos:
+  - Avatar optimizado enmarcado en 2px con iniciales de respaldo.
+  - Posición en cancha (`Delantero`, `Mediocampista`, `Defensor`, `Arquero` o `Jugador` por defecto).
+  - Género configurado (`masculino`, `femenino`, `otro`) y dorsal preferido.
   - Edad calculada a partir de su fecha de nacimiento (`birth_date`, mayor a 18 años).
-  - **Métricas Deportivas Acumuladas** (desde `user_stats`): Partidos jugados, MVPs ganados, votos recibidos y eventos sociales asistidos.
+  - **Métricas Deportivas y Comunitarias Acumuladas** (desde `user_stats`):
+    - **MVPs** (icono `<Trophy />`): Premios al mejor jugador del partido.
+    - **Partidos** (icono `<Calendar />`): Presencias confirmadas en partidos oficiales y torneos.
+    - **Votos** (icono `<Sparkles />`): Votos totales recibidos históricamente en encuestas MVP.
+    - **Juntadas** (icono `<Flame />`): Asistencias confirmadas a asados, tercer tiempo, entrenamientos y reuniones del club.
 
 ---
 

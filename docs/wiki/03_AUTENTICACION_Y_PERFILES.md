@@ -68,6 +68,9 @@ Al registrarse un nuevo usuario en `auth.users`, el trigger SQL `handle_new_user
 2. **Fecha de Nacimiento (`birth_date`) y Restricción de Mayoría de Edad**:
    - **Frontend**: El selector `<input type="date">` cuenta con la propiedad `max` calculada al día exacto de 18 años atrás, impidiendo seleccionar fechas menores a 18 años.
    - **Backend**: [`updateProfile`](../../src/app/auth/actions.ts) valida la diferencia de años y rechaza cualquier intento de registro menor de 18 años.
+3. **Enfoque Exclusivo en Jugadores (Eliminación de "hincha / ambos")**:
+   - Con la incorporación de las categorías por género (femenino, masculino y mixto), la plataforma concentra su operación 100% en los jugadores del club.
+   - Se removió el selector de rol secundario (*"jugador, hincha o ambos"*). Todo socio registrado es jugador y su identidad atlética se define mediante su posición en la cancha y su dorsal preferido.
 
 ### Campos Dinámicos Adicionales
 Los campos deportivos complementarios (posición en la cancha, pierna hábil, número de camiseta preferido) no requieren alterar tablas SQL.
