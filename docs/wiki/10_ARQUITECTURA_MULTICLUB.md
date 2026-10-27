@@ -31,6 +31,7 @@ CREATE TABLE public.clubs (
   slug text NOT NULL UNIQUE,
   logo_url text,
   description text,
+  is_private boolean NOT NULL DEFAULT false,
   settings jsonb NOT NULL DEFAULT '{}'::jsonb,
   created_by uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
@@ -99,3 +100,31 @@ Para asegurar que un socio identifique inmediatamente a qué club corresponde un
 - Ejemplo: `[Los Pioneros FC] ¡Bienvenido al Club! 🎉`
 - Ejemplo: `[Club Principal] ¡Subiste de Lista de Espera! ⚽`
 - Ejemplo: `[Club Principal] ¡Vota al MVP del Partido! 🏆`
+
+---
+
+## 6. Visibilidad de Clubes y Directorio de Exploración
+
+La plataforma permite a los clubes definir su política de descubrimiento para equilibrar la captación abierta con la privacidad de grupos cerrados:
+
+### A. Modos de Visibilidad (`is_private`)
+* **🌐 Club Público (`is_private = false`)**:
+  * Aparece en el catálogo y buscador general de la plataforma (`/club/unirse`).
+  * Cualquier usuario puede consultar su ficha, lema, colores y cantidad de miembros.
+  * Permite solicitar admisión mediante el Pase Provisional.
+* **🔒 Club Privado (`is_private = true`)**:
+  * Queda **100% oculto** de las búsquedas y del listado del directorio.
+  * Exclusivamente accesible para personas que cuenten con el enlace o código slug directo de invitación (`/club/unirse/[slug]`).
+  * Protege la privacidad de ligas de empresas o grupos cerrados de amigos.
+
+### B. Gestión Administrativa
+* **Fundación de Club (`/club/nuevo`)**: Selector Neo-Brutalista táctil donde el fundador define la visibilidad inicial antes de confirmar.
+* **Edición de Identidad (`/club/editar`)**: Los administradores pueden cambiar la visibilidad de su club en cualquier momento desde la pestaña *"Identidad & Escudo"*.
+* **Tarjeta de Previsualización en Vivo**: Muestra la insignia correspondiente (`Público` o `Privado`) en tiempo real mientras se configuran los datos.
+
+### C. Buscador y Directorio Interactivo (`/club/unirse`)
+* Desarrollado con el componente cliente `ClubDirectoryExplorer`:
+  * **Búsqueda reactiva instantánea**: Filtrado en memoria sin recargas por nombre, slug o descripción.
+  * **Filtro estricto**: La consulta en Supabase excluye clubes privados (`.neq('is_private', true)`).
+  * **Atajo para Enlaces Privados**: Caja de acceso rápido *"¿Tienes un código o enlace privado?"* que permite introducir directamente el slug o pegar la URL completa para acceder a la ficha de postulación de un club oculto.
+* **Ficha de Fichaje (`/club/unirse/[slug]`)**: Encabezado oficial con etiqueta visual identificatoria (`🌐 Público` o `🔒 Privado`).

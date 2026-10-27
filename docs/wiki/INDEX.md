@@ -17,7 +17,7 @@ Bienvenido a la documentación técnica de la plataforma móvil para el Club Dep
 | [07. Sistema MVP y Estadísticas](./07_SISTEMA_MVP_Y_ESTADISTICAS.md) | Votación democrática de MVP, prevención de autovoto, empates, tabla de líderes y cómputo de métricas (Partidos, MVPs, Votos y Juntadas). |
 | [08. PWA y Notificaciones Unificadas](./08_PWA_Y_WEB_PUSH.md) | Instalación standalone, Service Worker, Buzón In-App con Realtime, Web Push VAPID segmentado y 11 disparadores automáticos. |
 | [09. Directorio de Miembros y Roles](./09_ADMISION_DIRECTORIO_Y_ROLES.md) | Plantilla activa de jugadores, filtro táctil combo box por posición, asignación de roles de admin y cola de admisión sin blacklist. |
-| [10. Arquitectura Multi-Club](./10_ARQUITECTURA_MULTICLUB.md) | Multi-tenancy a nivel de filas, selector de clubes, membresías independientes, creación y admisión por slug. |
+| [10. Arquitectura Multi-Club](./10_ARQUITECTURA_MULTICLUB.md) | Multi-tenancy a nivel de filas, selector de clubes, visibilidad pública/privada, buscador interactivo y admisión por slug. |
 | [11. Sistema de Diseño Táctil y UX](./11_DISENO_Y_UX_MOBILE_FIRST.md) | Sistema "Athletic Clubhouse" (Neo-Brutalismo deportivo), Modo Oscuro nativo SSR anti-flash, tipografía auditada con Impeccable, 10 paletas dinámicas y ergonomía mobile-first. |
 
 ---

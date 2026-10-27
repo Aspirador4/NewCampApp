@@ -92,6 +92,13 @@ erDiagram
 
 ## 2. Catálogo de Tablas
 
+### `clubs`
+Entidades deportivas independientes en la arquitectura multi-club.
+- **`is_private`**: Booleano (`default false`). Define la visibilidad del club. Si es `false` (público), figura en el buscador y directorio de clubes (`/club/unirse`). Si es `true` (privado), se oculta del buscador público y solo se puede acceder con el enlace directo de invitación (`/club/unirse/[slug]`).
+- **`slug`**: Identificador alfanumérico único para rutas amigables y códigos de fichaje.
+- **`settings`**: Objeto `JSONB` que almacena la paleta de color institucional (`palette`) y datos bancarios para transferencias (`bank_details`).
+- **`created_by`**: Identificador del usuario fundador y administrador original.
+
 ### `profiles`
 Extensión de `auth.users`. Almacena la identidad deportiva y de membresía del usuario.
 - **`birth_date`**: Fecha de nacimiento. Restringida por validación a mayores de 18 años.
@@ -206,3 +213,4 @@ Las migraciones se ejecutan ordenadamente en el SQL Editor de Supabase:
 11. **[`010_guest_support_and_team_removal_on_leave.sql`](../../supabase/migrations/010_guest_support_and_team_removal_on_leave.sql)**: Soporte de invitados en fixtures de equipos y remoción automática de alineaciones al darse de baja o pasar a espectador.
 12. **[`011_guest_waitlist_and_event_editing.sql`](../../supabase/migrations/011_guest_waitlist_and_event_editing.sql)**: Aprobación de invitados en lista de espera ante cupo lleno (`lista_espera` en `event_guests`), auditoría `invitado_espera` y RPC unificada `promote_waitlist`.
 13. **[`012_pessimistic_locking_for_event_capacity.sql`](../../supabase/migrations/012_pessimistic_locking_for_event_capacity.sql)**: Cerrojo pesimista (`FOR UPDATE`) a nivel de fila en `events` para erradicar condiciones de carrera en inscripciones simultáneas.
+14. **[`013_club_visibility_and_search.sql`](../../supabase/migrations/013_club_visibility_and_search.sql)**: Incorpora visibilidad pública/privada en `clubs` (`is_private`), índice optimizado `idx_clubs_is_private` para búsquedas en el directorio de clubes y actualización de la RPC atómica `create_new_club`.
