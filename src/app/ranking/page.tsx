@@ -27,7 +27,6 @@ interface UserStatItem {
   matches_tied: number | null
   best_teammate_count: number | null
   surprise_player_count: number | null
-  average_rating: number | null
   mutable_stats: Record<string, Json>
   profiles: {
     id: string
@@ -73,7 +72,6 @@ export default async function RankingPage({ searchParams }: RankingPageProps) {
       matches_tied,
       best_teammate_count,
       surprise_player_count,
-      average_rating,
       mutable_stats,
       profiles (
         id,

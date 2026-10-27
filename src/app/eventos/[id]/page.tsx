@@ -245,7 +245,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       fullName: p?.full_name || 'Socio',
       avatarUrl: p?.avatar_url || null,
       posicion: posStr,
-      averageRating: s?.average_rating ?? null,
+      averageRating: canManageEvent ? (s?.average_rating ?? null) : null,
       matchesWon: s?.matches_won ?? 0,
       matchesLost: s?.matches_lost ?? 0,
       matchesPlayed: s?.matches_played ?? 0,

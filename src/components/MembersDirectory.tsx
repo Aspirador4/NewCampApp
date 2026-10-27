@@ -520,29 +520,31 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
 
                 {/* Stats badges */}
                 <div className="flex items-center gap-1.5 text-right flex-shrink-0 pl-1">
-                  {/* Rating badge */}
-                  <div
-                    onClick={(e) => {
-                      if (isAdmin && member.id !== currentUserId) {
-                        e.stopPropagation()
-                        setEvalRating(stats.average_rating ? Number(stats.average_rating) : 7.0)
-                        setEvalComment('')
-                        setEvalError(null)
-                        setEvaluatingMember(member)
-                      }
-                    }}
-                    className={`border-2 border-neutral-900 dark:border-neutral-700 px-2 py-1 rounded-xl text-center min-w-[42px] shadow-tactile-sm transition ${
-                      isAdmin && member.id !== currentUserId
-                        ? 'hover:scale-105 cursor-pointer bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/60'
-                        : 'bg-purple-50 dark:bg-purple-950/40'
-                    }`}
-                    title={isAdmin && member.id !== currentUserId ? 'Click para evaluar nota de jugador' : 'Nota de rendimiento'}
-                  >
-                    <span className="font-display font-bold text-sm text-purple-900 dark:text-purple-300 block leading-none">
-                      {stats.average_rating ? Number(stats.average_rating).toFixed(1) : '—'}
-                    </span>
-                    <span className="font-mono text-[8px] font-bold text-purple-800 dark:text-purple-400 uppercase block mt-0.5">Nota</span>
-                  </div>
+                  {/* Rating badge - STRICT PRIVACY: Only visible to admins or the player themselves */}
+                  {(isAdmin || member.id === currentUserId) && (
+                    <div
+                      onClick={(e) => {
+                        if (isAdmin && member.id !== currentUserId) {
+                          e.stopPropagation()
+                          setEvalRating(stats.average_rating ? Number(stats.average_rating) : 7.0)
+                          setEvalComment('')
+                          setEvalError(null)
+                          setEvaluatingMember(member)
+                        }
+                      }}
+                      className={`border-2 border-neutral-900 dark:border-neutral-700 px-2 py-1 rounded-xl text-center min-w-[42px] shadow-tactile-sm transition ${
+                        isAdmin && member.id !== currentUserId
+                          ? 'hover:scale-105 cursor-pointer bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/60'
+                          : 'bg-purple-50 dark:bg-purple-950/40'
+                      }`}
+                      title={isAdmin && member.id !== currentUserId ? 'Click para evaluar nota de jugador' : 'Tu nota confidencial'}
+                    >
+                      <span className="font-display font-bold text-sm text-purple-900 dark:text-purple-300 block leading-none">
+                        {stats.average_rating ? Number(stats.average_rating).toFixed(1) : '—'}
+                      </span>
+                      <span className="font-mono text-[8px] font-bold text-purple-800 dark:text-purple-400 uppercase block mt-0.5">Nota</span>
+                    </div>
+                  )}
 
                   <div className="bg-amber-50 dark:bg-amber-950/40 border-2 border-neutral-900 dark:border-neutral-700 px-2 py-1 rounded-xl text-center min-w-[42px] shadow-tactile-sm">
                     <div className="flex items-center justify-center gap-0.5 text-amber-700 dark:text-amber-400 font-display font-bold text-sm leading-none">
@@ -656,50 +658,52 @@ export function MembersDirectory({ members, isAdmin, currentUserId }: MembersDir
               </div>
             </div>
 
-            {/* Athletic Rating & Admin Evaluation Card */}
-            <div className="pt-2 border-t-2 border-neutral-900/10 dark:border-white/10 space-y-2">
-              <div className="flex items-center justify-between">
-                <h4 className="font-display font-bold uppercase tracking-wider text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
-                  <Star className="w-3.5 h-3.5 text-amber-500 fill-current" />
-                  <span>Rendimiento Deportivo</span>
-                </h4>
-                <span className="flex items-center gap-1 text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border border-neutral-300 dark:border-neutral-700">
-                  <Lock className="w-2.5 h-2.5 stroke-[2.5]" />
-                  <span>CONFIDENCIAL</span>
-                </span>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700 flex items-center justify-between gap-3">
-                <div>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="font-display font-black text-2xl text-neutral-950 dark:text-white">
-                      {activeMember.stats?.average_rating ? Number(activeMember.stats.average_rating).toFixed(1) : '—'}
-                    </span>
-                    <span className="font-mono text-xs text-neutral-400">/ 10</span>
-                  </div>
-                  <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 mt-0.5">
-                    {activeMember.stats?.ratings_count || 0} {(activeMember.stats?.ratings_count || 0) === 1 ? 'evaluación registrada' : 'evaluaciones registradas'}
-                    {activeMember.stats?.last_match_rating ? ` • Última: ${Number(activeMember.stats.last_match_rating).toFixed(1)}` : ''}
-                  </p>
+            {/* Athletic Rating & Admin Evaluation Card - STRICT PRIVACY: Only visible to admins or the player themselves */}
+            {(isAdmin || activeMember.id === currentUserId) && (
+              <div className="pt-2 border-t-2 border-neutral-900/10 dark:border-white/10 space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-display font-bold uppercase tracking-wider text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
+                    <Star className="w-3.5 h-3.5 text-amber-500 fill-current" />
+                    <span>Rendimiento Deportivo</span>
+                  </h4>
+                  <span className="flex items-center gap-1 text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border border-neutral-300 dark:border-neutral-700">
+                    <Lock className="w-2.5 h-2.5 stroke-[2.5]" />
+                    <span>CONFIDENCIAL</span>
+                  </span>
                 </div>
 
-                {isAdmin && activeMember.id !== currentUserId && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEvalRating(activeMember.stats?.average_rating ? Number(activeMember.stats.average_rating) : 7.0)
-                      setEvalComment('')
-                      setEvalError(null)
-                      setEvaluatingMember(activeMember)
-                    }}
-                    className="btn-tactile min-h-[38px] px-3.5 py-1.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-amber-400 hover:bg-amber-300 text-neutral-950 font-display font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-tactile-sm transition active:scale-95"
-                  >
-                    <Star className="w-3.5 h-3.5 fill-current" />
-                    <span>{activeMember.stats?.average_rating ? 'Editar Nota' : 'Calificar'}</span>
-                  </button>
-                )}
+                <div className="p-3.5 rounded-2xl bg-neutral-50 dark:bg-[#1a1d28] border-2 border-neutral-200 dark:border-neutral-700 flex items-center justify-between gap-3">
+                  <div>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="font-display font-black text-2xl text-neutral-950 dark:text-white">
+                        {activeMember.stats?.average_rating ? Number(activeMember.stats.average_rating).toFixed(1) : '—'}
+                      </span>
+                      <span className="font-mono text-xs text-neutral-400">/ 10</span>
+                    </div>
+                    <p className="font-mono text-[10px] text-neutral-500 dark:text-neutral-400 mt-0.5">
+                      {activeMember.stats?.ratings_count || 0} {(activeMember.stats?.ratings_count || 0) === 1 ? 'evaluación registrada' : 'evaluaciones registradas'}
+                      {activeMember.stats?.last_match_rating ? ` • Última: ${Number(activeMember.stats.last_match_rating).toFixed(1)}` : ''}
+                    </p>
+                  </div>
+
+                  {isAdmin && activeMember.id !== currentUserId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEvalRating(activeMember.stats?.average_rating ? Number(activeMember.stats.average_rating) : 7.0)
+                        setEvalComment('')
+                        setEvalError(null)
+                        setEvaluatingMember(activeMember)
+                      }}
+                      className="btn-tactile min-h-[38px] px-3.5 py-1.5 rounded-xl border-2 border-neutral-900 dark:border-neutral-700 bg-amber-400 hover:bg-amber-300 text-neutral-950 font-display font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-tactile-sm transition active:scale-95"
+                    >
+                      <Star className="w-3.5 h-3.5 fill-current" />
+                      <span>{activeMember.stats?.average_rating ? 'Editar Nota' : 'Calificar'}</span>
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Custom Attributes & Profile Info */}
             <div className="space-y-2 pt-2 border-t-2 border-neutral-900/10 dark:border-white/10 text-xs">

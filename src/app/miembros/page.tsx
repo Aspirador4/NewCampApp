@@ -62,14 +62,16 @@ export default async function MiembrosPage() {
 
   const statsMap = new Map<string, MemberStatsItem>()
   for (const s of statsRaw || []) {
+    // STRICT PRIVACY: Only admins or the member themselves may see their rating data
+    const canSeeRating = isAdmin || s.user_id === user.id
     statsMap.set(s.user_id, {
       matches_played: s.matches_played || 0,
       mvp_count: s.mvp_count || 0,
       mvp_votes_received: s.mvp_votes_received || 0,
       social_events_attended: s.social_events_attended || 0,
-      average_rating: s.average_rating ? Number(s.average_rating) : null,
-      last_match_rating: s.last_match_rating ? Number(s.last_match_rating) : null,
-      ratings_count: s.ratings_count || 0,
+      average_rating: canSeeRating && s.average_rating ? Number(s.average_rating) : null,
+      last_match_rating: canSeeRating && s.last_match_rating ? Number(s.last_match_rating) : null,
+      ratings_count: canSeeRating ? (s.ratings_count || 0) : 0,
     })
   }
 

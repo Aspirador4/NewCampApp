@@ -253,13 +253,16 @@ async function fallbackJoinEvent(
 
   const { error: upsertErr } = await supabase
     .from('event_attendees')
-    .upsert({
-      event_id: eventId,
-      user_id: userId,
-      status: targetStatus,
-      attendance_type: attendanceType,
-      registered_at: new Date().toISOString(),
-    })
+    .upsert(
+      {
+        event_id: eventId,
+        user_id: userId,
+        status: targetStatus,
+        attendance_type: attendanceType,
+        registered_at: new Date().toISOString(),
+      },
+      { onConflict: 'event_id,user_id' }
+    )
 
   if (upsertErr) {
     return { error: upsertErr.message }
